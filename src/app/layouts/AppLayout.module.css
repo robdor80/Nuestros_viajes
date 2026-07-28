@@ -111,16 +111,18 @@
  */
 @media (min-width: 48rem) and (min-height: 37.5rem) {
   .header {
+    height: calc(clamp(14rem, 23vw, 20rem) + 1rem);
     padding-block: 0.5rem;
     background: #01111b;
   }
 
   .headerInner {
+    height: 100%;
     width: min(calc(100% - 4rem), 90rem);
   }
 
   .headerImage {
-    height: clamp(14rem, 23vw, 20rem);
+    height: 100%;
     border-radius: 1rem;
   }
 
@@ -145,5 +147,12 @@
   .navigationItem {
     padding: 0.65rem 0.85rem;
     white-space: nowrap;
+  }
+}
+
+/* More vertical room for the image on desktop and landscape tablets. */
+@media (min-width: 48rem) and (min-height: 37.5rem) and (orientation: landscape) {
+  .header {
+    height: calc(clamp(15.4rem, 25.3vw, 22rem) + 1rem);
   }
 }
