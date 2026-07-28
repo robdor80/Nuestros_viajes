@@ -117,7 +117,11 @@
   min-width: 0;
 }
 
-@media (min-width: 64rem) {
+/*
+ * Tablet and desktop mode.
+ * Both dimensions are required so a phone in landscape remains in mobile mode.
+ */
+@media (min-width: 48rem) and (min-height: 37.5rem) {
   .headerInner {
     min-height: 6rem;
     align-items: center;
