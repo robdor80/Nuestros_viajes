@@ -1,6 +1,6 @@
-# Travel Companion
+# Nuestros viajes
 
-Progressive Web App para organizar y consultar viajes personales desde cualquier dispositivo.
+Progressive Web App para organizar y consultar nuestros viajes personales desde cualquier dispositivo.
 
 ## Requisitos
 
