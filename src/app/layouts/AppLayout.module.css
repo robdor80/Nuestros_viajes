@@ -110,13 +110,18 @@
  * Both dimensions are required so a phone in landscape remains in mobile mode.
  */
 @media (min-width: 48rem) and (min-height: 37.5rem) {
+  .header {
+    padding-block: 0.5rem;
+    background: #123c56;
+  }
+
   .headerInner {
     width: min(calc(100% - 4rem), 90rem);
   }
 
   .headerImage {
     height: clamp(14rem, 23vw, 20rem);
-    border-radius: 0 0 1rem 1rem;
+    border-radius: 1rem;
   }
 
   .menuButton {
