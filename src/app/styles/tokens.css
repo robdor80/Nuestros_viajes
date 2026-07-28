@@ -1,0 +1,14 @@
+:root {
+  --color-background: #f6f2ea;
+  --color-surface: #ffffff;
+  --color-text: #20302a;
+  --color-text-muted: #5f6c66;
+  --color-accent: #a44d2b;
+
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.125rem;
+
+  --space-3: 0.75rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+}
