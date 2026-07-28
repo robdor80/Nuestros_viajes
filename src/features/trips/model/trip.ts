@@ -22,6 +22,11 @@ export type TripTransport =
 
 export type TripStatus = 'draft' | 'planned'
 
+export const tripStatusLabels: Record<TripStatus, string> = {
+  draft: 'Borrador',
+  planned: 'Planificado',
+}
+
 export type BaseTrip = {
   id: string
   name: string

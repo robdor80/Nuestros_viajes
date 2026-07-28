@@ -19,7 +19,7 @@
   font-weight: 650;
 }
 
-.confirmation span {
+.confirmationMark {
   display: grid;
   width: 1.6rem;
   height: 1.6rem;
@@ -28,6 +28,41 @@
   border-radius: 50%;
   color: #ffffff;
   background: #64725d;
+}
+
+.confirmation p {
+  flex: 1;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.confirmation button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #40513c;
+  background: transparent;
+  cursor: pointer;
+}
+
+.confirmation button:hover {
+  background: rgb(64 81 60 / 9%);
+}
+
+.confirmation button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.confirmation button span {
+  margin-top: -0.1rem;
+  font-size: 1.35rem;
+  line-height: 1;
 }
 
 .welcome {
@@ -80,6 +115,27 @@
   border-radius: 1.25rem;
   background: var(--color-surface);
   box-shadow: var(--shadow-soft);
+}
+
+.tripCardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid #c7d0c2;
+  border-radius: 999px;
+  color: #4f604a;
+  background: rgb(255 255 255 / 68%);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .activeTrip {

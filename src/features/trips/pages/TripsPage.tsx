@@ -1,12 +1,13 @@
 import { ComingSoonPage } from '../../../shared/components/ComingSoonPage/ComingSoonPage'
-import type { BaseTrip } from '../model/trip'
+import { tripStatusLabels, type BaseTrip } from '../model/trip'
 import styles from './TripsPage.module.css'
 
 type TripsPageProps = {
   activeTrip: BaseTrip | null
+  onOpenTrip: (trip: BaseTrip) => void
 }
 
-export function TripsPage({ activeTrip }: TripsPageProps) {
+export function TripsPage({ activeTrip, onOpenTrip }: TripsPageProps) {
   return (
     <ComingSoonPage
       eyebrow="Mis viajes"
@@ -15,11 +16,19 @@ export function TripsPage({ activeTrip }: TripsPageProps) {
     >
       {activeTrip && (
         <div className={styles.currentTrip}>
-          <span>Viaje activo</span>
+          <div className={styles.cardMeta}>
+            <span className={styles.cardLabel}>Viaje activo</span>
+            <span className={styles.statusBadge}>
+              {tripStatusLabels[activeTrip.status]}
+            </span>
+          </div>
           <strong>{activeTrip.name}</strong>
           <p>
             {activeTrip.destination}, {activeTrip.country}
           </p>
+          <button type="button" onClick={() => onOpenTrip(activeTrip)}>
+            Abrir viaje
+          </button>
         </div>
       )}
     </ComingSoonPage>

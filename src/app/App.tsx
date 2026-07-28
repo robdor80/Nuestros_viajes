@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Navigate,
   Route,
@@ -50,18 +50,50 @@ export function App() {
     [navigate],
   )
 
+  const dismissConfirmation = useCallback(() => {
+    setConfirmation(null)
+  }, [])
+
+  const openTrip = useCallback(
+    (trip: BaseTrip) => {
+      setActiveTrip(trip)
+      void navigate('/')
+    },
+    [navigate],
+  )
+
+  useEffect(() => {
+    if (!confirmation) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setConfirmation(null)
+    }, 4_000)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [confirmation])
+
   return (
     <AppLayout>
       <Routes location={contentLocation}>
         <Route
           path="/"
           element={
-            <HomePage activeTrip={activeTrip} confirmation={confirmation} />
+            <HomePage
+              activeTrip={activeTrip}
+              confirmation={confirmation}
+              onDismissConfirmation={dismissConfirmation}
+            />
           }
         />
         <Route
           path="/mis-viajes"
-          element={<TripsPage activeTrip={activeTrip} />}
+          element={
+            <TripsPage activeTrip={activeTrip} onOpenTrip={openTrip} />
+          }
         />
         <Route path="/ajustes" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

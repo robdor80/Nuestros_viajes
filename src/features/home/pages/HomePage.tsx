@@ -1,9 +1,13 @@
-import type { BaseTrip } from '../../trips/model/trip'
+import {
+  tripStatusLabels,
+  type BaseTrip,
+} from '../../trips/model/trip'
 import styles from './HomePage.module.css'
 
 type HomePageProps = {
   activeTrip: BaseTrip | null
   confirmation: string | null
+  onDismissConfirmation: () => void
 }
 
 function formatDate(date: string) {
@@ -15,15 +19,32 @@ function formatDate(date: string) {
   }).format(new Date(`${date}T00:00:00Z`))
 }
 
-export function HomePage({ activeTrip, confirmation }: HomePageProps) {
+export function HomePage({
+  activeTrip,
+  confirmation,
+  onDismissConfirmation,
+}: HomePageProps) {
   const activeTripYear = activeTrip?.startDate.slice(0, 4)
 
   return (
     <div className={styles.page}>
       {confirmation && (
-        <div className={styles.confirmation} role="status">
-          <span aria-hidden="true">✓</span>
-          {confirmation}
+        <div
+          className={styles.confirmation}
+          role="status"
+          aria-atomic="true"
+        >
+          <span className={styles.confirmationMark} aria-hidden="true">
+            ✓
+          </span>
+          <p>{confirmation}</p>
+          <button
+            type="button"
+            aria-label="Cerrar confirmación"
+            onClick={onDismissConfirmation}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
         </div>
       )}
 
@@ -49,7 +70,12 @@ export function HomePage({ activeTrip, confirmation }: HomePageProps) {
           aria-labelledby="active-trip-title"
         >
           <div className={styles.activeTripHeading}>
-            <p className={styles.emptyStateLabel}>Tu próximo viaje</p>
+            <div className={styles.tripCardMeta}>
+              <p className={styles.emptyStateLabel}>Tu próximo viaje</p>
+              <span className={styles.statusBadge}>
+                {tripStatusLabels[activeTrip.status]}
+              </span>
+            </div>
             <h2 id="active-trip-title" className={styles.emptyStateTitle}>
               {activeTrip.name}
             </h2>
@@ -76,7 +102,7 @@ export function HomePage({ activeTrip, confirmation }: HomePageProps) {
             </div>
             <div>
               <dt>Viajeros</dt>
-              <dd>{activeTrip.participants.join(', ')}</dd>
+              <dd>{activeTrip.participants.join(' · ')}</dd>
             </div>
           </dl>
         </section>
