@@ -1,0 +1,43 @@
+.page {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vmin, 6rem) 1.25rem 4rem;
+}
+
+.eyebrow,
+.title,
+.description {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  max-width: 48rem;
+  margin-top: 0.9rem;
+  color: var(--color-text);
+  font-size: clamp(2.25rem, 7vmin, 4.5rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.description {
+  max-width: 40rem;
+  margin-top: 1.5rem;
+  color: var(--color-text-muted);
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  line-height: 1.65;
+}
+
+@media (min-width: 48rem) and (min-height: 37.5rem) {
+  .page {
+    padding-inline: 2rem;
+  }
+}

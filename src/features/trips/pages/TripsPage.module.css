@@ -1,0 +1,30 @@
+.currentTrip {
+  max-width: 32rem;
+  margin-top: 3rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-left: 0.3rem solid var(--color-accent);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.currentTrip span {
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.currentTrip strong {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--color-text);
+  font-size: 1.35rem;
+}
+
+.currentTrip p {
+  margin: 0.45rem 0 0;
+  color: var(--color-text-muted);
+}

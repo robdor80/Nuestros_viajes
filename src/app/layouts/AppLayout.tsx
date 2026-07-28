@@ -1,9 +1,8 @@
 import { useState, type ReactNode } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 
 import headerImage from '../../assets/images/header-fati-rober.webp'
 import styles from './AppLayout.module.css'
-
-const navigationItems = ['Inicio', 'Nuevo viaje', 'Mis viajes', 'Ajustes'] as const
 
 type AppLayoutProps = {
   children: ReactNode
@@ -11,6 +10,16 @@ type AppLayoutProps = {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const location = useLocation()
+
+  const closeMobileMenu = () => {
+    setIsMenuOpen(false)
+  }
+
+  const navigationClassName = ({ isActive }: { isActive: boolean }) =>
+    `${styles.navigationItem} ${
+      isActive ? styles.navigationItemActive : ''
+    }`
 
   return (
     <div className={styles.application}>
@@ -50,18 +59,48 @@ export function AppLayout({ children }: AppLayoutProps) {
           aria-label="Navegación principal"
         >
           <ul className={styles.navigationList}>
-            {navigationItems.map((item) => (
-              <li key={item}>
-                <span
-                  className={`${styles.navigationItem} ${
-                    item === 'Inicio' ? styles.navigationItemActive : ''
-                  }`}
-                  aria-current={item === 'Inicio' ? 'page' : undefined}
-                >
-                  {item}
-                </span>
-              </li>
-            ))}
+            <li>
+              <NavLink
+                className={navigationClassName}
+                to="/"
+                end
+                onClick={closeMobileMenu}
+              >
+                Inicio
+              </NavLink>
+            </li>
+            <li>
+              <Link
+                className={`${styles.navigationItem} ${
+                  location.pathname === '/nuevo-viaje'
+                    ? styles.navigationItemActive
+                    : ''
+                }`}
+                to="/nuevo-viaje"
+                state={{ backgroundLocation: location }}
+                onClick={closeMobileMenu}
+              >
+                Nuevo viaje
+              </Link>
+            </li>
+            <li>
+              <NavLink
+                className={navigationClassName}
+                to="/mis-viajes"
+                onClick={closeMobileMenu}
+              >
+                Mis viajes
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                className={navigationClassName}
+                to="/ajustes"
+                onClick={closeMobileMenu}
+              >
+                Ajustes
+              </NavLink>
+            </li>
           </ul>
         </nav>
       </div>

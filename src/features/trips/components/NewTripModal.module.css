@@ -1,0 +1,484 @@
+.backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  padding: 0.5rem;
+  background: rgb(10 18 24 / 72%);
+  backdrop-filter: blur(0.35rem);
+}
+
+.dialog {
+  display: flex;
+  width: 100%;
+  height: calc(100dvh - 1rem);
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 36%);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  box-shadow: 0 2rem 6rem rgb(2 11 16 / 32%);
+}
+
+.modalHeader {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1.25rem;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background:
+    linear-gradient(135deg, rgb(231 237 235 / 88%), rgb(244 240 234 / 92%)),
+    var(--color-surface);
+}
+
+.eyebrow,
+.title,
+.description,
+.sectionHeading h2,
+.sectionHeading p,
+.sectionsFieldset p,
+.rangeError {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 0.35rem;
+  color: var(--color-text);
+  font-size: clamp(1.55rem, 7vw, 2.35rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.description {
+  max-width: 40rem;
+  margin-top: 0.6rem;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.closeButton {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  background: rgb(255 255 255 / 72%);
+  cursor: pointer;
+}
+
+.closeButton span {
+  margin-top: -0.15rem;
+  font-size: 1.85rem;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  background: var(--color-surface-strong);
+}
+
+.closeButton:focus-visible,
+.cancelButton:focus-visible,
+.submitButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.form {
+  min-height: 0;
+  padding: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.errorSummary {
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #d7aaa3;
+  border-radius: 0.75rem;
+  color: #763d36;
+  background: #fbefec;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.section {
+  --section-detail: #9a8062;
+  --section-background: #f6f0e7;
+
+  margin-bottom: 1rem;
+  padding: 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--section-detail) 28%, white);
+  border-left: 0.3rem solid var(--section-detail);
+  border-radius: 1rem;
+  background: var(--section-background);
+}
+
+.datesSection {
+  --section-detail: #748774;
+  --section-background: #edf2eb;
+}
+
+.peopleSection {
+  --section-detail: #718794;
+  --section-background: #edf2f4;
+}
+
+.configurationSection {
+  --section-detail: #887d99;
+  --section-background: #f1eef5;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.15rem;
+  gap: 0.8rem;
+}
+
+.sectionIndex {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--section-detail);
+  background: rgb(255 255 255 / 72%);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.sectionHeading h2 {
+  color: var(--color-text);
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.sectionHeading p {
+  margin-top: 0.2rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.fieldsGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+  color: var(--color-text);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--section-detail) 35%, white);
+  border-radius: 0.7rem;
+  color: var(--color-text);
+  background: rgb(255 255 255 / 86%);
+  outline: none;
+}
+
+.field textarea {
+  min-height: 5.75rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover {
+  border-color: color-mix(in srgb, var(--section-detail) 60%, white);
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--section-detail);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--section-detail) 20%, transparent);
+}
+
+.field input[aria-invalid='true'],
+.field textarea[aria-invalid='true'] {
+  border-color: #a75b51;
+}
+
+.fieldHelp,
+.fieldError {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.fieldHelp {
+  color: var(--color-text-subtle);
+}
+
+.fieldError,
+.rangeError {
+  color: #8d443c;
+}
+
+.rangeError {
+  margin-top: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.duration {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
+  gap: 0.75rem;
+}
+
+.duration span {
+  padding: 0.8rem;
+  border-radius: 0.75rem;
+  color: var(--color-text-muted);
+  background: rgb(255 255 255 / 64%);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.duration strong {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: var(--color-text);
+  font-size: 1.25rem;
+}
+
+.choiceFieldset,
+.sectionsFieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choiceFieldset legend,
+.sectionsFieldset legend {
+  padding: 0;
+  color: var(--color-text);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.choiceGroup {
+  display: grid;
+  margin-top: 0.45rem;
+  gap: 0.55rem;
+}
+
+.choiceCard {
+  display: flex;
+  min-height: 3rem;
+  align-items: flex-start;
+  padding: 0.7rem;
+  gap: 0.65rem;
+  border: 1px solid rgb(136 125 153 / 28%);
+  border-radius: 0.7rem;
+  background: rgb(255 255 255 / 62%);
+  cursor: pointer;
+}
+
+.choiceCard input {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+  margin: 0.15rem 0 0;
+  accent-color: var(--color-accent);
+}
+
+.choiceCard span {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.choiceCard strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 0.83rem;
+}
+
+.sectionsFieldset {
+  margin-top: 1.2rem;
+}
+
+.sectionsFieldset p {
+  margin-top: 0.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.sectionsGrid {
+  display: grid;
+  margin-top: 0.8rem;
+  gap: 0.55rem;
+}
+
+.sectionChoice {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  gap: 0.65rem;
+  border: 1px solid rgb(136 125 153 / 24%);
+  border-radius: 0.7rem;
+  background: rgb(255 255 255 / 64%);
+  cursor: pointer;
+}
+
+.sectionChoice input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.sectionChoice span {
+  color: var(--color-text);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.actions {
+  position: sticky;
+  bottom: -1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 1rem 0 0.15rem;
+  gap: 0.7rem;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--color-surface) 22%
+  );
+}
+
+.cancelButton,
+.submitButton {
+  min-height: 3.25rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancelButton {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface-strong);
+}
+
+.submitButton {
+  border: 1px solid #43574e;
+  color: #ffffff;
+  background: #43574e;
+  box-shadow: 0 0.6rem 1.5rem rgb(67 87 78 / 18%);
+}
+
+.cancelButton:hover {
+  background: #f1efe9;
+}
+
+.submitButton:hover {
+  background: #35473f;
+}
+
+@media (min-width: 48rem) and (min-height: 37.5rem) {
+  .backdrop {
+    padding: clamp(1.5rem, 4vw, 3rem);
+    place-items: center;
+  }
+
+  .dialog {
+    width: min(68rem, 100%);
+    height: auto;
+    max-height: 90dvh;
+    border-radius: 1.5rem;
+  }
+
+  .modalHeader {
+    padding: 1.5rem 1.75rem;
+  }
+
+  .form {
+    padding: 1.5rem;
+  }
+
+  .section {
+    margin-bottom: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  .fieldsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
+  }
+
+  .fieldFull {
+    grid-column: 1 / -1;
+  }
+
+  .choiceGroup {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sectionsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .actions {
+    bottom: -1.5rem;
+    grid-template-columns: auto auto;
+    justify-content: end;
+    padding: 1.25rem 0 0.25rem;
+  }
+
+  .cancelButton,
+  .submitButton {
+    min-width: 9.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .closeButton,
+  .cancelButton,
+  .submitButton {
+    transition: none;
+  }
+}
