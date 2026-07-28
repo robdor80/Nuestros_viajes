@@ -1,0 +1,101 @@
+.page {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 6rem) 1.25rem 4rem;
+}
+
+.welcome {
+  max-width: 46rem;
+}
+
+.eyebrow,
+.title,
+.introduction,
+.emptyStateLabel,
+.emptyStateTitle,
+.emptyStateDescription {
+  margin: 0;
+}
+
+.eyebrow,
+.emptyStateLabel {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 0.9rem;
+  color: var(--color-text);
+  font-size: clamp(2.25rem, 7vw, 4.5rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.introduction {
+  max-width: 40rem;
+  margin-top: 1.5rem;
+  color: var(--color-text-muted);
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  line-height: 1.65;
+}
+
+.emptyState {
+  display: grid;
+  max-width: 52rem;
+  margin-top: clamp(3rem, 8vw, 5.5rem);
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  gap: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.emptyStateMark {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.emptyStateMark span {
+  width: 1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.emptyStateTitle {
+  margin-top: 0.6rem;
+  color: var(--color-text);
+  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.emptyStateDescription {
+  max-width: 40rem;
+  margin-top: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+@media (min-width: 40rem) {
+  .page {
+    padding-inline: 2rem;
+  }
+
+  .emptyState {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+  }
+}

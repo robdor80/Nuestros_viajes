@@ -1,6 +1,14 @@
 :root {
-  --color-background: #f5f5f3;
-  --color-text: #252724;
-  --color-text-muted: #5f645f;
-  --color-text-subtle: #858a85;
+  --color-background: #f4f2ed;
+  --color-surface: #faf9f6;
+  --color-surface-strong: #ffffff;
+  --color-text: #272823;
+  --color-text-muted: #62665f;
+  --color-text-subtle: #868980;
+  --color-border: #ddd9d0;
+  --color-accent: #64725d;
+  --color-accent-soft: #e6ebe2;
+  --color-focus: #9aaa91;
+
+  --shadow-soft: 0 1rem 3rem rgb(48 52 44 / 7%);
 }
