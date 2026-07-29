@@ -1,0 +1,143 @@
+.account {
+  display: grid;
+  padding: 0.9rem 0;
+  gap: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.avatar,
+.avatarFallback {
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: none;
+  border-radius: 50%;
+}
+
+.avatar {
+  object-fit: cover;
+}
+
+.avatarFallback {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.details {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.details strong,
+.details span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details strong {
+  color: var(--color-text);
+  font-size: 0.82rem;
+}
+
+.details span {
+  color: var(--color-text-subtle);
+  font-size: 0.7rem;
+}
+
+.details .uid {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.62rem;
+}
+
+.signOutButton {
+  min-height: 2.65rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.7rem;
+  color: var(--color-text-muted);
+  background: var(--color-surface-strong);
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.signOutButton:hover:not(:disabled) {
+  color: var(--color-text);
+  background: #f1efe9;
+}
+
+.signOutButton:focus-visible,
+.error button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.signOutButton:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.65rem 0.75rem;
+  gap: 0.5rem;
+  border: 1px solid #d7aaa3;
+  border-radius: 0.65rem;
+  color: #763d36;
+  background: #fbefec;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.error span {
+  flex: 1;
+}
+
+.error button {
+  flex: none;
+  padding: 0 0.25rem;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (min-width: 48rem) and (min-height: 37.5rem) {
+  .account {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    gap: 0.8rem;
+    border-top: 0;
+  }
+
+  .identity {
+    max-width: 14rem;
+  }
+
+  .signOutButton {
+    min-height: 2.4rem;
+    white-space: nowrap;
+  }
+
+  .error {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: min(22rem, 90vw);
+    box-shadow: var(--shadow-soft);
+  }
+}

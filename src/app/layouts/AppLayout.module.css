@@ -87,6 +87,10 @@
   list-style: none;
 }
 
+.accountControls {
+  min-width: 0;
+}
+
 .navigationItem {
   display: block;
   padding: 0.75rem 0.9rem;
@@ -150,14 +154,17 @@
 
   .navigation,
   .navigationOpen {
-    display: block;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 1rem;
   }
 
   .navigationList {
     display: flex;
     min-height: 4.5rem;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
     gap: 0.25rem;
     padding: 0;
   }

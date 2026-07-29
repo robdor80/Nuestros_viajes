@@ -8,6 +8,9 @@ import {
   type Location,
 } from 'react-router-dom'
 
+import { AuthUserMenu } from '../features/auth/components/AuthUserMenu'
+import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage'
+import { useAuth } from '../features/auth/hooks/useAuth'
 import { HomePage } from '../features/home/pages/HomePage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { NewTripModal } from '../features/trips/components/NewTripModal'
@@ -20,6 +23,28 @@ type ModalNavigationState = {
 }
 
 export function App() {
+  const { user, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <AppLayout showNavigation={false}>
+        <PrivateAccessPage isLoading />
+      </AppLayout>
+    )
+  }
+
+  if (!user) {
+    return (
+      <AppLayout showNavigation={false}>
+        <PrivateAccessPage />
+      </AppLayout>
+    )
+  }
+
+  return <AuthenticatedApplication />
+}
+
+function AuthenticatedApplication() {
   const [activeTrip, setActiveTrip] = useState<BaseTrip | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
   const location = useLocation()
@@ -77,7 +102,7 @@ export function App() {
   }, [confirmation])
 
   return (
-    <AppLayout>
+    <AppLayout accountControls={<AuthUserMenu />}>
       <Routes location={contentLocation}>
         <Route
           path="/"

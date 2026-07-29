@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { App } from './app/App'
 import './app/styles/global.css'
+import { AuthProvider } from './features/auth/context/AuthProvider'
 
 const rootElement = document.getElementById('root')
 
@@ -14,7 +15,9 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
