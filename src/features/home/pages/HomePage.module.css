@@ -476,7 +476,7 @@
 /* Give the three dashboard zones more breathing room on PC. */
 @media (min-width: 85.001rem) and (min-height: 37.5rem) {
   .dashboard {
-    column-gap: 2.5rem;
+    column-gap: 5rem;
   }
 }
 

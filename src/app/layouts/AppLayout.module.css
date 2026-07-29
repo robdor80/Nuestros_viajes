@@ -135,7 +135,7 @@
   .header {
     height: calc(clamp(18rem, 36vw, 34rem) + 1rem);
     padding-block: 0.5rem;
-    background: #01111b;
+    background: var(--color-cerulean);
   }
 
   .headerInner {
@@ -177,6 +177,12 @@
 
   .navigationItem {
     padding: 0.65rem 0.85rem;
+    color: var(--color-cerulean);
     white-space: nowrap;
+  }
+
+  .navigationItem:hover,
+  .navigationItemActive {
+    color: var(--color-cerulean);
   }
 }

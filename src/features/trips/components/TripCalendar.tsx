@@ -14,8 +14,8 @@ type CalendarMonth = {
   monthIndex: number
 }
 
-type CalendarMarkStyle = CSSProperties & {
-  '--mark-color': string
+type TripDayStyle = CSSProperties & {
+  '--trip-day-color': string
 }
 
 const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
@@ -169,23 +169,20 @@ export function TripCalendar({
             <>
               <span
                 className={`${styles.dayNumber} ${
-                  date === today ? styles.today : ''
+                  dayTrips.length > 0 ? styles.tripDate : ''
                 }`}
+                style={
+                  dayTrips.length > 0
+                    ? ({
+                        '--trip-day-color': dayTrips[0].color,
+                      } as TripDayStyle)
+                    : undefined
+                }
               >
                 {day}
               </span>
               <span className={styles.marks} aria-hidden="true">
-                {dayTrips.map((trip) => (
-                  <span
-                    className={styles.mark}
-                    key={trip.id}
-                    style={
-                      {
-                        '--mark-color': trip.color,
-                      } as CalendarMarkStyle
-                    }
-                  />
-                ))}
+                {date === today && <span className={styles.todayMark} />}
               </span>
             </>
           )

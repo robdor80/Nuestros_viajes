@@ -137,9 +137,9 @@
   line-height: 1;
 }
 
-.today {
+.tripDate {
   color: #ffffff;
-  background: var(--color-accent);
+  background: var(--trip-day-color);
   font-weight: 750;
 }
 
@@ -150,11 +150,11 @@
   gap: 0.12rem;
 }
 
-.mark {
+.todayMark {
   width: min(0.75rem, 31%);
-  height: 0.2rem;
+  height: 0.16rem;
   border-radius: 999px;
-  background: var(--mark-color);
+  background: var(--color-text);
 }
 
 @media (max-width: 68rem) and (min-width: 48rem) and (min-height: 37.5rem) {
