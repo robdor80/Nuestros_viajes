@@ -187,11 +187,16 @@
   .taglineStart {
     top: 1.5rem;
     left: 1.75rem;
+    animation: taglineDescend 14s ease-in-out infinite alternate;
+    will-change: transform;
   }
 
   .taglineEnd {
+    top: auto;
     right: 1.75rem;
     bottom: 1.5rem;
+    animation: taglineAscend 14s ease-in-out infinite alternate;
+    will-change: transform;
   }
 
   .menuButton {
@@ -230,5 +235,36 @@
   .navigationItem:hover,
   .navigationItemActive {
     color: var(--color-cerulean);
+  }
+}
+
+@keyframes taglineDescend {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(
+      calc(clamp(18rem, 36vw, 34rem) - 3rem - 1lh)
+    );
+  }
+}
+
+@keyframes taglineAscend {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(
+      calc(3rem + 1lh - clamp(18rem, 36vw, 34rem))
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taglineStart,
+  .taglineEnd {
+    animation: none;
   }
 }
