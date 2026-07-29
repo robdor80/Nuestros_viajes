@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import type { CSSProperties } from 'react'
 
 import { TripCalendar } from '../../trips/components/TripCalendar'
+import { TripActionsMenu } from '../../trips/components/TripActionsMenu'
 import { TripCard } from '../../trips/components/TripCard'
 import type {
   BaseTrip,
@@ -15,10 +16,12 @@ type HomePageProps = {
   trips: BaseTrip[]
   tripsStatus: TripsLoadStatus
   tripsError: string | null
-  confirmation: string | null
-  onDismissConfirmation: () => void
   onOpenTrip: (trip: BaseTrip) => void
+  onEditTrip: (trip: BaseTrip) => void
+  onArchiveTrip: (trip: BaseTrip) => void
+  onDeleteTrip: (trip: BaseTrip) => void
   onRetryTrips: () => void
+  actionsDisabledTripId: string | null
 }
 
 type CompletedTripStyle = CSSProperties & {
@@ -39,40 +42,22 @@ export function HomePage({
   trips,
   tripsStatus,
   tripsError,
-  confirmation,
-  onDismissConfirmation,
   onOpenTrip,
+  onEditTrip,
+  onArchiveTrip,
+  onDeleteTrip,
   onRetryTrips,
+  actionsDisabledTripId,
 }: HomePageProps) {
   const location = useLocation()
   const { upcomingTrips, completedTrips } = classifyTrips(trips)
   const calendarTrips = [...upcomingTrips, ...completedTrips]
   const recentCompletedTrips = completedTrips.slice(0, 5)
   const hasUpcomingTrips = upcomingTrips.length > 0
-  const hasTrips = trips.length > 0
+  const hasTrips = calendarTrips.length > 0
 
   return (
     <div className={styles.page}>
-      {confirmation && (
-        <div
-          className={styles.confirmation}
-          role="status"
-          aria-atomic="true"
-        >
-          <span className={styles.confirmationMark} aria-hidden="true">
-            ✓
-          </span>
-          <p>{confirmation}</p>
-          <button
-            type="button"
-            aria-label="Cerrar confirmación"
-            onClick={onDismissConfirmation}
-          >
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
-      )}
-
       {tripsStatus === 'loading' && (
         <section className={styles.state} role="status" aria-live="polite">
           <span className={styles.spinner} aria-hidden="true" />
@@ -126,6 +111,12 @@ export function HomePage({
                     isActive={trip.id === activeTrip?.id}
                     contextLabel="Próximo viaje"
                     onOpen={onOpenTrip}
+                    onEdit={onEditTrip}
+                    onArchive={onArchiveTrip}
+                    onDelete={onDeleteTrip}
+                    actionsDisabled={
+                      actionsDisabledTripId === trip.id
+                    }
                   />
                 ))}
               </div>
@@ -185,13 +176,24 @@ export function HomePage({
                             {formatShortDate(trip.endDate)}
                           </time>
                         </div>
-                        <button
-                          type="button"
-                          aria-label={`Abrir viaje ${trip.name}`}
-                          onClick={() => onOpenTrip(trip)}
-                        >
-                          Abrir
-                        </button>
+                        <div className={styles.completedActions}>
+                          <button
+                            type="button"
+                            aria-label={`Abrir viaje ${trip.name}`}
+                            onClick={() => onOpenTrip(trip)}
+                          >
+                            Abrir
+                          </button>
+                          <TripActionsMenu
+                            trip={trip}
+                            disabled={
+                              actionsDisabledTripId === trip.id
+                            }
+                            onEdit={onEditTrip}
+                            onArchive={onArchiveTrip}
+                            onDelete={onDeleteTrip}
+                          />
+                        </div>
                       </article>
                     ))}
                   </div>

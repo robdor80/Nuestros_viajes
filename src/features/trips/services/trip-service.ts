@@ -2,11 +2,14 @@ import { FirebaseError } from 'firebase/app'
 import {
   Timestamp,
   collection,
+  deleteDoc,
+  deleteField,
   doc,
   getDoc,
   onSnapshot,
   serverTimestamp,
   setDoc,
+  updateDoc,
   type DocumentData,
   type DocumentSnapshot,
 } from 'firebase/firestore'
@@ -20,10 +23,12 @@ import {
   tripSections,
   type BaseTrip,
   type CreateTripData,
+  type EditableTripStatus,
   type TripColor,
   type TripSection,
   type TripStatus,
   type TripTransport,
+  type UpdateTripData,
 } from '../model/trip'
 import {
   getStableTripColor,
@@ -49,6 +54,21 @@ const tripStatuses: TripStatus[] = [
   'completed',
   'archived',
 ]
+
+const editableTripStatuses: EditableTripStatus[] = [
+  'draft',
+  'planned',
+  'preparing',
+  'completed',
+]
+
+type TripOperation =
+  | 'create'
+  | 'load'
+  | 'update'
+  | 'archive'
+  | 'restore'
+  | 'delete'
 
 class TripServiceError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -104,6 +124,20 @@ function requireTimestamp(data: DocumentData, field: string) {
   }
 
   return value.toDate().toISOString()
+}
+
+function getOptionalString(data: DocumentData, field: string) {
+  const value = data[field]
+
+  return typeof value === 'string' ? value : undefined
+}
+
+function getOptionalTimestamp(data: DocumentData, field: string) {
+  const value = data[field]
+
+  return value instanceof Timestamp
+    ? value.toDate().toISOString()
+    : undefined
 }
 
 function getTripColor(data: DocumentData, tripId: string) {
@@ -171,6 +205,14 @@ function mapTripDocument(
     createdBy: requireString(data, 'createdBy'),
     createdAt: requireTimestamp(data, 'createdAt'),
     updatedAt: requireTimestamp(data, 'updatedAt'),
+    updatedBy: getOptionalString(data, 'updatedBy'),
+    statusBeforeArchive: editableTripStatuses.includes(
+      data.statusBeforeArchive as EditableTripStatus,
+    )
+      ? (data.statusBeforeArchive as EditableTripStatus)
+      : undefined,
+    archivedAt: getOptionalTimestamp(data, 'archivedAt'),
+    archivedBy: getOptionalString(data, 'archivedBy'),
   }
 }
 
@@ -193,7 +235,25 @@ function sortTripsByRelevance(trips: BaseTrip[]) {
   })
 }
 
-function toTripServiceError(error: unknown, operation: 'create' | 'load') {
+const operationErrorMessages: Record<TripOperation, string> = {
+  create: 'No se ha podido guardar el viaje. Inténtalo de nuevo.',
+  load: 'No se han podido cargar los viajes. Inténtalo de nuevo.',
+  update: 'No se han podido guardar los cambios. Inténtalo de nuevo.',
+  archive: 'No se ha podido archivar el viaje. Inténtalo de nuevo.',
+  restore: 'No se ha podido restaurar el viaje. Inténtalo de nuevo.',
+  delete: 'No se ha podido eliminar el viaje. Inténtalo de nuevo.',
+}
+
+const permissionErrorMessages: Record<TripOperation, string> = {
+  create: 'Firestore no permite crear viajes con esta cuenta.',
+  load: 'Firestore no permite consultar los viajes con esta cuenta.',
+  update: 'Firestore no permite editar viajes con esta cuenta.',
+  archive: 'Firestore no permite archivar viajes con esta cuenta.',
+  restore: 'Firestore no permite restaurar viajes con esta cuenta.',
+  delete: 'Firestore no permite eliminar viajes con esta cuenta.',
+}
+
+function toTripServiceError(error: unknown, operation: TripOperation) {
   if (error instanceof TripServiceError) {
     return error
   }
@@ -202,9 +262,7 @@ function toTripServiceError(error: unknown, operation: 'create' | 'load') {
     switch (error.code) {
       case 'permission-denied':
         return new TripServiceError(
-          operation === 'create'
-            ? 'Firestore no permite crear viajes con esta cuenta.'
-            : 'Firestore no permite consultar los viajes con esta cuenta.',
+          permissionErrorMessages[operation],
           { cause: error },
         )
       case 'unavailable':
@@ -217,11 +275,22 @@ function toTripServiceError(error: unknown, operation: 'create' | 'load') {
   }
 
   return new TripServiceError(
-    operation === 'create'
-      ? 'No se ha podido guardar el viaje. Inténtalo de nuevo.'
-      : 'No se han podido cargar los viajes. Inténtalo de nuevo.',
+    operationErrorMessages[operation],
     { cause: error },
   )
+}
+
+function requireUserId(userId: string, operation: string) {
+  if (!userId.trim()) {
+    throw new TripServiceError(
+      `Es necesario iniciar sesión para ${operation} un viaje.`,
+    )
+  }
+}
+
+async function readTrip(tripId: string) {
+  const tripSnapshot = await getDoc(doc(requireFirestore(), 'trips', tripId))
+  return mapTripDocument(tripSnapshot)
 }
 
 export async function createTrip(
@@ -229,11 +298,7 @@ export async function createTrip(
   userId: string,
   usedColors: readonly TripColor[],
 ) {
-  if (!userId.trim()) {
-    throw new TripServiceError(
-      'Es necesario iniciar sesión para crear un viaje.',
-    )
-  }
+  requireUserId(userId, 'crear')
 
   try {
     const database = requireFirestore()
@@ -255,6 +320,107 @@ export async function createTrip(
     return mapTripDocument(savedTrip)
   } catch (error) {
     throw toTripServiceError(error, 'create')
+  }
+}
+
+export async function updateTrip(
+  tripId: string,
+  changes: UpdateTripData,
+  userId: string,
+) {
+  requireUserId(userId, 'editar')
+
+  try {
+    const tripReference = doc(requireFirestore(), 'trips', tripId)
+    const currentTrip = await readTrip(tripId)
+    const isArchived = currentTrip.status === 'archived'
+    const editableChanges = {
+      name: changes.name,
+      destination: changes.destination,
+      country: changes.country,
+      description: changes.description,
+      startDate: changes.startDate,
+      endDate: changes.endDate,
+      participants: changes.participants,
+      transport: changes.transport,
+      currency: changes.currency,
+      status: isArchived ? 'archived' : changes.status,
+      color: changes.color,
+      enabledSections: changes.enabledSections,
+      ...(isArchived && { statusBeforeArchive: changes.status }),
+      updatedAt: serverTimestamp(),
+      updatedBy: userId,
+    }
+
+    await updateDoc(tripReference, editableChanges)
+  } catch (error) {
+    throw toTripServiceError(error, 'update')
+  }
+}
+
+export async function archiveTrip(trip: BaseTrip, userId: string) {
+  requireUserId(userId, 'archivar')
+
+  try {
+    const statusBeforeArchive = editableTripStatuses.includes(
+      trip.status as EditableTripStatus,
+    )
+      ? (trip.status as EditableTripStatus)
+      : 'draft'
+
+    await updateDoc(doc(requireFirestore(), 'trips', trip.id), {
+      status: 'archived',
+      statusBeforeArchive,
+      archivedAt: serverTimestamp(),
+      archivedBy: userId,
+      updatedAt: serverTimestamp(),
+      updatedBy: userId,
+    })
+
+    return await readTrip(trip.id)
+  } catch (error) {
+    throw toTripServiceError(error, 'archive')
+  }
+}
+
+export async function restoreTrip(trip: BaseTrip, userId: string) {
+  requireUserId(userId, 'restaurar')
+
+  try {
+    const restoredStatus =
+      trip.statusBeforeArchive &&
+      editableTripStatuses.includes(trip.statusBeforeArchive)
+        ? trip.statusBeforeArchive
+        : 'draft'
+
+    await updateDoc(doc(requireFirestore(), 'trips', trip.id), {
+      status: restoredStatus,
+      statusBeforeArchive: deleteField(),
+      archivedAt: deleteField(),
+      archivedBy: deleteField(),
+      updatedAt: serverTimestamp(),
+      updatedBy: userId,
+    })
+
+    return await readTrip(trip.id)
+  } catch (error) {
+    throw toTripServiceError(error, 'restore')
+  }
+}
+
+export async function deleteTrip(tripId: string, userId: string) {
+  requireUserId(userId, 'eliminar')
+
+  try {
+    /*
+     * Esta eliminación directa solo es segura mientras los viajes no tengan
+     * subcolecciones. Antes de añadir lugares, itinerarios, alojamientos,
+     * gastos, fotografías, trayectos u otros contenidos anidados deberá
+     * sustituirse por una eliminación recursiva o un backend seguro.
+     */
+    await deleteDoc(doc(requireFirestore(), 'trips', tripId))
+  } catch (error) {
+    throw toTripServiceError(error, 'delete')
   }
 }
 

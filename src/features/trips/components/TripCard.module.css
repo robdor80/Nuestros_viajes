@@ -28,6 +28,12 @@
   gap: 0.75rem;
 }
 
+.metaActions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 .cardLabel {
   color: var(--trip-color);
   font-size: 0.7rem;
@@ -111,6 +117,11 @@
 .openButton:hover {
   border-color: color-mix(in srgb, var(--trip-color) 82%, #000000);
   background: color-mix(in srgb, var(--trip-color) 82%, #000000);
+}
+
+.openButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .openButton:focus-visible {

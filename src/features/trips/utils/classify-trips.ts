@@ -3,6 +3,7 @@ import type { BaseTrip } from '../model/trip'
 export type ClassifiedTrips = {
   upcomingTrips: BaseTrip[]
   completedTrips: BaseTrip[]
+  archivedTrips: BaseTrip[]
 }
 
 export function getLocalDateString(date = new Date()) {
@@ -19,8 +20,14 @@ export function classifyTrips(
 ): ClassifiedTrips {
   const upcomingTrips: BaseTrip[] = []
   const completedTrips: BaseTrip[] = []
+  const archivedTrips: BaseTrip[] = []
 
   trips.forEach((trip) => {
+    if (trip.status === 'archived') {
+      archivedTrips.push(trip)
+      return
+    }
+
     const isCompleted =
       trip.status === 'completed' || trip.endDate < today
 
@@ -29,7 +36,7 @@ export function classifyTrips(
       return
     }
 
-    if (trip.status !== 'archived' && trip.endDate >= today) {
+    if (trip.endDate >= today) {
       upcomingTrips.push(trip)
     }
   })
@@ -40,6 +47,11 @@ export function classifyTrips(
   completedTrips.sort((firstTrip, secondTrip) =>
     secondTrip.endDate.localeCompare(firstTrip.endDate),
   )
+  archivedTrips.sort((firstTrip, secondTrip) =>
+    (secondTrip.archivedAt ?? secondTrip.updatedAt).localeCompare(
+      firstTrip.archivedAt ?? firstTrip.updatedAt,
+    ),
+  )
 
-  return { upcomingTrips, completedTrips }
+  return { upcomingTrips, completedTrips, archivedTrips }
 }

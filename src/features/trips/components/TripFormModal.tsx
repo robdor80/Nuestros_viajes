@@ -9,17 +9,21 @@ import {
 } from 'react'
 
 import {
+  tripColorPalette,
   tripSections,
-  type CreateTripData,
+  type BaseTrip,
+  type EditableTripStatus,
+  type TripFormData,
   type TripSection,
-  type TripStatus,
   type TripTransport,
 } from '../model/trip'
-import styles from './NewTripModal.module.css'
+import styles from './TripFormModal.module.css'
 
-type NewTripModalProps = {
+type TripFormModalProps = {
+  mode: 'create' | 'edit'
+  trip?: BaseTrip
   onCancel: () => void
-  onCreate: (trip: CreateTripData) => Promise<void>
+  onSave: (trip: TripFormData) => Promise<void>
 }
 
 type TripFormValues = {
@@ -32,7 +36,8 @@ type TripFormValues = {
   participants: string
   transport: TripTransport
   currency: string
-  status: TripStatus
+  status: EditableTripStatus
+  color: TripFormData['color']
   enabledSections: TripSection[]
 }
 
@@ -66,6 +71,7 @@ const initialValues: TripFormValues = {
   transport: 'car',
   currency: 'EUR',
   status: 'draft',
+  color: tripColorPalette[0],
   enabledSections: defaultSections,
 }
 
@@ -76,6 +82,33 @@ const transportOptions: Array<{ value: TripTransport; label: string }> = [
   { value: 'bus', label: 'Autobús' },
   { value: 'boat', label: 'Barco' },
   { value: 'other', label: 'Otro' },
+]
+
+const statusOptions: Array<{
+  value: EditableTripStatus
+  label: string
+  description: string
+}> = [
+  {
+    value: 'draft',
+    label: 'Borrador',
+    description: 'Para empezar a reunir ideas.',
+  },
+  {
+    value: 'preparing',
+    label: 'En preparación',
+    description: 'Cuando ya estás organizando los detalles.',
+  },
+  {
+    value: 'planned',
+    label: 'Planificado',
+    description: 'Si las fechas y el plan ya están decididos.',
+  },
+  {
+    value: 'completed',
+    label: 'Finalizado',
+    description: 'Cuando el viaje ya forma parte de los recuerdos.',
+  },
 ]
 
 const sectionLabels: Record<TripSection, string> = {
@@ -116,12 +149,48 @@ function calculateDuration(startDate: string, endDate: string) {
   }
 }
 
-export function NewTripModal({
+function getInitialValues(
+  mode: TripFormModalProps['mode'],
+  trip?: BaseTrip,
+): TripFormValues {
+  if (mode !== 'edit' || !trip) {
+    return initialValues
+  }
+
+  return {
+    name: trip.name,
+    destination: trip.destination,
+    country: trip.country,
+    description: trip.description,
+    startDate: trip.startDate,
+    endDate: trip.endDate,
+    participants: trip.participants.join('\n'),
+    transport: trip.transport,
+    currency: trip.currency,
+    status:
+      trip.status === 'archived'
+        ? (trip.statusBeforeArchive ?? 'draft')
+        : trip.status,
+    color: trip.color,
+    enabledSections: trip.enabledSections,
+  }
+}
+
+export function TripFormModal({
+  mode,
+  trip,
   onCancel,
-  onCreate,
-}: NewTripModalProps) {
-  const [values, setValues] = useState<TripFormValues>(initialValues)
-  const [isNameEdited, setIsNameEdited] = useState(false)
+  onSave,
+}: TripFormModalProps) {
+  /*
+   * La edición parte de una instantánea tomada al abrir el formulario.
+   * Si llega un cambio remoto mientras permanece abierto, el último guardado
+   * válido prevalece; no se intenta resolver conflictos campo a campo.
+   */
+  const [values, setValues] = useState<TripFormValues>(() =>
+    getInitialValues(mode, trip),
+  )
+  const [isNameEdited, setIsNameEdited] = useState(mode === 'edit')
   const [errors, setErrors] = useState<FormErrors>({})
   const [submissionError, setSubmissionError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -136,6 +205,9 @@ export function NewTripModal({
 
   const displayedName = isNameEdited ? values.name : suggestedName
   const duration = calculateDuration(values.startDate, values.endDate)
+  const isEditMode = mode === 'edit'
+  const titleId = 'trip-form-title'
+  const descriptionId = 'trip-form-description'
 
   useEffect(() => {
     const previouslyFocusedElement = document.activeElement as HTMLElement | null
@@ -296,7 +368,7 @@ export function NewTripModal({
     setIsSaving(true)
 
     try {
-      await onCreate({
+      await onSave({
         name: displayedName.trim(),
         destination: values.destination.trim(),
         country: values.country.trim(),
@@ -307,6 +379,7 @@ export function NewTripModal({
         transport: values.transport,
         currency: values.currency,
         status: values.status,
+        color: values.color,
         enabledSections: values.enabledSections,
       })
     } catch (error) {
@@ -330,26 +403,33 @@ export function NewTripModal({
         className={styles.dialog}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="new-trip-title"
-        aria-describedby="new-trip-description"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
         onKeyDown={trapFocus}
       >
         <header className={styles.modalHeader}>
           <div>
-            <p className={styles.eyebrow}>Nuevo viaje</p>
-            <h1 id="new-trip-title" className={styles.title}>
-              Crear un nuevo viaje
+            <p className={styles.eyebrow}>
+              {isEditMode ? 'Gestión del viaje' : 'Nuevo viaje'}
+            </p>
+            <h1 id={titleId} className={styles.title}>
+              {isEditMode ? 'Editar viaje' : 'Crear un nuevo viaje'}
             </h1>
-            <p id="new-trip-description" className={styles.description}>
-              Empecemos por lo esencial. El resto del viaje se completará poco
-              a poco.
+            <p id={descriptionId} className={styles.description}>
+              {isEditMode
+                ? 'Actualiza la información del viaje. Los cambios se guardarán cuando Firestore los confirme.'
+                : 'Empecemos por lo esencial. El resto del viaje se completará poco a poco.'}
             </p>
           </div>
 
           <button
             className={styles.closeButton}
             type="button"
-            aria-label="Cerrar formulario de nuevo viaje"
+            aria-label={
+              isEditMode
+                ? 'Cerrar formulario de edición'
+                : 'Cerrar formulario de nuevo viaje'
+            }
             disabled={isSaving}
             onClick={onCancel}
           >
@@ -360,7 +440,7 @@ export function NewTripModal({
         <form className={styles.form} noValidate onSubmit={handleSubmit}>
           {Object.keys(errors).length > 0 && (
             <div className={styles.errorSummary} role="alert">
-              Revisa los campos señalados antes de crear el viaje.
+              Revisa los campos señalados antes de guardar el viaje.
             </div>
           )}
 
@@ -616,7 +696,11 @@ export function NewTripModal({
               <span className={styles.sectionIndex}>D</span>
               <div>
                 <h2 id="configuration-title">Configuración</h2>
-                <p>Las preferencias iniciales del nuevo espacio de viaje.</p>
+                <p>
+                  {isEditMode
+                    ? 'El estado, el color y las secciones disponibles.'
+                    : 'Las preferencias iniciales del nuevo espacio de viaje.'}
+                </p>
               </div>
             </div>
 
@@ -637,37 +721,56 @@ export function NewTripModal({
               </label>
 
               <fieldset className={styles.choiceFieldset}>
-                <legend>Estado inicial</legend>
+                <legend>Estado del viaje</legend>
                 <div className={styles.choiceGroup}>
-                  <label className={styles.choiceCard}>
-                    <input
-                      type="radio"
-                      name="status"
-                      value="draft"
-                      checked={values.status === 'draft'}
-                      onChange={() => updateField('status', 'draft')}
-                    />
-                    <span>
-                      <strong>Borrador</strong>
-                      Para empezar a reunir ideas.
-                    </span>
-                  </label>
-                  <label className={styles.choiceCard}>
-                    <input
-                      type="radio"
-                      name="status"
-                      value="planned"
-                      checked={values.status === 'planned'}
-                      onChange={() => updateField('status', 'planned')}
-                    />
-                    <span>
-                      <strong>Planificado</strong>
-                      Si las fechas ya están decididas.
-                    </span>
-                  </label>
+                  {statusOptions.map((option) => (
+                    <label className={styles.choiceCard} key={option.value}>
+                      <input
+                        type="radio"
+                        name="status"
+                        value={option.value}
+                        checked={values.status === option.value}
+                        onChange={() =>
+                          updateField('status', option.value)
+                        }
+                      />
+                      <span>
+                        <strong>{option.label}</strong>
+                        {option.description}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </fieldset>
             </div>
+
+            {isEditMode && (
+              <fieldset className={styles.colorFieldset}>
+                <legend>Color del viaje</legend>
+                <p>
+                  Se utilizará en las tarjetas, botones y calendario.
+                </p>
+                <div className={styles.colorOptions}>
+                  {tripColorPalette.map((color, index) => (
+                    <label className={styles.colorOption} key={color}>
+                      <input
+                        type="radio"
+                        name="trip-color"
+                        value={color}
+                        checked={values.color === color}
+                        aria-label={`Color ${index + 1}`}
+                        onChange={() => updateField('color', color)}
+                      />
+                      <span
+                        className={styles.colorSwatch}
+                        style={{ backgroundColor: color }}
+                        aria-hidden="true"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
 
             <fieldset className={styles.sectionsFieldset}>
               <legend>Secciones del viaje</legend>
@@ -701,7 +804,13 @@ export function NewTripModal({
               type="submit"
               disabled={isSaving}
             >
-              {isSaving ? 'Guardando viaje…' : 'Crear viaje'}
+              {isSaving
+                ? isEditMode
+                  ? 'Guardando cambios…'
+                  : 'Guardando viaje…'
+                : isEditMode
+                  ? 'Guardar cambios'
+                  : 'Crear viaje'}
             </button>
           </footer>
         </form>

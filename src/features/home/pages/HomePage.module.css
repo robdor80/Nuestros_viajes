@@ -4,69 +4,12 @@
   padding: 1.25rem 1rem 3rem;
 }
 
-.confirmation {
-  display: flex;
-  max-width: 52rem;
-  align-items: center;
-  margin: 0 auto 1rem;
-  padding: 0.9rem 1rem;
-  gap: 0.7rem;
-  border: 1px solid #b8c7b4;
-  border-radius: 0.8rem;
-  color: #40513c;
-  background: #edf3ea;
-  font-size: 0.9rem;
-  font-weight: 650;
-}
-
-.confirmationMark {
-  display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
-  flex: none;
-  place-items: center;
-  border-radius: 50%;
-  color: #ffffff;
-  background: #64725d;
-}
-
-.confirmation p {
-  flex: 1;
-  margin: 0;
-  line-height: 1.45;
-}
-
-.confirmation button {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  flex: none;
-  padding: 0;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  color: #40513c;
-  background: transparent;
-  cursor: pointer;
-}
-
-.confirmation button:hover {
-  background: rgb(64 81 60 / 9%);
-}
-
-.confirmation button:focus-visible,
 .state button:focus-visible,
-.completedTrip button:focus-visible,
+.completedActions > button:focus-visible,
 .libraryLink:focus-visible,
 .noTrips a:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
-}
-
-.confirmation button span {
-  margin-top: -0.1rem;
-  font-size: 1.35rem;
-  line-height: 1;
 }
 
 .state {
@@ -270,7 +213,13 @@
   line-height: 1.35;
 }
 
-.completedTrip button {
+.completedActions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.completedActions > button {
   min-height: 2.15rem;
   padding: 0.35rem 0.55rem;
   border: 1px solid var(--trip-color);
@@ -282,7 +231,7 @@
   cursor: pointer;
 }
 
-.completedTrip button:hover {
+.completedActions > button:hover {
   color: #ffffff;
   background: var(--trip-color);
 }

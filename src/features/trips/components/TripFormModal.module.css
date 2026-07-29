@@ -283,6 +283,7 @@
 }
 
 .choiceFieldset,
+.colorFieldset,
 .sectionsFieldset {
   min-width: 0;
   margin: 0;
@@ -291,6 +292,7 @@
 }
 
 .choiceFieldset legend,
+.colorFieldset legend,
 .sectionsFieldset legend {
   padding: 0;
   color: var(--color-text);
@@ -337,15 +339,67 @@
   font-size: 0.83rem;
 }
 
+.colorFieldset,
 .sectionsFieldset {
   margin-top: 1.2rem;
 }
 
+.colorFieldset p,
 .sectionsFieldset p {
   margin-top: 0.25rem;
   color: var(--color-text-muted);
   font-size: 0.8rem;
   line-height: 1.45;
+}
+
+.colorOptions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+  gap: 0.65rem;
+}
+
+.colorOption {
+  position: relative;
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.colorOption input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.colorSwatch {
+  width: 2rem;
+  height: 2rem;
+  border: 0.18rem solid rgb(255 255 255 / 86%);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(39 40 35 / 20%);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.colorOption:hover .colorSwatch {
+  transform: scale(1.08);
+}
+
+.colorOption input:checked + .colorSwatch {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 5px var(--color-text);
+}
+
+.colorOption input:focus-visible + .colorSwatch {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
 }
 
 .sectionsGrid {

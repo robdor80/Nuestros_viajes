@@ -1,0 +1,89 @@
+.notification {
+  position: fixed;
+  z-index: 1200;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  width: min(28rem, calc(100% - 2rem));
+  align-items: center;
+  padding: 0.9rem 1rem;
+  gap: 0.7rem;
+  border: 1px solid;
+  border-radius: 0.85rem;
+  box-shadow: 0 1rem 2.5rem rgb(20 28 23 / 16%);
+}
+
+.success {
+  border-color: #b8c7b4;
+  color: #40513c;
+  background: #edf3ea;
+}
+
+.error {
+  border-color: #d7aaa3;
+  color: #763d36;
+  background: #fbefec;
+}
+
+.mark {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.success .mark {
+  background: #64725d;
+}
+
+.error .mark {
+  background: #8b3932;
+}
+
+.notification p {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.notification button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: currentColor;
+  background: transparent;
+  cursor: pointer;
+}
+
+.notification button:hover {
+  background: rgb(40 55 45 / 8%);
+}
+
+.notification button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.notification button span {
+  margin-top: -0.1rem;
+  font-size: 1.35rem;
+}
+
+@media (max-width: 47.999rem), (max-height: 37.499rem) {
+  .notification {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    width: calc(100% - 1.5rem);
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Navigate,
   Route,
@@ -14,21 +14,36 @@ import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { HomePage } from '../features/home/pages/HomePage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
-import { NewTripModal } from '../features/trips/components/NewTripModal'
+import { TripActionDialog } from '../features/trips/components/TripActionDialog'
+import { TripFormModal } from '../features/trips/components/TripFormModal'
+import {
+  TripNotification,
+  type TripNotificationData,
+} from '../features/trips/components/TripNotification'
 import type {
   BaseTrip,
   CreateTripData,
+  TripFormData,
   TripsLoadStatus,
 } from '../features/trips/model/trip'
 import { TripsPage } from '../features/trips/pages/TripsPage'
 import {
+  archiveTrip as persistArchiveTrip,
   createTrip as persistTrip,
+  deleteTrip as persistDeleteTrip,
+  restoreTrip as persistRestoreTrip,
   subscribeToTrips,
+  updateTrip as persistTripChanges,
 } from '../features/trips/services/trip-service'
 import { AppLayout } from './layouts/AppLayout'
 
 type ModalNavigationState = {
   backgroundLocation?: Location
+}
+
+type TripActionDialogState = {
+  action: 'archive' | 'delete'
+  trip: BaseTrip
 }
 
 export function App() {
@@ -90,7 +105,14 @@ function AuthenticatedApplication({
     useState<TripsLoadStatus>('loading')
   const [tripsError, setTripsError] = useState<string | null>(null)
   const [subscriptionVersion, setSubscriptionVersion] = useState(0)
-  const [confirmation, setConfirmation] = useState<string | null>(null)
+  const [notification, setNotification] =
+    useState<TripNotificationData | null>(null)
+  const [editingTrip, setEditingTrip] = useState<BaseTrip | null>(null)
+  const [actionDialog, setActionDialog] =
+    useState<TripActionDialogState | null>(null)
+  const [actionsDisabledTripId, setActionsDisabledTripId] =
+    useState<string | null>(null)
+  const actionInProgressRef = useRef(false)
   const location = useLocation()
   const navigate = useNavigate()
   const navigationState = location.state as ModalNavigationState | null
@@ -104,13 +126,17 @@ function AuthenticatedApplication({
   const handleTripsUpdate = useCallback((savedTrips: BaseTrip[]) => {
     setTrips(savedTrips)
     setActiveTrip((currentTrip) => {
-      if (!currentTrip) {
-        return savedTrips[0] ?? null
+      const availableTrips = savedTrips.filter(
+        (trip) => trip.status !== 'archived',
+      )
+
+      if (!currentTrip || currentTrip.status === 'archived') {
+        return availableTrips[0] ?? null
       }
 
       return (
-        savedTrips.find((trip) => trip.id === currentTrip.id) ??
-        savedTrips[0] ??
+        availableTrips.find((trip) => trip.id === currentTrip.id) ??
+        availableTrips[0] ??
         null
       )
     })
@@ -153,9 +179,22 @@ function AuthenticatedApplication({
   }, [backgroundLocation, navigate])
 
   const createTrip = useCallback(
-    async (tripData: CreateTripData) => {
+    async (tripData: TripFormData) => {
+      const createData: CreateTripData = {
+        name: tripData.name,
+        destination: tripData.destination,
+        country: tripData.country,
+        description: tripData.description,
+        startDate: tripData.startDate,
+        endDate: tripData.endDate,
+        participants: tripData.participants,
+        transport: tripData.transport,
+        currency: tripData.currency,
+        status: tripData.status,
+        enabledSections: tripData.enabledSections,
+      }
       const savedTrip = await persistTrip(
-        tripData,
+        createData,
         userId,
         trips.map((trip) => trip.color),
       )
@@ -167,17 +206,114 @@ function AuthenticatedApplication({
       setTripsStatus('ready')
       setTripsError(null)
       setActiveTrip(savedTrip)
-      setConfirmation(
-        `El viaje “${savedTrip.name}” se ha creado correctamente.`,
-      )
+      setNotification({
+        message: `El viaje “${savedTrip.name}” se ha creado correctamente.`,
+        tone: 'success',
+      })
       void navigate('/', { replace: true })
     },
     [navigate, trips, userId],
   )
 
-  const dismissConfirmation = useCallback(() => {
-    setConfirmation(null)
+  const dismissNotification = useCallback(() => {
+    setNotification(null)
   }, [])
+
+  const editTrip = useCallback((trip: BaseTrip) => {
+    setEditingTrip(trip)
+  }, [])
+
+  const saveTripChanges = useCallback(
+    async (tripData: TripFormData) => {
+      if (!editingTrip) {
+        throw new Error('El viaje que intentas editar ya no está disponible.')
+      }
+
+      await persistTripChanges(editingTrip.id, tripData, userId)
+      setEditingTrip(null)
+      setNotification({
+        message: 'Viaje actualizado correctamente.',
+        tone: 'success',
+      })
+    },
+    [editingTrip, userId],
+  )
+
+  const requestArchiveTrip = useCallback((trip: BaseTrip) => {
+    setActionDialog({ action: 'archive', trip })
+  }, [])
+
+  const requestDeleteTrip = useCallback((trip: BaseTrip) => {
+    setActionDialog({ action: 'delete', trip })
+  }, [])
+
+  const restoreTrip = useCallback(
+    async (trip: BaseTrip) => {
+      if (actionInProgressRef.current) {
+        return
+      }
+
+      actionInProgressRef.current = true
+      setActionsDisabledTripId(trip.id)
+
+      try {
+        await persistRestoreTrip(trip, userId)
+        setNotification({
+          message: 'Viaje restaurado.',
+          tone: 'success',
+        })
+      } catch (error) {
+        setNotification({
+          message:
+            error instanceof Error
+              ? error.message
+              : 'No se ha podido restaurar el viaje.',
+          tone: 'error',
+        })
+      } finally {
+        actionInProgressRef.current = false
+        setActionsDisabledTripId(null)
+      }
+    },
+    [userId],
+  )
+
+  const confirmTripAction = useCallback(async () => {
+    if (!actionDialog || actionInProgressRef.current) {
+      return
+    }
+
+    const { action, trip } = actionDialog
+    actionInProgressRef.current = true
+    setActionsDisabledTripId(trip.id)
+
+    try {
+      if (action === 'archive') {
+        await persistArchiveTrip(trip, userId)
+        setNotification({
+          message: 'Viaje archivado.',
+          tone: 'success',
+        })
+      } else {
+        await persistDeleteTrip(trip.id, userId)
+        setActiveTrip((currentTrip) =>
+          currentTrip?.id === trip.id ? null : currentTrip,
+        )
+        setEditingTrip((currentTrip) =>
+          currentTrip?.id === trip.id ? null : currentTrip,
+        )
+        setNotification({
+          message: 'Viaje eliminado definitivamente.',
+          tone: 'success',
+        })
+      }
+
+      setActionDialog(null)
+    } finally {
+      actionInProgressRef.current = false
+      setActionsDisabledTripId(null)
+    }
+  }, [actionDialog, userId])
 
   const openTrip = useCallback(
     (trip: BaseTrip) => {
@@ -187,19 +323,27 @@ function AuthenticatedApplication({
     [navigate],
   )
 
+  const closeEditTrip = useCallback(() => {
+    setEditingTrip(null)
+  }, [])
+
+  const closeActionDialog = useCallback(() => {
+    setActionDialog(null)
+  }, [])
+
   useEffect(() => {
-    if (!confirmation) {
+    if (!notification) {
       return
     }
 
     const timeoutId = window.setTimeout(() => {
-      setConfirmation(null)
+      setNotification(null)
     }, 4_000)
 
     return () => {
       window.clearTimeout(timeoutId)
     }
-  }, [confirmation])
+  }, [notification])
 
   return (
     <AppLayout accountControls={<AuthUserMenu />}>
@@ -212,10 +356,12 @@ function AuthenticatedApplication({
               trips={trips}
               tripsStatus={tripsStatus}
               tripsError={tripsError}
-              confirmation={confirmation}
-              onDismissConfirmation={dismissConfirmation}
               onOpenTrip={openTrip}
+              onEditTrip={editTrip}
+              onArchiveTrip={requestArchiveTrip}
+              onDeleteTrip={requestDeleteTrip}
               onRetryTrips={retryTrips}
+              actionsDisabledTripId={actionsDisabledTripId}
             />
           }
         />
@@ -228,7 +374,12 @@ function AuthenticatedApplication({
               tripsStatus={tripsStatus}
               tripsError={tripsError}
               onOpenTrip={openTrip}
+              onEditTrip={editTrip}
+              onArchiveTrip={requestArchiveTrip}
+              onRestoreTrip={(trip) => void restoreTrip(trip)}
+              onDeleteTrip={requestDeleteTrip}
               onRetry={retryTrips}
+              actionsDisabledTripId={actionsDisabledTripId}
             />
           }
         />
@@ -236,10 +387,36 @@ function AuthenticatedApplication({
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
+      {notification && (
+        <TripNotification
+          notification={notification}
+          onDismiss={dismissNotification}
+        />
+      )}
+
       {isNewTripRoute && (
-        <NewTripModal
+        <TripFormModal
+          mode="create"
           onCancel={closeNewTripModal}
-          onCreate={createTrip}
+          onSave={createTrip}
+        />
+      )}
+
+      {editingTrip && (
+        <TripFormModal
+          mode="edit"
+          trip={editingTrip}
+          onCancel={closeEditTrip}
+          onSave={saveTripChanges}
+        />
+      )}
+
+      {actionDialog && (
+        <TripActionDialog
+          action={actionDialog.action}
+          trip={actionDialog.trip}
+          onCancel={closeActionDialog}
+          onConfirm={confirmTripAction}
         />
       )}
     </AppLayout>

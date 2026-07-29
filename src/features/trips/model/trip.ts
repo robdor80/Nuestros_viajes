@@ -39,6 +39,8 @@ export type TripStatus =
   | 'completed'
   | 'archived'
 
+export type EditableTripStatus = Exclude<TripStatus, 'archived'>
+
 export type TripsLoadStatus = 'loading' | 'ready' | 'error'
 
 export const tripStatusLabels: Record<TripStatus, string> = {
@@ -67,14 +69,29 @@ export type BaseTrip = {
   createdBy: string
   createdAt: string
   updatedAt: string
+  updatedBy?: string
+  statusBeforeArchive?: EditableTripStatus
+  archivedAt?: string
+  archivedBy?: string
 }
 
-export type CreateTripData = Omit<
+export type TripFormData = Pick<
   BaseTrip,
-  | 'id'
+  | 'name'
+  | 'destination'
+  | 'country'
+  | 'description'
+  | 'startDate'
+  | 'endDate'
+  | 'participants'
+  | 'transport'
+  | 'currency'
   | 'color'
-  | 'ownerId'
-  | 'createdBy'
-  | 'createdAt'
-  | 'updatedAt'
->
+  | 'enabledSections'
+> & {
+  status: EditableTripStatus
+}
+
+export type CreateTripData = Omit<TripFormData, 'color'>
+
+export type UpdateTripData = TripFormData
