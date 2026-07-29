@@ -92,6 +92,6 @@ export type TripFormData = Pick<
   status: EditableTripStatus
 }
 
-export type CreateTripData = Omit<TripFormData, 'color'>
+export type CreateTripData = TripFormData
 
 export type UpdateTripData = TripFormData

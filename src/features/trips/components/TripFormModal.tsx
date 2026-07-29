@@ -696,11 +696,7 @@ export function TripFormModal({
               <span className={styles.sectionIndex}>D</span>
               <div>
                 <h2 id="configuration-title">Configuración</h2>
-                <p>
-                  {isEditMode
-                    ? 'El estado, el color y las secciones disponibles.'
-                    : 'Las preferencias iniciales del nuevo espacio de viaje.'}
-                </p>
+                <p>El estado, el color y las secciones disponibles.</p>
               </div>
             </div>
 
@@ -744,33 +740,31 @@ export function TripFormModal({
               </fieldset>
             </div>
 
-            {isEditMode && (
-              <fieldset className={styles.colorFieldset}>
-                <legend>Color del viaje</legend>
-                <p>
-                  Se utilizará en las tarjetas, botones y calendario.
-                </p>
-                <div className={styles.colorOptions}>
-                  {tripColorPalette.map((color, index) => (
-                    <label className={styles.colorOption} key={color}>
-                      <input
-                        type="radio"
-                        name="trip-color"
-                        value={color}
-                        checked={values.color === color}
-                        aria-label={`Color ${index + 1}`}
-                        onChange={() => updateField('color', color)}
-                      />
-                      <span
-                        className={styles.colorSwatch}
-                        style={{ backgroundColor: color }}
-                        aria-hidden="true"
-                      />
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            )}
+            <fieldset className={styles.colorFieldset}>
+              <legend>Color del viaje</legend>
+              <p>
+                Se utilizará en las tarjetas, botones y calendario.
+              </p>
+              <div className={styles.colorOptions}>
+                {tripColorPalette.map((color, index) => (
+                  <label className={styles.colorOption} key={color}>
+                    <input
+                      type="radio"
+                      name="trip-color"
+                      value={color}
+                      checked={values.color === color}
+                      aria-label={`Color ${index + 1}`}
+                      onChange={() => updateField('color', color)}
+                    />
+                    <span
+                      className={styles.colorSwatch}
+                      style={{ backgroundColor: color }}
+                      aria-hidden="true"
+                    />
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
             <fieldset className={styles.sectionsFieldset}>
               <legend>Secciones del viaje</legend>

@@ -30,10 +30,7 @@ import {
   type TripTransport,
   type UpdateTripData,
 } from '../model/trip'
-import {
-  getStableTripColor,
-  selectTripColor,
-} from '../utils/trip-colors'
+import { getStableTripColor } from '../utils/trip-colors'
 
 type TripsSubscriber = (trips: BaseTrip[]) => void
 type TripsSubscriptionErrorHandler = (error: Error) => void
@@ -296,18 +293,15 @@ async function readTrip(tripId: string) {
 export async function createTrip(
   tripData: CreateTripData,
   userId: string,
-  usedColors: readonly TripColor[],
 ) {
   requireUserId(userId, 'crear')
 
   try {
     const database = requireFirestore()
     const tripReference = doc(collection(database, 'trips'))
-    const color = selectTripColor(usedColors, tripReference.id)
     const tripDocument = {
       ...tripData,
       id: tripReference.id,
-      color,
       ownerId: userId,
       createdBy: userId,
       createdAt: serverTimestamp(),

@@ -191,13 +191,10 @@ function AuthenticatedApplication({
         transport: tripData.transport,
         currency: tripData.currency,
         status: tripData.status,
+        color: tripData.color,
         enabledSections: tripData.enabledSections,
       }
-      const savedTrip = await persistTrip(
-        createData,
-        userId,
-        trips.map((trip) => trip.color),
-      )
+      const savedTrip = await persistTrip(createData, userId)
 
       setTrips((currentTrips) => [
         savedTrip,
@@ -212,7 +209,7 @@ function AuthenticatedApplication({
       })
       void navigate('/', { replace: true })
     },
-    [navigate, trips, userId],
+    [navigate, userId],
   )
 
   const dismissNotification = useCallback(() => {
