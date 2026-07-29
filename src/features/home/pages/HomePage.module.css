@@ -163,6 +163,15 @@
   gap: 0.85rem;
 }
 
+.upcomingGrid > article {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--trip-color) 16%, var(--color-surface)) 0%,
+    color-mix(in srgb, var(--trip-color) 7%, var(--color-surface)) 44%,
+    var(--color-surface) 100%
+  );
+}
+
 .completedPanel,
 .noTrips {
   min-width: 0;
