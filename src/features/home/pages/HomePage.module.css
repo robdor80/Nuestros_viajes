@@ -1,14 +1,14 @@
 .page {
-  width: min(100%, 72rem);
+  width: min(100%, 100rem);
   margin: 0 auto;
-  padding: clamp(3rem, 8vmin, 6rem) 1.25rem 4rem;
+  padding: 1.25rem 1rem 3rem;
 }
 
 .confirmation {
   display: flex;
   max-width: 52rem;
   align-items: center;
-  margin-bottom: 2rem;
+  margin: 0 auto 1rem;
   padding: 0.9rem 1rem;
   gap: 0.7rem;
   border: 1px solid #b8c7b4;
@@ -54,7 +54,11 @@
   background: rgb(64 81 60 / 9%);
 }
 
-.confirmation button:focus-visible {
+.confirmation button:focus-visible,
+.state button:focus-visible,
+.completedTrip button:focus-visible,
+.libraryLink:focus-visible,
+.noTrips a:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
@@ -65,69 +69,29 @@
   line-height: 1;
 }
 
-.welcome {
-  max-width: 46rem;
-}
-
-.eyebrow,
-.title,
-.introduction,
-.emptyStateLabel,
-.emptyStateTitle,
-.emptyStateDescription {
-  margin: 0;
-}
-
-.eyebrow,
-.emptyStateLabel {
-  color: var(--color-accent);
-  font-size: 0.75rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.title {
-  margin-top: 0.9rem;
-  color: var(--color-text);
-  font-size: clamp(2.25rem, 7vmin, 4.5rem);
-  font-weight: 650;
-  letter-spacing: -0.045em;
-  line-height: 1.04;
-}
-
-.introduction {
-  max-width: 40rem;
-  margin-top: 1.5rem;
-  color: var(--color-text-muted);
-  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
-  line-height: 1.65;
-}
-
-.emptyState,
 .state {
   display: grid;
   max-width: 52rem;
-  margin-top: clamp(3rem, 8vmin, 5.5rem);
-  padding: clamp(1.5rem, 5vw, 2.5rem);
-  gap: 1.25rem;
+  margin: 2rem auto 0;
+  padding: 1.5rem;
+  gap: 1rem;
   border: 1px solid var(--color-border);
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   background: var(--color-surface);
   box-shadow: var(--shadow-soft);
 }
 
-.state {
+.state[role='status'] {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
 }
 
-.state h2,
+.state h1,
 .state p {
   margin: 0;
 }
 
-.state h2 {
+.state h1 {
   color: var(--color-text);
   font-size: 1.25rem;
 }
@@ -153,11 +117,6 @@
   background: #43523f;
 }
 
-.state button:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
 .spinner {
   width: 2rem;
   height: 2rem;
@@ -167,57 +126,226 @@
   animation: spin 800ms linear infinite;
 }
 
-.tripsSection {
-  max-width: 72rem;
-  margin-top: clamp(3rem, 8vmin, 5.5rem);
-}
-
-.tripsHeading {
-  margin-bottom: 1.5rem;
-}
-
-.tripsGrid {
+.dashboard {
   display: grid;
   gap: 1rem;
 }
 
-.emptyState {
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: 1.5rem;
+.upcomingSection {
+  grid-area: upcoming;
+  min-width: 0;
 }
 
-.emptyStateMark {
+.calendarArea {
   display: grid;
-  width: 3rem;
-  height: 3rem;
+  grid-area: calendar;
+  min-width: 0;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.completedPanel,
+.noTrips {
+  grid-area: completed;
+}
+
+.sectionHeader,
+.completedHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  gap: 0.75rem;
+}
+
+.eyebrow,
+.sectionHeader h1,
+.completedHeader h2,
+.noTrips h1,
+.noTrips p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.67rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.sectionHeader h1,
+.completedHeader h2 {
+  margin-top: 0.25rem;
+  color: var(--color-text);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.sectionHeader h1 {
+  font-size: clamp(1.65rem, 4vw, 2.25rem);
+}
+
+.completedHeader h2 {
+  font-size: 1.25rem;
+}
+
+.tripCount {
+  display: grid;
+  min-width: 1.8rem;
+  height: 1.8rem;
+  padding-inline: 0.4rem;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 999px;
   color: var(--color-accent);
   background: var(--color-accent-soft);
+  font-size: 0.72rem;
+  font-weight: 750;
 }
 
-.emptyStateMark span {
-  width: 1rem;
-  height: 2px;
-  border-radius: 999px;
-  background: currentColor;
+.upcomingGrid {
+  display: grid;
+  max-width: 42rem;
+  margin-inline: auto;
+  gap: 0.85rem;
 }
 
-.emptyStateTitle {
-  margin-top: 0.6rem;
+.completedPanel,
+.noTrips {
+  min-width: 0;
+  padding: 1.15rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1.1rem;
+  background: color-mix(
+    in srgb,
+    var(--color-surface) 88%,
+    var(--color-accent-soft)
+  );
+  box-shadow: var(--shadow-soft);
+}
+
+.completedPanel {
+  display: none;
+  align-self: start;
+}
+
+.completedList {
+  display: grid;
+}
+
+.completedTrip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 0.8rem 0 0.8rem 0.75rem;
+  gap: 0.65rem;
+  border-bottom: 1px solid var(--color-border);
+  border-left: 0.22rem solid var(--trip-color);
+}
+
+.completedTrip:first-child {
+  border-top: 1px solid var(--color-border);
+}
+
+.completedTrip h3,
+.completedTrip p,
+.completedTrip time {
+  margin: 0;
+}
+
+.completedTrip h3 {
+  overflow: hidden;
   color: var(--color-text);
-  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
-  font-weight: 650;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.emptyStateDescription {
-  max-width: 40rem;
-  margin-top: 0.8rem;
+.completedTrip p,
+.completedTrip time {
+  display: block;
+  margin-top: 0.2rem;
   color: var(--color-text-muted);
-  line-height: 1.65;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.completedTrip button {
+  min-height: 2.15rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--trip-color);
+  border-radius: 0.55rem;
+  color: var(--trip-color);
+  background: transparent;
+  font-size: 0.72rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.completedTrip button:hover {
+  color: #ffffff;
+  background: var(--trip-color);
+}
+
+.libraryLink {
+  display: inline-flex;
+  margin-top: 0.9rem;
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-underline-offset: 0.18rem;
+}
+
+.completedEmpty,
+.mobileEmptyMessage {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.completedEmpty {
+  padding: 1rem 0;
+}
+
+.mobileEmptyMessage {
+  text-align: center;
+}
+
+.noTrips {
+  display: grid;
+  align-content: center;
+  gap: 0.8rem;
+}
+
+.noTrips h1 {
+  color: var(--color-text);
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.noTrips > p:not(.eyebrow) {
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.noTrips a {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 2.75rem;
+  align-items: center;
+  margin-top: 0.35rem;
+  padding: 0.65rem 1rem;
+  border-radius: 0.7rem;
+  color: #ffffff;
+  background: var(--color-accent);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.noTrips a:hover {
+  background: #43523f;
 }
 
 @keyframes spin {
@@ -226,16 +354,133 @@
   }
 }
 
-/*
- * Keep the content vertical on phones, including landscape orientation.
- */
-@media (min-width: 48rem) and (min-height: 37.5rem) {
-  .page {
-    padding-inline: 2rem;
+/* Phones in either orientation. */
+@media (max-width: 47.999rem), (max-height: 37.499rem) {
+  .dashboard {
+    grid-template-areas:
+      'upcoming'
+      'calendar';
   }
 
-  .tripsGrid {
+  .dashboard.withoutUpcoming,
+  .emptyDashboard {
+    grid-template-areas:
+      'calendar'
+      'completed';
+  }
+
+  .completedPanel {
+    display: none;
+  }
+
+  .emptyDashboard .noTrips {
+    display: grid;
+  }
+}
+
+/* Tablet in portrait orientation. */
+@media (min-width: 48rem) and (max-width: 61.999rem) and (min-height: 37.5rem) {
+  .page {
+    padding: 1.5rem 1.25rem 3rem;
+  }
+
+  .dashboard.withUpcoming {
+    grid-template-columns: minmax(17rem, 0.86fr) minmax(0, 1.45fr);
+    grid-template-areas:
+      'calendar upcoming'
+      'completed upcoming';
+    align-items: start;
+  }
+
+  .dashboard.withoutUpcoming {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: 'calendar completed';
+    max-width: 58rem;
+    margin-inline: auto;
+    align-items: start;
+  }
+
+  .completedPanel {
+    display: block;
+  }
+
+  .mobileEmptyMessage {
+    display: none;
+  }
+}
+
+/* Desktop and tablet in landscape orientation. */
+@media (min-width: 62rem) and (min-height: 37.5rem) {
+  .page {
+    padding: 1.5rem 2rem 4rem;
+  }
+
+  .dashboard.withUpcoming {
+    grid-template-columns:
+      minmax(17rem, 0.9fr)
+      minmax(24rem, 1.45fr)
+      minmax(17rem, 0.9fr);
+    grid-template-areas: 'calendar upcoming completed';
+    align-items: start;
+  }
+
+  .dashboard.withoutUpcoming {
+    grid-template-columns: minmax(18rem, 1fr) minmax(22rem, 1.15fr);
+    grid-template-areas: 'calendar completed';
+    max-width: 72rem;
+    margin-inline: auto;
+    align-items: start;
+  }
+
+  .completedPanel {
+    display: block;
+  }
+
+  .mobileEmptyMessage {
+    display: none;
+  }
+}
+
+/* Compact the three-column layout on a landscape tablet. */
+@media (min-width: 62rem) and (max-width: 85rem) and (min-height: 37.5rem) {
+  .page {
+    padding-inline: 1.25rem;
+  }
+
+  .dashboard {
+    gap: 0.75rem;
+  }
+
+  .dashboard.withUpcoming {
+    grid-template-columns:
+      minmax(16rem, 0.9fr)
+      minmax(21rem, 1.35fr)
+      minmax(16rem, 0.9fr);
+  }
+
+  .completedPanel,
+  .noTrips {
+    padding: 0.9rem;
+  }
+}
+
+/* Phones in landscape need especially compact vertical rhythm. */
+@media (max-height: 37.499rem) {
+  .page {
+    padding: 0.75rem 1rem 2rem;
+  }
+
+  .dashboard,
+  .upcomingGrid {
+    gap: 0.7rem;
+  }
+
+  .sectionHeader {
+    margin-bottom: 0.6rem;
+  }
+
+  .sectionHeader h1 {
+    font-size: 1.5rem;
   }
 }
 

@@ -16,13 +16,19 @@ import {
   firestore,
 } from '../../../infrastructure/firebase/firebaseClient'
 import {
+  tripColorPalette,
   tripSections,
   type BaseTrip,
   type CreateTripData,
+  type TripColor,
   type TripSection,
   type TripStatus,
   type TripTransport,
 } from '../model/trip'
+import {
+  getStableTripColor,
+  selectTripColor,
+} from '../utils/trip-colors'
 
 type TripsSubscriber = (trips: BaseTrip[]) => void
 type TripsSubscriptionErrorHandler = (error: Error) => void
@@ -36,7 +42,13 @@ const tripTransports: TripTransport[] = [
   'other',
 ]
 
-const tripStatuses: TripStatus[] = ['draft', 'planned']
+const tripStatuses: TripStatus[] = [
+  'draft',
+  'planned',
+  'preparing',
+  'completed',
+  'archived',
+]
 
 class TripServiceError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -94,6 +106,19 @@ function requireTimestamp(data: DocumentData, field: string) {
   return value.toDate().toISOString()
 }
 
+function getTripColor(data: DocumentData, tripId: string) {
+  const color = data.color
+
+  if (
+    typeof color === 'string' &&
+    tripColorPalette.includes(color as TripColor)
+  ) {
+    return color as TripColor
+  }
+
+  return getStableTripColor(tripId)
+}
+
 function mapTripDocument(
   snapshot: DocumentSnapshot<DocumentData>,
 ): BaseTrip {
@@ -140,6 +165,7 @@ function mapTripDocument(
     transport: transport as TripTransport,
     currency: requireString(data, 'currency'),
     status: status as TripStatus,
+    color: getTripColor(data, snapshot.id),
     enabledSections: enabledSections as TripSection[],
     ownerId: requireString(data, 'ownerId'),
     createdBy: requireString(data, 'createdBy'),
@@ -201,6 +227,7 @@ function toTripServiceError(error: unknown, operation: 'create' | 'load') {
 export async function createTrip(
   tripData: CreateTripData,
   userId: string,
+  usedColors: readonly TripColor[],
 ) {
   if (!userId.trim()) {
     throw new TripServiceError(
@@ -211,9 +238,11 @@ export async function createTrip(
   try {
     const database = requireFirestore()
     const tripReference = doc(collection(database, 'trips'))
+    const color = selectTripColor(usedColors, tripReference.id)
     const tripDocument = {
       ...tripData,
       id: tripReference.id,
+      color,
       ownerId: userId,
       createdBy: userId,
       createdAt: serverTimestamp(),

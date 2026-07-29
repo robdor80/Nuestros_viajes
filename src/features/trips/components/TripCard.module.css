@@ -4,15 +4,19 @@
   padding: 1.5rem;
   gap: 0.85rem;
   border: 1px solid var(--color-border);
+  border-left: 0.35rem solid var(--trip-color);
   border-radius: 1rem;
   background: var(--color-surface);
   box-shadow: var(--shadow-soft);
 }
 
 .activeCard {
-  border-left: 0.3rem solid var(--color-accent);
   background:
-    linear-gradient(135deg, rgb(230 235 226 / 72%), transparent 55%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--trip-color) 11%, transparent),
+      transparent 55%
+    ),
     var(--color-surface);
 }
 
@@ -25,7 +29,7 @@
 }
 
 .cardLabel {
-  color: var(--color-accent);
+  color: var(--trip-color);
   font-size: 0.7rem;
   font-weight: 750;
   letter-spacing: 0.1em;
@@ -37,10 +41,15 @@
   align-items: center;
   min-height: 1.75rem;
   padding: 0.25rem 0.65rem;
-  border: 1px solid #c7d0c2;
+  border: 1px solid
+    color-mix(in srgb, var(--trip-color) 38%, var(--color-border));
   border-radius: 999px;
   color: #4f604a;
-  background: var(--color-accent-soft);
+  background: color-mix(
+    in srgb,
+    var(--trip-color) 12%,
+    var(--color-surface)
+  );
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -91,19 +100,44 @@
   min-height: 2.75rem;
   margin-top: 0.25rem;
   padding: 0.65rem 1rem;
-  border: 1px solid #53644e;
+  border: 1px solid var(--trip-color);
   border-radius: 0.7rem;
   color: #ffffff;
-  background: #53644e;
+  background: var(--trip-color);
   font-weight: 700;
   cursor: pointer;
 }
 
 .openButton:hover {
-  background: #43523f;
+  border-color: color-mix(in srgb, var(--trip-color) 82%, #000000);
+  background: color-mix(in srgb, var(--trip-color) 82%, #000000);
 }
 
 .openButton:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+@media (max-height: 37.499rem) {
+  .card {
+    padding: 1rem;
+    gap: 0.55rem;
+  }
+
+  .title {
+    font-size: 1.15rem;
+  }
+
+  .facts {
+    gap: 0.4rem;
+  }
+
+  .facts div {
+    padding-top: 0.5rem;
+  }
+
+  .openButton {
+    min-height: 2.4rem;
+    padding-block: 0.45rem;
+  }
 }

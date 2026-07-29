@@ -3,6 +3,7 @@ import type {
   BaseTrip,
   TripsLoadStatus,
 } from '../model/trip'
+import { classifyTrips } from '../utils/classify-trips'
 import styles from './TripsPage.module.css'
 
 type TripsPageProps = {
@@ -22,13 +23,16 @@ export function TripsPage({
   onOpenTrip,
   onRetry,
 }: TripsPageProps) {
+  const { completedTrips } = classifyTrips(trips)
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>Mis viajes</p>
-        <h1 className={styles.title}>Todos nuestros viajes.</h1>
+        <h1 className={styles.title}>Viajes realizados.</h1>
         <p className={styles.description}>
-          Los viajes que estamos preparando y aquellos que queremos conservar.
+          La biblioteca de destinos que ya forman parte de nuestros
+          recuerdos.
         </p>
       </header>
 
@@ -54,26 +58,27 @@ export function TripsPage({
         </section>
       )}
 
-      {tripsStatus === 'ready' && trips.length === 0 && (
+      {tripsStatus === 'ready' && completedTrips.length === 0 && (
         <section className={styles.emptyState}>
-          <h2>Aún no hay viajes disponibles.</h2>
+          <h2>Aún no hay viajes realizados.</h2>
           <p>
-            Cuando creemos el primero, aparecerá aquí para poder abrirlo
-            cuando lo necesitemos.
+            Cuando finalice el primero, aparecerá aquí para poder volver a
+            abrirlo cuando lo necesitemos.
           </p>
         </section>
       )}
 
-      {tripsStatus === 'ready' && trips.length > 0 && (
+      {tripsStatus === 'ready' && completedTrips.length > 0 && (
         <section
           className={styles.tripsGrid}
-          aria-label="Viajes guardados"
+          aria-label="Viajes realizados"
         >
-          {trips.map((trip) => (
+          {completedTrips.map((trip) => (
             <TripCard
               key={trip.id}
               trip={trip}
               isActive={trip.id === activeTrip?.id}
+              contextLabel="Viaje realizado"
               onOpen={onOpenTrip}
             />
           ))}

@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import {
   tripStatusLabels,
   type BaseTrip,
@@ -8,6 +10,11 @@ type TripCardProps = {
   trip: BaseTrip
   isActive: boolean
   onOpen: (trip: BaseTrip) => void
+  contextLabel?: string
+}
+
+type TripCardStyle = CSSProperties & {
+  '--trip-color': string
 }
 
 function formatDate(date: string) {
@@ -23,15 +30,16 @@ export function TripCard({
   trip,
   isActive,
   onOpen,
+  contextLabel = 'Viaje guardado',
 }: TripCardProps) {
   return (
     <article
       className={`${styles.card} ${isActive ? styles.activeCard : ''}`}
+      style={{ '--trip-color': trip.color } as TripCardStyle}
+      aria-current={isActive ? 'true' : undefined}
     >
       <div className={styles.meta}>
-        <span className={styles.cardLabel}>
-          {isActive ? 'Viaje activo' : 'Viaje guardado'}
-        </span>
+        <span className={styles.cardLabel}>{contextLabel}</span>
         <span className={styles.statusBadge}>
           {tripStatusLabels[trip.status]}
         </span>

@@ -20,12 +20,33 @@ export type TripTransport =
   | 'boat'
   | 'other'
 
-export type TripStatus = 'draft' | 'planned'
+export const tripColorPalette = [
+  '#62745e',
+  '#5d7387',
+  '#9b6655',
+  '#75698a',
+  '#8a733b',
+  '#3e7372',
+  '#855566',
+] as const
+
+export type TripColor = (typeof tripColorPalette)[number]
+
+export type TripStatus =
+  | 'draft'
+  | 'planned'
+  | 'preparing'
+  | 'completed'
+  | 'archived'
+
 export type TripsLoadStatus = 'loading' | 'ready' | 'error'
 
 export const tripStatusLabels: Record<TripStatus, string> = {
   draft: 'Borrador',
   planned: 'Planificado',
+  preparing: 'En preparación',
+  completed: 'Finalizado',
+  archived: 'Archivado',
 }
 
 export type BaseTrip = {
@@ -40,6 +61,7 @@ export type BaseTrip = {
   transport: TripTransport
   currency: string
   status: TripStatus
+  color: TripColor
   enabledSections: TripSection[]
   ownerId: string
   createdBy: string
@@ -49,5 +71,10 @@ export type BaseTrip = {
 
 export type CreateTripData = Omit<
   BaseTrip,
-  'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'
+  | 'id'
+  | 'color'
+  | 'ownerId'
+  | 'createdBy'
+  | 'createdAt'
+  | 'updatedAt'
 >
