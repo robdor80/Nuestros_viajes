@@ -1,4 +1,3 @@
-import { ComingSoonPage } from '../../../shared/components/ComingSoonPage/ComingSoonPage'
 import { useAuth } from '../../auth/hooks/useAuth'
 import styles from './SettingsPage.module.css'
 
@@ -11,13 +10,11 @@ export function SettingsPage() {
   } = useAuth()
 
   return (
-    <ComingSoonPage
-      eyebrow="Ajustes"
-      title="Un espacio que se adaptará a nosotros."
-      description="Aquí configuraremos más adelante las preferencias generales de Nuestros viajes."
-    >
+    <div className={styles.page}>
+      <h1 className={styles.pageTitle}>Ajustes</h1>
+
       <section className={styles.session} aria-labelledby="session-title">
-        <h2 id="session-title" className={styles.title}>
+        <h2 id="session-title" className={styles.sectionTitle}>
           Sesión
         </h2>
         <p className={styles.description}>
@@ -46,6 +43,6 @@ export function SettingsPage() {
           </div>
         )}
       </section>
-    </ComingSoonPage>
+    </div>
   )
 }

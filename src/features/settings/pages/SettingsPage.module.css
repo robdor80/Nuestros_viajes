@@ -1,6 +1,21 @@
+.page {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vmin, 6rem) 1.25rem 4rem;
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(2.25rem, 7vmin, 4.5rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
 .session {
   width: min(100%, 34rem);
-  margin-top: 2.5rem;
+  margin-top: 2rem;
   padding: 1.4rem;
   border: 1px solid var(--color-border);
   border-radius: 1rem;
@@ -8,12 +23,12 @@
   box-shadow: var(--shadow-soft);
 }
 
-.title,
+.sectionTitle,
 .description {
   margin: 0;
 }
 
-.title {
+.sectionTitle {
   color: var(--color-text);
   font-size: 1.15rem;
 }
@@ -78,4 +93,10 @@
   color: inherit;
   background: transparent;
   cursor: pointer;
+}
+
+@media (min-width: 48rem) and (min-height: 37.5rem) {
+  .page {
+    padding-inline: 2rem;
+  }
 }
