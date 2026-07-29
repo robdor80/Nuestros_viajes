@@ -37,6 +37,18 @@ export function AppLayout({
             alt="Fati y Rober disfrutando de un viaje"
           />
 
+          <p
+            className={styles.headerTagline}
+            aria-label="¿Nos hacemos un viajecito?"
+          >
+            <span className={styles.taglineStart} aria-hidden="true">
+              ¿Nos hacemos...
+            </span>
+            <span className={styles.taglineEnd} aria-hidden="true">
+              ...un viajecito?
+            </span>
+          </p>
+
           {showNavigation && (
             <button
               className={styles.menuButton}
