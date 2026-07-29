@@ -4,7 +4,7 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
+  onSnapshot,
   serverTimestamp,
   setDoc,
   type DocumentData,
@@ -23,6 +23,9 @@ import {
   type TripStatus,
   type TripTransport,
 } from '../model/trip'
+
+type TripsSubscriber = (trips: BaseTrip[]) => void
+type TripsSubscriptionErrorHandler = (error: Error) => void
 
 const tripTransports: TripTransport[] = [
   'car',
@@ -98,7 +101,7 @@ function mapTripDocument(
     throw new TripServiceError('El viaje guardado ya no está disponible.')
   }
 
-  const data = snapshot.data()
+  const data = snapshot.data({ serverTimestamps: 'estimate' })
   const transport = requireString(data, 'transport')
   const status = requireString(data, 'status')
   const enabledSections = requireStringArray(data, 'enabledSections')
@@ -226,15 +229,27 @@ export async function createTrip(
   }
 }
 
-export async function getTrips() {
+export function subscribeToTrips(
+  onData: TripsSubscriber,
+  onError: TripsSubscriptionErrorHandler,
+) {
   try {
-    const tripsSnapshot = await getDocs(
+    return onSnapshot(
       collection(requireFirestore(), 'trips'),
+      (tripsSnapshot) => {
+        try {
+          const trips = tripsSnapshot.docs.map(mapTripDocument)
+          onData(sortTripsByRelevance(trips))
+        } catch (error) {
+          onError(toTripServiceError(error, 'load'))
+        }
+      },
+      (error) => {
+        onError(toTripServiceError(error, 'load'))
+      },
     )
-    const trips = tripsSnapshot.docs.map(mapTripDocument)
-
-    return sortTripsByRelevance(trips)
   } catch (error) {
-    throw toTripServiceError(error, 'load')
+    onError(toTripServiceError(error, 'load'))
+    return () => undefined
   }
 }

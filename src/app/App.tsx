@@ -23,7 +23,7 @@ import type {
 import { TripsPage } from '../features/trips/pages/TripsPage'
 import {
   createTrip as persistTrip,
-  getTrips,
+  subscribeToTrips,
 } from '../features/trips/services/trip-service'
 import { AppLayout } from './layouts/AppLayout'
 
@@ -89,6 +89,7 @@ function AuthenticatedApplication({
   const [tripsStatus, setTripsStatus] =
     useState<TripsLoadStatus>('loading')
   const [tripsError, setTripsError] = useState<string | null>(null)
+  const [subscriptionVersion, setSubscriptionVersion] = useState(0)
   const [confirmation, setConfirmation] = useState<string | null>(null)
   const location = useLocation()
   const navigate = useNavigate()
@@ -100,45 +101,47 @@ function AuthenticatedApplication({
       ? { ...location, pathname: '/', state: null }
       : (backgroundLocation ?? location)
 
-  const loadTrips = useCallback(async () => {
-    setTripsStatus('loading')
-    setTripsError(null)
+  const handleTripsUpdate = useCallback((savedTrips: BaseTrip[]) => {
+    setTrips(savedTrips)
+    setActiveTrip((currentTrip) => {
+      if (!currentTrip) {
+        return savedTrips[0] ?? null
+      }
 
-    try {
-      const savedTrips = await getTrips()
-
-      setTrips(savedTrips)
-      setActiveTrip((currentTrip) => {
-        if (!currentTrip) {
-          return savedTrips[0] ?? null
-        }
-
-        return (
-          savedTrips.find((trip) => trip.id === currentTrip.id) ??
-          savedTrips[0] ??
-          null
-        )
-      })
-      setTripsStatus('ready')
-    } catch (error) {
-      setTripsError(
-        error instanceof Error
-          ? error.message
-          : 'No se han podido cargar los viajes. Inténtalo de nuevo.',
+      return (
+        savedTrips.find((trip) => trip.id === currentTrip.id) ??
+        savedTrips[0] ??
+        null
       )
-      setTripsStatus('error')
-    }
+    })
+    setTripsError(null)
+    setTripsStatus('ready')
+  }, [])
+
+  const handleTripsError = useCallback((error: Error) => {
+    setTripsError(error.message)
+    setTripsStatus('error')
   }, [])
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void loadTrips()
-    }, 0)
+    const unsubscribe = subscribeToTrips(
+      handleTripsUpdate,
+      handleTripsError,
+    )
 
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [loadTrips])
+    return unsubscribe
+  }, [
+    handleTripsError,
+    handleTripsUpdate,
+    subscriptionVersion,
+    userId,
+  ])
+
+  const retryTrips = useCallback(() => {
+    setTripsStatus('loading')
+    setTripsError(null)
+    setSubscriptionVersion((currentVersion) => currentVersion + 1)
+  }, [])
 
   const closeNewTripModal = useCallback(() => {
     if (backgroundLocation) {
@@ -208,7 +211,7 @@ function AuthenticatedApplication({
               confirmation={confirmation}
               onDismissConfirmation={dismissConfirmation}
               onOpenTrip={openTrip}
-              onRetryTrips={() => void loadTrips()}
+              onRetryTrips={retryTrips}
             />
           }
         />
@@ -221,7 +224,7 @@ function AuthenticatedApplication({
               tripsStatus={tripsStatus}
               tripsError={tripsError}
               onOpenTrip={openTrip}
-              onRetry={() => void loadTrips()}
+              onRetry={retryTrips}
             />
           }
         />
