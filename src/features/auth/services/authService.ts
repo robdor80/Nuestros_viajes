@@ -10,11 +10,27 @@ import {
   type User,
 } from 'firebase/auth'
 
-import { firebaseAuth } from '../../../infrastructure/firebase/firebaseClient'
+import {
+  firebaseAuth,
+  firebaseConfigurationError,
+} from '../../../infrastructure/firebase/firebaseClient'
 import type { AuthUser } from '../model/authUser'
 
 const googleProvider = new GoogleAuthProvider()
 let persistencePromise: Promise<void> | null = null
+
+class FirebaseConfigurationError extends Error {}
+
+function requireFirebaseAuth() {
+  if (!firebaseAuth) {
+    throw new FirebaseConfigurationError(
+      firebaseConfigurationError ??
+        'Firebase Authentication no está disponible.',
+    )
+  }
+
+  return firebaseAuth
+}
 
 function toAuthUser(user: User): AuthUser {
   return {
@@ -27,7 +43,7 @@ function toAuthUser(user: User): AuthUser {
 
 function ensureLocalPersistence() {
   persistencePromise ??= setPersistence(
-    firebaseAuth,
+    requireFirebaseAuth(),
     browserLocalPersistence,
   )
 
@@ -43,7 +59,7 @@ export function observeAuthentication(
   onError: (error: unknown) => void,
 ): Unsubscribe {
   return onAuthStateChanged(
-    firebaseAuth,
+    requireFirebaseAuth(),
     (user) => {
       onUserChanged(user ? toAuthUser(user) : null)
     },
@@ -55,7 +71,7 @@ export async function signInWithGoogle() {
   await ensureLocalPersistence()
 
   try {
-    await signInWithPopup(firebaseAuth, googleProvider)
+    await signInWithPopup(requireFirebaseAuth(), googleProvider)
     return 'authenticated' as const
   } catch (error) {
     if (
@@ -71,10 +87,14 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
-  await firebaseSignOut(firebaseAuth)
+  await firebaseSignOut(requireFirebaseAuth())
 }
 
 export function getAuthenticationErrorMessage(error: unknown) {
+  if (error instanceof FirebaseConfigurationError) {
+    return error.message
+  }
+
   if (!(error instanceof FirebaseError)) {
     return 'No se ha podido completar la operación. Inténtalo de nuevo.'
   }

@@ -15,12 +15,14 @@ const missingEnvironmentVariables = Object.entries(firebaseEnvironment)
   .filter(([, value]) => !value?.trim())
   .map(([key]) => key)
 
-if (missingEnvironmentVariables.length > 0) {
-  throw new Error(
-    `Falta configuración de Firebase. Revisa las variables VITE_FIREBASE_* correspondientes a: ${missingEnvironmentVariables.join(', ')}.`,
-  )
-}
+export const firebaseConfigurationError =
+  missingEnvironmentVariables.length > 0
+    ? `Falta configuración de Firebase. Revisa las variables VITE_FIREBASE_* correspondientes a: ${missingEnvironmentVariables.join(', ')}.`
+    : null
 
-export const firebaseApp = initializeApp(firebaseEnvironment)
-export const firebaseAuth = getAuth(firebaseApp)
-export const firestore = getFirestore(firebaseApp)
+export const firebaseApp = firebaseConfigurationError
+  ? null
+  : initializeApp(firebaseEnvironment)
+
+export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null
+export const firestore = firebaseApp ? getFirestore(firebaseApp) : null
