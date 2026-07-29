@@ -404,6 +404,10 @@
     display: block;
   }
 
+  .dashboard.withUpcoming .calendarArea {
+    margin-top: 4.39rem;
+  }
+
   .mobileEmptyMessage {
     display: none;
   }
@@ -436,6 +440,11 @@
     display: block;
   }
 
+  .dashboard.withUpcoming .calendarArea,
+  .dashboard.withUpcoming .completedPanel {
+    margin-top: 4.64rem;
+  }
+
   .mobileEmptyMessage {
     display: none;
   }
@@ -461,6 +470,13 @@
   .completedPanel,
   .noTrips {
     padding: 0.9rem;
+  }
+}
+
+/* Give the three dashboard zones more breathing room on PC. */
+@media (min-width: 85.001rem) and (min-height: 37.5rem) {
+  .dashboard {
+    column-gap: 2.5rem;
   }
 }
 
