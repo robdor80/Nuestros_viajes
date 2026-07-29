@@ -101,12 +101,9 @@ export function TripCalendar({
   return (
     <section className={styles.calendar} aria-labelledby="calendar-title">
       <header className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Calendario</p>
-          <h2 id="calendar-title" className={styles.month}>
-            {monthLabel}
-          </h2>
-        </div>
+        <h2 id="calendar-title" className={styles.month}>
+          {monthLabel}
+        </h2>
         <div className={styles.controls}>
           <button
             type="button"

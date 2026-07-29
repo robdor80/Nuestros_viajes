@@ -94,14 +94,15 @@ export function HomePage({
               aria-labelledby="upcoming-title"
             >
               <header className={styles.sectionHeader}>
-                <div>
-                  <p className={styles.eyebrow}>En el horizonte</p>
-                  <h1 id="upcoming-title">Próximos viajes</h1>
-                </div>
+                <h1 id="upcoming-title">Próximos viajes</h1>
                 <span className={styles.tripCount}>
                   {upcomingTrips.length}
                 </span>
               </header>
+
+              <p className={`${styles.eyebrow} ${styles.zoneLabel}`}>
+                En el horizonte
+              </p>
 
               <div className={styles.upcomingGrid}>
                 {upcomingTrips.map((trip) => (
@@ -124,6 +125,9 @@ export function HomePage({
           )}
 
           <div className={styles.calendarArea}>
+            <p className={`${styles.eyebrow} ${styles.zoneLabel}`}>
+              Calendario
+            </p>
             <TripCalendar
               trips={calendarTrips}
               onOpenTrip={onOpenTrip}
@@ -138,23 +142,23 @@ export function HomePage({
 
           {hasTrips ? (
             <aside
-              className={styles.completedPanel}
+              className={styles.completedArea}
               aria-labelledby="completed-title"
             >
-              <header className={styles.completedHeader}>
-                <div>
-                  <p className={styles.eyebrow}>Recuerdos</p>
+              <p className={`${styles.eyebrow} ${styles.zoneLabel}`}>
+                Recuerdos
+              </p>
+              <div className={styles.completedPanel}>
+                <header className={styles.completedHeader}>
                   <h2 id="completed-title">Viajes realizados</h2>
-                </div>
-                {completedTrips.length > 0 && (
-                  <span className={styles.tripCount}>
-                    {completedTrips.length}
-                  </span>
-                )}
-              </header>
+                  {completedTrips.length > 0 && (
+                    <span className={styles.tripCount}>
+                      {completedTrips.length}
+                    </span>
+                  )}
+                </header>
 
-              {recentCompletedTrips.length > 0 ? (
-                <>
+                {recentCompletedTrips.length > 0 ? (
                   <div className={styles.completedList}>
                     {recentCompletedTrips.map((trip) => (
                       <article
@@ -166,6 +170,12 @@ export function HomePage({
                           } as CompletedTripStyle
                         }
                       >
+                        <button
+                          className={styles.tabletCardButton}
+                          type="button"
+                          aria-label={`Abrir viaje ${trip.name}`}
+                          onClick={() => onOpenTrip(trip)}
+                        />
                         <div>
                           <h3>{trip.name}</h3>
                           <p>
@@ -178,6 +188,7 @@ export function HomePage({
                         </div>
                         <div className={styles.completedActions}>
                           <button
+                            className={styles.openCompletedButton}
                             type="button"
                             aria-label={`Abrir viaje ${trip.name}`}
                             onClick={() => onOpenTrip(trip)}
@@ -197,16 +208,12 @@ export function HomePage({
                       </article>
                     ))}
                   </div>
-
-                  <Link className={styles.libraryLink} to="/mis-viajes">
-                    Ver todos en Mis viajes
-                  </Link>
-                </>
-              ) : (
-                <p className={styles.completedEmpty}>
-                  Aún no hay viajes realizados.
-                </p>
-              )}
+                ) : (
+                  <p className={styles.completedEmpty}>
+                    Aún no hay viajes realizados.
+                  </p>
+                )}
+              </div>
             </aside>
           ) : (
             <section className={styles.noTrips} aria-labelledby="no-trips">
