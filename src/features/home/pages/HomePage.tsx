@@ -1,28 +1,30 @@
-import {
-  tripStatusLabels,
-  type BaseTrip,
+import { TripCard } from '../../trips/components/TripCard'
+import type {
+  BaseTrip,
+  TripsLoadStatus,
 } from '../../trips/model/trip'
 import styles from './HomePage.module.css'
 
 type HomePageProps = {
   activeTrip: BaseTrip | null
+  trips: BaseTrip[]
+  tripsStatus: TripsLoadStatus
+  tripsError: string | null
   confirmation: string | null
   onDismissConfirmation: () => void
-}
-
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat('es-ES', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${date}T00:00:00Z`))
+  onOpenTrip: (trip: BaseTrip) => void
+  onRetryTrips: () => void
 }
 
 export function HomePage({
   activeTrip,
+  trips,
+  tripsStatus,
+  tripsError,
   confirmation,
   onDismissConfirmation,
+  onOpenTrip,
+  onRetryTrips,
 }: HomePageProps) {
   const activeTripYear = activeTrip?.startDate.slice(0, 4)
 
@@ -64,49 +66,29 @@ export function HomePage({
         </p>
       </section>
 
-      {activeTrip ? (
-        <section
-          className={styles.activeTrip}
-          aria-labelledby="active-trip-title"
-        >
-          <div className={styles.activeTripHeading}>
-            <div className={styles.tripCardMeta}>
-              <p className={styles.emptyStateLabel}>Tu próximo viaje</p>
-              <span className={styles.statusBadge}>
-                {tripStatusLabels[activeTrip.status]}
-              </span>
-            </div>
-            <h2 id="active-trip-title" className={styles.emptyStateTitle}>
-              {activeTrip.name}
-            </h2>
-            {activeTrip.description && (
-              <p className={styles.emptyStateDescription}>
-                {activeTrip.description}
-              </p>
-            )}
+      {tripsStatus === 'loading' && (
+        <section className={styles.state} role="status" aria-live="polite">
+          <span className={styles.spinner} aria-hidden="true" />
+          <div>
+            <h2>Cargando viajes…</h2>
+            <p>Estamos recuperando los viajes guardados.</p>
           </div>
-
-          <dl className={styles.tripFacts}>
-            <div>
-              <dt>Destino</dt>
-              <dd>
-                {activeTrip.destination}, {activeTrip.country}
-              </dd>
-            </div>
-            <div>
-              <dt>Fechas</dt>
-              <dd>
-                {formatDate(activeTrip.startDate)} —{' '}
-                {formatDate(activeTrip.endDate)}
-              </dd>
-            </div>
-            <div>
-              <dt>Viajeros</dt>
-              <dd>{activeTrip.participants.join(' · ')}</dd>
-            </div>
-          </dl>
         </section>
-      ) : (
+      )}
+
+      {tripsStatus === 'error' && (
+        <section className={styles.state} role="alert">
+          <div>
+            <h2>No se han podido cargar los viajes.</h2>
+            <p>{tripsError}</p>
+          </div>
+          <button type="button" onClick={onRetryTrips}>
+            Reintentar
+          </button>
+        </section>
+      )}
+
+      {tripsStatus === 'ready' && trips.length === 0 && (
         <section
           className={styles.emptyState}
           aria-labelledby="empty-state-title"
@@ -123,6 +105,30 @@ export function HomePage({
               Cuando creemos el primero, aparecerá aquí con todo lo necesario
               para empezar a prepararlo.
             </p>
+          </div>
+        </section>
+      )}
+
+      {tripsStatus === 'ready' && trips.length > 0 && (
+        <section
+          className={styles.tripsSection}
+          aria-labelledby="home-trips-title"
+        >
+          <div className={styles.tripsHeading}>
+            <p className={styles.emptyStateLabel}>Tus viajes</p>
+            <h2 id="home-trips-title" className={styles.emptyStateTitle}>
+              Viajes guardados
+            </h2>
+          </div>
+          <div className={styles.tripsGrid}>
+            {trips.map((trip) => (
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                isActive={trip.id === activeTrip?.id}
+                onOpen={onOpenTrip}
+              />
+            ))}
           </div>
         </section>
       )}

@@ -90,7 +90,7 @@
   line-height: 1;
 }
 
-.closeButton:hover {
+.closeButton:hover:not(:disabled) {
   background: var(--color-surface-strong);
 }
 
@@ -108,7 +108,8 @@
   overscroll-behavior: contain;
 }
 
-.errorSummary {
+.errorSummary,
+.submissionError {
   margin-bottom: 1rem;
   padding: 0.9rem 1rem;
   border: 1px solid #d7aaa3;
@@ -117,6 +118,10 @@
   background: #fbefec;
   font-size: 0.9rem;
   font-weight: 650;
+}
+
+.submissionError {
+  line-height: 1.45;
 }
 
 .section {
@@ -411,12 +416,19 @@
   box-shadow: 0 0.6rem 1.5rem rgb(67 87 78 / 18%);
 }
 
-.cancelButton:hover {
+.cancelButton:hover:not(:disabled) {
   background: #f1efe9;
 }
 
-.submitButton:hover {
+.submitButton:hover:not(:disabled) {
   background: #35473f;
+}
+
+.closeButton:disabled,
+.cancelButton:disabled,
+.submitButton:disabled {
+  cursor: wait;
+  opacity: 0.68;
 }
 
 @media (min-width: 48rem) and (min-height: 37.5rem) {

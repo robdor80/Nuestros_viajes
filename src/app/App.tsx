@@ -15,8 +15,16 @@ import { useAuth } from '../features/auth/hooks/useAuth'
 import { HomePage } from '../features/home/pages/HomePage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { NewTripModal } from '../features/trips/components/NewTripModal'
-import type { BaseTrip } from '../features/trips/model/trip'
+import type {
+  BaseTrip,
+  CreateTripData,
+  TripsLoadStatus,
+} from '../features/trips/model/trip'
 import { TripsPage } from '../features/trips/pages/TripsPage'
+import {
+  createTrip as persistTrip,
+  getTrips,
+} from '../features/trips/services/trip-service'
 import { AppLayout } from './layouts/AppLayout'
 
 type ModalNavigationState = {
@@ -62,15 +70,25 @@ export function App() {
     )
   }
 
-  if (status === 'authorized') {
-    return <AuthenticatedApplication />
+  if (status === 'authorized' && user) {
+    return <AuthenticatedApplication userId={user.uid} />
   }
 
   return null
 }
 
-function AuthenticatedApplication() {
+type AuthenticatedApplicationProps = {
+  userId: string
+}
+
+function AuthenticatedApplication({
+  userId,
+}: AuthenticatedApplicationProps) {
+  const [trips, setTrips] = useState<BaseTrip[]>([])
   const [activeTrip, setActiveTrip] = useState<BaseTrip | null>(null)
+  const [tripsStatus, setTripsStatus] =
+    useState<TripsLoadStatus>('loading')
+  const [tripsError, setTripsError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
   const location = useLocation()
   const navigate = useNavigate()
@@ -82,6 +100,46 @@ function AuthenticatedApplication() {
       ? { ...location, pathname: '/', state: null }
       : (backgroundLocation ?? location)
 
+  const loadTrips = useCallback(async () => {
+    setTripsStatus('loading')
+    setTripsError(null)
+
+    try {
+      const savedTrips = await getTrips()
+
+      setTrips(savedTrips)
+      setActiveTrip((currentTrip) => {
+        if (!currentTrip) {
+          return savedTrips[0] ?? null
+        }
+
+        return (
+          savedTrips.find((trip) => trip.id === currentTrip.id) ??
+          savedTrips[0] ??
+          null
+        )
+      })
+      setTripsStatus('ready')
+    } catch (error) {
+      setTripsError(
+        error instanceof Error
+          ? error.message
+          : 'No se han podido cargar los viajes. Inténtalo de nuevo.',
+      )
+      setTripsStatus('error')
+    }
+  }, [])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadTrips()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [loadTrips])
+
   const closeNewTripModal = useCallback(() => {
     if (backgroundLocation) {
       void navigate(-1)
@@ -92,12 +150,22 @@ function AuthenticatedApplication() {
   }, [backgroundLocation, navigate])
 
   const createTrip = useCallback(
-    (trip: BaseTrip) => {
-      setActiveTrip(trip)
-      setConfirmation(`El viaje “${trip.name}” se ha creado correctamente.`)
+    async (tripData: CreateTripData) => {
+      const savedTrip = await persistTrip(tripData, userId)
+
+      setTrips((currentTrips) => [
+        savedTrip,
+        ...currentTrips.filter((trip) => trip.id !== savedTrip.id),
+      ])
+      setTripsStatus('ready')
+      setTripsError(null)
+      setActiveTrip(savedTrip)
+      setConfirmation(
+        `El viaje “${savedTrip.name}” se ha creado correctamente.`,
+      )
       void navigate('/', { replace: true })
     },
-    [navigate],
+    [navigate, userId],
   )
 
   const dismissConfirmation = useCallback(() => {
@@ -134,15 +202,27 @@ function AuthenticatedApplication() {
           element={
             <HomePage
               activeTrip={activeTrip}
+              trips={trips}
+              tripsStatus={tripsStatus}
+              tripsError={tripsError}
               confirmation={confirmation}
               onDismissConfirmation={dismissConfirmation}
+              onOpenTrip={openTrip}
+              onRetryTrips={() => void loadTrips()}
             />
           }
         />
         <Route
           path="/mis-viajes"
           element={
-            <TripsPage activeTrip={activeTrip} onOpenTrip={openTrip} />
+            <TripsPage
+              activeTrip={activeTrip}
+              trips={trips}
+              tripsStatus={tripsStatus}
+              tripsError={tripsError}
+              onOpenTrip={openTrip}
+              onRetry={() => void loadTrips()}
+            />
           }
         />
         <Route path="/ajustes" element={<SettingsPage />} />

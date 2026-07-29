@@ -21,6 +21,7 @@ export type TripTransport =
   | 'other'
 
 export type TripStatus = 'draft' | 'planned'
+export type TripsLoadStatus = 'loading' | 'ready' | 'error'
 
 export const tripStatusLabels: Record<TripStatus, string> = {
   draft: 'Borrador',
@@ -40,5 +41,13 @@ export type BaseTrip = {
   currency: string
   status: TripStatus
   enabledSections: TripSection[]
+  ownerId: string
+  createdBy: string
   createdAt: string
+  updatedAt: string
 }
+
+export type CreateTripData = Omit<
+  BaseTrip,
+  'id' | 'ownerId' | 'createdBy' | 'createdAt' | 'updatedAt'
+>

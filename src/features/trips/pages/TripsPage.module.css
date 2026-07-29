@@ -1,58 +1,81 @@
-.currentTrip {
-  max-width: 32rem;
+.page {
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vmin, 6rem) 1.25rem 4rem;
+}
+
+.header {
+  max-width: 46rem;
+}
+
+.eyebrow,
+.title,
+.description,
+.state h2,
+.state p,
+.emptyState h2,
+.emptyState p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 0.9rem;
+  color: var(--color-text);
+  font-size: clamp(2.25rem, 7vmin, 4.5rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.description {
+  max-width: 40rem;
+  margin-top: 1.5rem;
+  color: var(--color-text-muted);
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  line-height: 1.65;
+}
+
+.state,
+.emptyState {
+  display: grid;
+  max-width: 52rem;
   margin-top: 3rem;
   padding: 1.5rem;
+  gap: 1rem;
   border: 1px solid var(--color-border);
-  border-left: 0.3rem solid var(--color-accent);
   border-radius: 1rem;
   background: var(--color-surface);
   box-shadow: var(--shadow-soft);
 }
 
-.cardMeta {
-  display: flex;
-  flex-wrap: wrap;
+.state {
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
 }
 
-.cardLabel {
-  color: var(--color-accent);
-  font-size: 0.7rem;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.75rem;
-  padding: 0.25rem 0.65rem;
-  border: 1px solid #c7d0c2;
-  border-radius: 999px;
-  color: #4f604a;
-  background: var(--color-accent-soft);
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.currentTrip strong {
-  display: block;
-  margin-top: 0.5rem;
+.state h2,
+.emptyState h2 {
   color: var(--color-text);
-  font-size: 1.35rem;
+  font-size: 1.25rem;
 }
 
-.currentTrip p {
-  margin: 0.45rem 0 0;
+.state p,
+.emptyState p {
+  margin-top: 0.35rem;
   color: var(--color-text-muted);
+  line-height: 1.5;
 }
 
-.currentTrip button {
+.state button {
   min-height: 2.75rem;
-  margin-top: 1.25rem;
   padding: 0.65rem 1rem;
   border: 1px solid #53644e;
   border-radius: 0.7rem;
@@ -62,11 +85,48 @@
   cursor: pointer;
 }
 
-.currentTrip button:hover {
+.state button:hover {
   background: #43523f;
 }
 
-.currentTrip button:focus-visible {
+.state button:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 0.2rem solid var(--color-accent-soft);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.tripsGrid {
+  display: grid;
+  margin-top: 3rem;
+  gap: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 48rem) and (min-height: 37.5rem) {
+  .page {
+    padding-inline: 2rem;
+  }
+
+  .tripsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
 }

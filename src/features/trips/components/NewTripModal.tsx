@@ -10,7 +10,7 @@ import {
 
 import {
   tripSections,
-  type BaseTrip,
+  type CreateTripData,
   type TripSection,
   type TripStatus,
   type TripTransport,
@@ -19,7 +19,7 @@ import styles from './NewTripModal.module.css'
 
 type NewTripModalProps = {
   onCancel: () => void
-  onCreate: (trip: BaseTrip) => void
+  onCreate: (trip: CreateTripData) => Promise<void>
 }
 
 type TripFormValues = {
@@ -116,10 +116,6 @@ function calculateDuration(startDate: string, endDate: string) {
   }
 }
 
-function createTemporaryId() {
-  return `trip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-}
-
 export function NewTripModal({
   onCancel,
   onCreate,
@@ -127,8 +123,11 @@ export function NewTripModal({
   const [values, setValues] = useState<TripFormValues>(initialValues)
   const [isNameEdited, setIsNameEdited] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const [submissionError, setSubmissionError] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
   const dialogRef = useRef<HTMLDivElement>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const isSubmittingRef = useRef(false)
 
   const suggestedName = useMemo(() => {
     const year = values.startDate.slice(0, 4)
@@ -146,7 +145,7 @@ export function NewTripModal({
     nameInputRef.current?.focus()
 
     const handleDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && !isSaving) {
         event.preventDefault()
         onCancel()
       }
@@ -159,7 +158,7 @@ export function NewTripModal({
       document.body.style.overflow = previousBodyOverflow
       previouslyFocusedElement?.focus()
     }
-  }, [onCancel])
+  }, [isSaving, onCancel])
 
   const updateField = <Field extends keyof TripFormValues>(
     field: Field,
@@ -181,6 +180,10 @@ export function NewTripModal({
           dateRange: undefined,
         }),
       }))
+    }
+
+    if (submissionError) {
+      setSubmissionError(null)
     }
   }
 
@@ -223,7 +226,7 @@ export function NewTripModal({
   }
 
   const handleBackdropMouseDown = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
+    if (event.target === event.currentTarget && !isSaving) {
       onCancel()
     }
   }
@@ -274,8 +277,12 @@ export function NewTripModal({
     }
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if (isSubmittingRef.current) {
+      return
+    }
 
     const { nextErrors, participants } = validateForm()
 
@@ -284,21 +291,33 @@ export function NewTripModal({
       return
     }
 
-    onCreate({
-      id: createTemporaryId(),
-      name: displayedName.trim(),
-      destination: values.destination.trim(),
-      country: values.country.trim(),
-      description: values.description.trim(),
-      startDate: values.startDate,
-      endDate: values.endDate,
-      participants,
-      transport: values.transport,
-      currency: values.currency,
-      status: values.status,
-      enabledSections: values.enabledSections,
-      createdAt: new Date().toISOString(),
-    })
+    isSubmittingRef.current = true
+    setSubmissionError(null)
+    setIsSaving(true)
+
+    try {
+      await onCreate({
+        name: displayedName.trim(),
+        destination: values.destination.trim(),
+        country: values.country.trim(),
+        description: values.description.trim(),
+        startDate: values.startDate,
+        endDate: values.endDate,
+        participants,
+        transport: values.transport,
+        currency: values.currency,
+        status: values.status,
+        enabledSections: values.enabledSections,
+      })
+    } catch (error) {
+      isSubmittingRef.current = false
+      setIsSaving(false)
+      setSubmissionError(
+        error instanceof Error
+          ? error.message
+          : 'No se ha podido guardar el viaje. Inténtalo de nuevo.',
+      )
+    }
   }
 
   return (
@@ -331,6 +350,7 @@ export function NewTripModal({
             className={styles.closeButton}
             type="button"
             aria-label="Cerrar formulario de nuevo viaje"
+            disabled={isSaving}
             onClick={onCancel}
           >
             <span aria-hidden="true">×</span>
@@ -341,6 +361,12 @@ export function NewTripModal({
           {Object.keys(errors).length > 0 && (
             <div className={styles.errorSummary} role="alert">
               Revisa los campos señalados antes de crear el viaje.
+            </div>
+          )}
+
+          {submissionError && (
+            <div className={styles.submissionError} role="alert">
+              {submissionError}
             </div>
           )}
 
@@ -665,12 +691,17 @@ export function NewTripModal({
             <button
               className={styles.cancelButton}
               type="button"
+              disabled={isSaving}
               onClick={onCancel}
             >
               Cancelar
             </button>
-            <button className={styles.submitButton} type="submit">
-              Crear viaje
+            <button
+              className={styles.submitButton}
+              type="submit"
+              disabled={isSaving}
+            >
+              {isSaving ? 'Guardando viaje…' : 'Crear viaje'}
             </button>
           </footer>
         </form>
