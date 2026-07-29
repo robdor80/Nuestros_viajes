@@ -41,10 +41,14 @@ export function AccessStatusPage({ status }: AccessStatusPageProps) {
   return (
     <div className={styles.page}>
       <section
-        className={styles.card}
+        className={`${styles.card} ${
+          isUnauthorized ? styles.unauthorizedCard : ''
+        }`}
         aria-labelledby="access-status-title"
       >
-        <p className={styles.eyebrow}>Nuestros viajes</p>
+        {!isUnauthorized && (
+          <p className={styles.eyebrow}>Nuestros viajes</p>
+        )}
         <h1 id="access-status-title" className={styles.title}>
           {isUnauthorized
             ? 'Cuenta no autorizada'
