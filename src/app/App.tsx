@@ -8,6 +8,7 @@ import {
   type Location,
 } from 'react-router-dom'
 
+import { AccessStatusPage } from '../features/auth/components/AccessStatusPage'
 import { AuthUserMenu } from '../features/auth/components/AuthUserMenu'
 import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage'
 import { useAuth } from '../features/auth/hooks/useAuth'
@@ -23,9 +24,9 @@ type ModalNavigationState = {
 }
 
 export function App() {
-  const { user, isLoading } = useAuth()
+  const { user, status } = useAuth()
 
-  if (isLoading) {
+  if (status === 'loading') {
     return (
       <AppLayout showNavigation={false}>
         <PrivateAccessPage isLoading />
@@ -33,7 +34,7 @@ export function App() {
     )
   }
 
-  if (!user) {
+  if (status === 'signedOut') {
     return (
       <AppLayout showNavigation={false}>
         <PrivateAccessPage />
@@ -41,7 +42,31 @@ export function App() {
     )
   }
 
-  return <AuthenticatedApplication />
+  if (status === 'checkingAccess' || status === 'unauthorized') {
+    return (
+      <AppLayout showNavigation={false}>
+        <AccessStatusPage status={status} />
+      </AppLayout>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <AppLayout showNavigation={false}>
+        {user ? (
+          <AccessStatusPage status="error" />
+        ) : (
+          <PrivateAccessPage />
+        )}
+      </AppLayout>
+    )
+  }
+
+  if (status === 'authorized') {
+    return <AuthenticatedApplication />
+  }
+
+  return null
 }
 
 function AuthenticatedApplication() {

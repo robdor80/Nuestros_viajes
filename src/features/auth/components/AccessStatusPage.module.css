@@ -1,0 +1,137 @@
+.page {
+  display: grid;
+  min-height: calc(100dvh - clamp(10rem, 33vw, 14rem));
+  padding: clamp(2rem, 8vw, 6rem) 1.25rem;
+  place-items: start center;
+  background:
+    radial-gradient(circle at 50% 0%, #edf1eb 0, transparent 34rem),
+    var(--color-background);
+}
+
+.card {
+  display: grid;
+  width: min(100%, 34rem);
+  padding: clamp(1.6rem, 5vw, 3rem);
+  gap: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-top: 0.3rem solid var(--color-accent);
+  border-radius: 1rem;
+  background: var(--color-surface-strong);
+  box-shadow: var(--shadow-soft);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(2rem, 7vw, 3rem);
+  font-weight: 520;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.description,
+.error {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.error {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #d7aaa3;
+  border-radius: 0.7rem;
+  color: #763d36;
+  background: #fbefec;
+}
+
+.spinner {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0.22rem solid var(--color-accent-soft);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 2.85rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.72rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 1px solid var(--color-accent);
+  color: #ffffff;
+  background: var(--color-accent);
+}
+
+.secondaryButton {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface-strong);
+}
+
+.primaryButton:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: #f1efe9;
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 48rem) and (min-height: 37.5rem) {
+  .page {
+    min-height: calc(
+      100dvh - calc(clamp(14rem, 23vw, 20rem) + 1rem)
+    );
+  }
+
+  .card {
+    margin-top: clamp(1rem, 4vh, 3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}

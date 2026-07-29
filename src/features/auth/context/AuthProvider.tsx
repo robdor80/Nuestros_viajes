@@ -7,6 +7,10 @@ import {
 } from 'react'
 
 import {
+  checkUserAccess,
+  getAuthorizationErrorMessage,
+} from '../services/authorizationService'
+import {
   getAuthenticationErrorMessage,
   observeAuthentication,
   prepareAuthentication,
@@ -14,7 +18,11 @@ import {
   signOut as signOutFromFirebase,
 } from '../services/authService'
 import type { AuthUser } from '../model/authUser'
-import { AuthContext, type AuthContextValue } from './AuthContext'
+import {
+  AuthContext,
+  type AuthContextValue,
+  type AuthStatus,
+} from './AuthContext'
 
 type AuthProviderProps = {
   children: ReactNode
@@ -22,9 +30,10 @@ type AuthProviderProps = {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [status, setStatus] = useState<AuthStatus>('loading')
   const [isActionPending, setIsActionPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [accessCheckVersion, setAccessCheckVersion] = useState(0)
 
   useEffect(() => {
     let isActive = true
@@ -43,15 +52,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
 
             setUser(nextUser)
-            setIsLoading(false)
+            setError(null)
+            setStatus(nextUser ? 'checkingAccess' : 'signedOut')
           },
           (authError) => {
             if (!isActive) {
               return
             }
 
+            setUser(null)
             setError(getAuthenticationErrorMessage(authError))
-            setIsLoading(false)
+            setStatus('error')
           },
         )
       })
@@ -60,8 +71,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return
         }
 
+        setUser(null)
         setError(getAuthenticationErrorMessage(authError))
-        setIsLoading(false)
+        setStatus('error')
       })
 
     return () => {
@@ -69,6 +81,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
       stopObserving?.()
     }
   }, [])
+
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    let isActive = true
+
+    void checkUserAccess(user.uid)
+      .then((hasAccess) => {
+        if (!isActive) {
+          return
+        }
+
+        setStatus(hasAccess ? 'authorized' : 'unauthorized')
+      })
+      .catch((authorizationError: unknown) => {
+        if (!isActive) {
+          return
+        }
+
+        setError(getAuthorizationErrorMessage(authorizationError))
+        setStatus('error')
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [accessCheckVersion, user])
 
   const signIn = useCallback(async () => {
     setError(null)
@@ -100,23 +141,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setError(null)
   }, [])
 
+  const retryAccessCheck = useCallback(() => {
+    if (user) {
+      setError(null)
+      setStatus('checkingAccess')
+      setAccessCheckVersion((currentVersion) => currentVersion + 1)
+    }
+  }, [user])
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      isLoading,
+      status,
       isActionPending,
       error,
       signIn,
       signOut,
+      retryAccessCheck,
       clearError,
     }),
     [
       user,
-      isLoading,
+      status,
       isActionPending,
       error,
       signIn,
       signOut,
+      retryAccessCheck,
       clearError,
     ],
   )
