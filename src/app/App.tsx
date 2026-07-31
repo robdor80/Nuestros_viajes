@@ -13,6 +13,7 @@ import { AuthUserMenu } from '../features/auth/components/AuthUserMenu'
 import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { HomePage } from '../features/home/pages/HomePage'
+import { PlacesPage } from '../features/places/pages/PlacesPage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { TripSectionPage } from '../features/trip-workspace/pages/TripSectionPage'
 import { TripWorkspaceOverviewPage } from '../features/trip-workspace/pages/TripWorkspaceOverviewPage'
@@ -310,6 +311,15 @@ function AuthenticatedApplication({
       }
 
       setActionDialog(null)
+    } catch (error) {
+      setNotification({
+        message:
+          error instanceof Error
+            ? error.message
+            : 'No se ha podido completar la acción.',
+        tone: 'error',
+      })
+      throw error
     } finally {
       actionInProgressRef.current = false
       setActionsDisabledTripId(null)
@@ -401,7 +411,9 @@ function AuthenticatedApplication({
           <Route index element={<TripWorkspaceOverviewPage />} />
           <Route
             path="que-ver"
-            element={<TripSectionPage sectionId="places" />}
+            element={
+              <PlacesPage userId={userId} onNotify={setNotification} />
+            }
           />
           <Route
             path="planning"

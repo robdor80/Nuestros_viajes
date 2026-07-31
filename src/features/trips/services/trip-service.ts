@@ -6,7 +6,10 @@ import {
   deleteField,
   doc,
   getDoc,
+  getDocs,
+  limit,
   onSnapshot,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -66,6 +69,10 @@ type TripOperation =
   | 'archive'
   | 'restore'
   | 'delete'
+
+const tripContentSubcollections = [
+  { id: 'places', label: 'lugares y actividades' },
+] as const
 
 class TripServiceError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -290,6 +297,31 @@ async function readTrip(tripId: string) {
   return mapTripDocument(tripSnapshot)
 }
 
+async function requireEmptyTripContent(tripId: string) {
+  const database = requireFirestore()
+  const contentChecks = await Promise.all(
+    tripContentSubcollections.map(async (subcollection) => {
+      const snapshot = await getDocs(
+        query(
+          collection(database, 'trips', tripId, subcollection.id),
+          limit(1),
+        ),
+      )
+
+      return snapshot.empty ? null : subcollection.label
+    }),
+  )
+  const existingContent = contentChecks.filter(
+    (label): label is NonNullable<typeof label> => label !== null,
+  )
+
+  if (existingContent.length > 0) {
+    throw new TripServiceError(
+      `No se puede eliminar este viaje porque contiene ${existingContent.join(', ')}. Elimina primero su contenido interior o utiliza, cuando esté disponible, la eliminación completa.`,
+    )
+  }
+}
+
 export async function createTrip(
   tripData: CreateTripData,
   userId: string,
@@ -406,12 +438,7 @@ export async function deleteTrip(tripId: string, userId: string) {
   requireUserId(userId, 'eliminar')
 
   try {
-    /*
-     * Esta eliminación directa solo es segura mientras los viajes no tengan
-     * subcolecciones. Antes de añadir lugares, itinerarios, alojamientos,
-     * gastos, fotografías, trayectos u otros contenidos anidados deberá
-     * sustituirse por una eliminación recursiva o un backend seguro.
-     */
+    await requireEmptyTripContent(tripId)
     await deleteDoc(doc(requireFirestore(), 'trips', tripId))
   } catch (error) {
     throw toTripServiceError(error, 'delete')

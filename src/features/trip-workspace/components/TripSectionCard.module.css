@@ -77,6 +77,22 @@
   line-height: 1.55;
 }
 
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  gap: 0.35rem 0.9rem;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  line-height: 1.4;
+  list-style-position: inside;
+}
+
+.summary li::marker {
+  color: var(--trip-color);
+}
+
 .link {
   display: inline-flex;
   width: fit-content;

@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 
+import { usePlaces } from '../../places/hooks/usePlaces'
 import { TripSectionCard } from '../components/TripSectionCard'
 import {
   getTripWorkspacePath,
@@ -9,9 +10,25 @@ import styles from './TripWorkspaceOverviewPage.module.css'
 
 export function TripWorkspaceOverviewPage() {
   const { tripId } = useParams()
+  const {
+    places,
+    status: placesStatus,
+  } = usePlaces(tripId ?? '')
 
   if (!tripId) {
     return null
+  }
+
+  const placesSummary = {
+    status: placesStatus,
+    total: places.length,
+    completed: places.filter(
+      (place) => place.contentStatus === 'completed',
+    ).length,
+    inProgress: places.filter(
+      (place) => place.contentStatus === 'in_progress',
+    ).length,
+    draft: places.filter((place) => place.contentStatus === 'draft').length,
   }
 
   return (
@@ -31,6 +48,9 @@ export function TripWorkspaceOverviewPage() {
             key={section.id}
             section={section}
             to={getTripWorkspacePath(tripId, section.slug)}
+            contentSummary={
+              section.id === 'places' ? placesSummary : undefined
+            }
           />
         ))}
       </div>

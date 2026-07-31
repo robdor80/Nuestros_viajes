@@ -1,0 +1,84 @@
+.card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  padding: 1rem;
+  gap: 1rem;
+  border: 1px solid var(--color-border);
+  border-left: 0.3rem solid var(--trip-color);
+  border-radius: 0.9rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  border-radius: 0.7rem;
+}
+
+.content {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 0.65rem;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.content h3,
+.content p {
+  margin: 0;
+}
+
+.content h3 {
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-size: 1.08rem;
+}
+
+.content p {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.content > button {
+  width: fit-content;
+  min-height: 2.5rem;
+  margin-top: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--trip-color) 42%, var(--color-border));
+  border-radius: 0.65rem;
+  color: color-mix(in srgb, var(--trip-color) 82%, #20231f);
+  background: var(--color-surface-strong);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.content > button:hover {
+  background: color-mix(in srgb, var(--trip-color) 10%, var(--color-surface));
+}
+
+.content > button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (min-width: 34rem) {
+  .card:has(.thumbnail) {
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+  }
+
+  .thumbnail {
+    height: 100%;
+    min-height: 9rem;
+    aspect-ratio: auto;
+  }
+}

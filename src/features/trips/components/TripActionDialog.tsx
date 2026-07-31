@@ -153,9 +153,8 @@ export function TripActionDialog({
                 deshacer.
               </p>
               <p>
-                Cuando un viaje contenga itinerarios, lugares, fotografías u
-                otros datos, también se perderán al utilizar la futura
-                eliminación completa.
+                Si contiene lugares u otra información interior, la
+                eliminación se bloqueará para evitar dejar datos huérfanos.
               </p>
               <label className={styles.confirmationField}>
                 <span>
