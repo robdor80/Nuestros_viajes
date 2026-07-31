@@ -99,6 +99,7 @@ export function PlanningDayFormModal({
   const activityTitleRef = useRef<HTMLInputElement>(null)
   const isSavingRef = useRef(false)
   const isSaving = savingStatus !== null
+  const activityEditorId = activityEditor?.id
 
   useEffect(() => {
     const previousFocus = document.activeElement as HTMLElement | null
@@ -122,8 +123,8 @@ export function PlanningDayFormModal({
   }, [onCancel])
 
   useEffect(() => {
-    if (activityEditor) activityTitleRef.current?.focus()
-  }, [activityEditor])
+    if (activityEditorId) activityTitleRef.current?.focus()
+  }, [activityEditorId])
 
   const trapFocus = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== 'Tab' || !dialogRef.current) return
