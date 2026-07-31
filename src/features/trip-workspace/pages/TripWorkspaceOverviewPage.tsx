@@ -1,6 +1,9 @@
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 
 import { usePlaces } from '../../places/hooks/usePlaces'
+import { usePlanningDays } from '../../planning/hooks/usePlanningDays'
+import { getTripDates } from '../../planning/utils/planning-dates'
+import type { BaseTrip } from '../../trips/model/trip'
 import { TripSectionCard } from '../components/TripSectionCard'
 import {
   getTripWorkspacePath,
@@ -10,10 +13,15 @@ import styles from './TripWorkspaceOverviewPage.module.css'
 
 export function TripWorkspaceOverviewPage() {
   const { tripId } = useParams()
+  const trip = useOutletContext<BaseTrip>()
   const {
     places,
     status: placesStatus,
   } = usePlaces(tripId ?? '')
+  const {
+    days: planningDays,
+    status: planningStatus,
+  } = usePlanningDays(tripId ?? '')
 
   if (!tripId) {
     return null
@@ -29,6 +37,26 @@ export function TripWorkspaceOverviewPage() {
       (place) => place.contentStatus === 'in_progress',
     ).length,
     draft: places.filter((place) => place.contentStatus === 'draft').length,
+  }
+  const tripDates = getTripDates(trip.startDate, trip.endDate)
+  const currentPlanningDays = planningDays.filter((day) =>
+    tripDates.includes(day.date),
+  )
+  const planningSummary = {
+    kind: 'planning' as const,
+    status: planningStatus,
+    total: tripDates.length,
+    contentCount: planningDays.length,
+    completed: currentPlanningDays.filter(
+      (day) => day.contentStatus === 'completed',
+    ).length,
+    inProgress: currentPlanningDays.filter(
+      (day) => day.contentStatus === 'in_progress',
+    ).length,
+    draft: currentPlanningDays.filter(
+      (day) => day.contentStatus === 'draft',
+    ).length,
+    notStarted: Math.max(0, tripDates.length - currentPlanningDays.length),
   }
 
   return (
@@ -49,7 +77,11 @@ export function TripWorkspaceOverviewPage() {
             section={section}
             to={getTripWorkspacePath(tripId, section.slug)}
             contentSummary={
-              section.id === 'places' ? placesSummary : undefined
+              section.id === 'places'
+                ? placesSummary
+                : section.id === 'planning'
+                  ? planningSummary
+                  : undefined
             }
           />
         ))}

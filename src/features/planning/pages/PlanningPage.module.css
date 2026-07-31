@@ -1,0 +1,136 @@
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.header p,
+.header h2,
+.state h3,
+.state p,
+.outsideHeading h3,
+.outsideHeading p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--trip-color);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin-top: 0.45rem;
+  color: var(--color-text);
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  letter-spacing: -0.035em;
+}
+
+.header p:not(.eyebrow) {
+  margin-top: 0.65rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.total {
+  flex: none;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  color: var(--trip-color);
+  background: color-mix(in srgb, var(--trip-color) 9%, var(--color-surface));
+  font-size: 0.73rem;
+  font-weight: 750;
+}
+
+.timeline {
+  display: grid;
+  width: min(100%, 62rem);
+  margin-top: 1.5rem;
+  gap: 1rem;
+}
+
+.state {
+  display: grid;
+  max-width: 52rem;
+  margin-top: 1.5rem;
+  padding: 1.4rem;
+  gap: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.state[role='status'] {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.state h3 {
+  color: var(--color-text);
+  font-size: 1.1rem;
+}
+
+.state p {
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+}
+
+.state button {
+  width: fit-content;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--trip-color);
+  border-radius: 0.65rem;
+  color: #fff;
+  background: var(--trip-color);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 0.2rem solid var(--color-accent-soft);
+  border-top-color: var(--trip-color);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.outsideSection {
+  width: min(100%, 62rem);
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.outsideHeading h3 {
+  color: var(--color-text);
+  font-size: 1.25rem;
+}
+
+.outsideHeading p {
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 42rem) {
+  .header {
+    display: grid;
+    align-items: start;
+  }
+
+  .total {
+    width: fit-content;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}

@@ -14,6 +14,7 @@ import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { HomePage } from '../features/home/pages/HomePage'
 import { PlacesPage } from '../features/places/pages/PlacesPage'
+import { PlanningPage } from '../features/planning/pages/PlanningPage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { TripSectionPage } from '../features/trip-workspace/pages/TripSectionPage'
 import { TripWorkspaceOverviewPage } from '../features/trip-workspace/pages/TripWorkspaceOverviewPage'
@@ -417,7 +418,9 @@ function AuthenticatedApplication({
           />
           <Route
             path="planning"
-            element={<TripSectionPage sectionId="planning" />}
+            element={
+              <PlanningPage userId={userId} onNotify={setNotification} />
+            }
           />
           <Route
             path="alojamiento"

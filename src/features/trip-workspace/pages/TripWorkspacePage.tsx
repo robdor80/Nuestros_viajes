@@ -69,7 +69,7 @@ export function TripWorkspacePage({
       <TripWorkspaceHeader trip={trip} />
       <TripSectionNavigation tripId={tripId} />
       <div className={styles.content}>
-        <Outlet />
+        <Outlet context={trip} />
       </div>
     </div>
   )
