@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 import {
   placeBestTimeLabels,
@@ -28,6 +28,13 @@ export function CompletedPlaceCard({
   onDelete,
 }: CompletedPlaceCardProps) {
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
+  const [expandedDescription, setExpandedDescription] = useState<
+    string | null
+  >(null)
+  const [canExpandDescription, setCanExpandDescription] = useState(false)
+  const descriptionRef = useRef<HTMLParagraphElement>(null)
+  const descriptionId = useId()
+  const isDescriptionExpanded = expandedDescription === place.description
   const showImage =
     Boolean(place.imageUrl) && failedImageUrl !== place.imageUrl
   const facts = [
@@ -47,6 +54,45 @@ export function CompletedPlaceCard({
       value: place.requiresReservation ? 'Necesaria' : 'No necesaria',
     },
   ].filter((fact): fact is { label: string; value: string } => Boolean(fact))
+
+  useEffect(() => {
+    const description = descriptionRef.current
+
+    if (!description || !place.description) {
+      return
+    }
+
+    let animationFrame: number | null = null
+    const measureOverflow = () => {
+      if (expandedDescription === place.description) {
+        return
+      }
+
+      setCanExpandDescription(
+        description.scrollHeight > description.clientHeight + 1,
+      )
+    }
+    const scheduleMeasurement = () => {
+      if (animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame)
+      }
+
+      animationFrame = window.requestAnimationFrame(measureOverflow)
+    }
+    const resizeObserver = new ResizeObserver(scheduleMeasurement)
+
+    resizeObserver.observe(description)
+    window.addEventListener('resize', scheduleMeasurement)
+    scheduleMeasurement()
+
+    return () => {
+      if (animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame)
+      }
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', scheduleMeasurement)
+    }
+  }, [expandedDescription, place.description])
 
   return (
     <article className={styles.card}>
@@ -86,7 +132,36 @@ export function CompletedPlaceCard({
         </div>
 
         {place.description && (
-          <p className={styles.description}>{place.description}</p>
+          <div className={styles.descriptionBlock}>
+            <p
+              ref={descriptionRef}
+              id={descriptionId}
+              className={`${styles.description} ${
+                isDescriptionExpanded ? '' : styles.descriptionCollapsed
+              }`}
+            >
+              {place.description}
+            </p>
+            {canExpandDescription && (
+              <button
+                className={styles.descriptionToggle}
+                type="button"
+                aria-expanded={isDescriptionExpanded}
+                aria-controls={descriptionId}
+                onClick={() =>
+                  setExpandedDescription((currentDescription) =>
+                    currentDescription === place.description
+                      ? null
+                      : place.description,
+                  )
+                }
+              >
+                {isDescriptionExpanded
+                  ? 'Mostrar menos'
+                  : 'Ver descripción completa'}
+              </button>
+            )}
+          </div>
         )}
 
         {facts.length > 0 && (
