@@ -7,12 +7,14 @@ import styles from './AppLayout.module.css'
 type AppLayoutProps = {
   children: ReactNode
   accountControls?: ReactNode
+  showHeader?: boolean
   showNavigation?: boolean
 }
 
 export function AppLayout({
   children,
   accountControls,
+  showHeader = true,
   showNavigation = true,
 }: AppLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -29,46 +31,52 @@ export function AppLayout({
 
   return (
     <div className={styles.application}>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <img
-            className={styles.headerImage}
-            src={headerImage}
-            alt="Fati y Rober disfrutando de un viaje"
-          />
+      {showHeader && (
+        <header className={styles.header}>
+          <div className={styles.headerInner}>
+            <img
+              className={styles.headerImage}
+              src={headerImage}
+              alt="Fati y Rober disfrutando de un viaje"
+            />
 
-          <p
-            className={styles.headerTagline}
-            aria-label="¿Nos hacemos un viajecito?"
-          >
-            <span className={styles.taglineStart} aria-hidden="true">
-              ¿Nos hacemos...
-            </span>
-            <span className={styles.taglineEnd} aria-hidden="true">
-              ...un viajecito?
-            </span>
-          </p>
-
-          {showNavigation && (
-            <button
-              className={styles.menuButton}
-              type="button"
-              aria-controls="primary-navigation"
-              aria-expanded={isMenuOpen}
-              aria-label={
-                isMenuOpen ? 'Cerrar menú principal' : 'Abrir menú principal'
-              }
-              onClick={() => setIsMenuOpen((currentValue) => !currentValue)}
+            <p
+              className={styles.headerTagline}
+              aria-label="¿Nos hacemos un viajecito?"
             >
-              <span className={styles.menuIcon} aria-hidden="true">
-                <span />
-                <span />
-                <span />
+              <span className={styles.taglineStart} aria-hidden="true">
+                ¿Nos hacemos...
               </span>
-            </button>
-          )}
-        </div>
-      </header>
+              <span className={styles.taglineEnd} aria-hidden="true">
+                ...un viajecito?
+              </span>
+            </p>
+
+            {showNavigation && (
+              <button
+                className={styles.menuButton}
+                type="button"
+                aria-controls="primary-navigation"
+                aria-expanded={isMenuOpen}
+                aria-label={
+                  isMenuOpen
+                    ? 'Cerrar menú principal'
+                    : 'Abrir menú principal'
+                }
+                onClick={() =>
+                  setIsMenuOpen((currentValue) => !currentValue)
+                }
+              >
+                <span className={styles.menuIcon} aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </button>
+            )}
+          </div>
+        </header>
+      )}
 
       {showNavigation && (
         <div className={styles.navigationBar}>

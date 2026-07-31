@@ -1,0 +1,49 @@
+.header {
+  max-width: 42rem;
+}
+
+.eyebrow,
+.header h2,
+.header p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--trip-color);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin-top: 0.55rem;
+  color: var(--color-text);
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.header p:not(.eyebrow) {
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  margin-top: 1.75rem;
+  gap: 1rem;
+}
+
+@media (min-width: 42rem) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 68rem) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

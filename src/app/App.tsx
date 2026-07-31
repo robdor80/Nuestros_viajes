@@ -14,6 +14,9 @@ import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { HomePage } from '../features/home/pages/HomePage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
+import { TripSectionPage } from '../features/trip-workspace/pages/TripSectionPage'
+import { TripWorkspaceOverviewPage } from '../features/trip-workspace/pages/TripWorkspaceOverviewPage'
+import { TripWorkspacePage } from '../features/trip-workspace/pages/TripWorkspacePage'
 import { TripActionDialog } from '../features/trips/components/TripActionDialog'
 import { TripFormModal } from '../features/trips/components/TripFormModal'
 import {
@@ -122,6 +125,7 @@ function AuthenticatedApplication({
     isNewTripRoute && !backgroundLocation
       ? { ...location, pathname: '/', state: null }
       : (backgroundLocation ?? location)
+  const isTripWorkspaceRoute = location.pathname.startsWith('/viajes/')
 
   const handleTripsUpdate = useCallback((savedTrips: BaseTrip[]) => {
     setTrips(savedTrips)
@@ -314,8 +318,7 @@ function AuthenticatedApplication({
 
   const openTrip = useCallback(
     (trip: BaseTrip) => {
-      setActiveTrip(trip)
-      void navigate('/')
+      void navigate(`/viajes/${encodeURIComponent(trip.id)}`)
     },
     [navigate],
   )
@@ -343,7 +346,11 @@ function AuthenticatedApplication({
   }, [notification])
 
   return (
-    <AppLayout accountControls={<AuthUserMenu />}>
+    <AppLayout
+      accountControls={<AuthUserMenu />}
+      showHeader={!isTripWorkspaceRoute}
+      showNavigation={!isTripWorkspaceRoute}
+    >
       <Routes location={contentLocation}>
         <Route
           path="/"
@@ -380,6 +387,47 @@ function AuthenticatedApplication({
             />
           }
         />
+        <Route
+          path="/viajes/:tripId"
+          element={
+            <TripWorkspacePage
+              trips={trips}
+              tripsStatus={tripsStatus}
+              tripsError={tripsError}
+              onRetry={retryTrips}
+            />
+          }
+        >
+          <Route index element={<TripWorkspaceOverviewPage />} />
+          <Route
+            path="que-ver"
+            element={<TripSectionPage sectionId="places" />}
+          />
+          <Route
+            path="planning"
+            element={<TripSectionPage sectionId="planning" />}
+          />
+          <Route
+            path="alojamiento"
+            element={<TripSectionPage sectionId="accommodation" />}
+          />
+          <Route
+            path="presupuesto"
+            element={<TripSectionPage sectionId="budget" />}
+          />
+          <Route
+            path="restaurantes"
+            element={<TripSectionPage sectionId="restaurants" />}
+          />
+          <Route
+            path="trayectos"
+            element={<TripSectionPage sectionId="transfers" />}
+          />
+          <Route
+            path="datos"
+            element={<TripSectionPage sectionId="useful-data" />}
+          />
+        </Route>
         <Route path="/ajustes" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
