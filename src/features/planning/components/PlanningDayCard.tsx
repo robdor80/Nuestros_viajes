@@ -139,31 +139,31 @@ function ActivityDetails({ activity, index }: { activity: PlanningActivity; inde
 
   return (
     <li className={styles.activity}>
+      <div className={styles.activityTop}>
+        <span className={styles.order} aria-label={`Actividad ${index + 1}`}>{index + 1}</span>
+        <div>
+          {(time || activity.momentOfDay) && (
+            <p className={styles.timing}>
+              {[time, activity.momentOfDay ? planningMomentLabels[activity.momentOfDay] : ''].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          <h4>{activity.title}</h4>
+          {(activity.type || activity.estimatedDuration) && (
+            <p className={styles.activityMeta}>
+              {[
+                activity.type ? planningActivityTypeLabels[activity.type] : '',
+                activity.estimatedDuration,
+              ].filter(Boolean).join(' · ')}
+            </p>
+          )}
+        </div>
+      </div>
       {activity.imageUrl && !imageFailed && (
         <div className={styles.activityImage}>
           <img src={activity.imageUrl} alt={activity.title} loading="lazy" onError={() => setImageFailed(true)} />
         </div>
       )}
       <div className={styles.activityBody}>
-        <div className={styles.activityTop}>
-          <span className={styles.order} aria-label={`Actividad ${index + 1}`}>{index + 1}</span>
-          <div>
-            {(time || activity.momentOfDay) && (
-              <p className={styles.timing}>
-                {[time, activity.momentOfDay ? planningMomentLabels[activity.momentOfDay] : ''].filter(Boolean).join(' · ')}
-              </p>
-            )}
-            <h4>{activity.title}</h4>
-            {(activity.type || activity.estimatedDuration) && (
-              <p className={styles.activityMeta}>
-                {[
-                  activity.type ? planningActivityTypeLabels[activity.type] : '',
-                  activity.estimatedDuration,
-                ].filter(Boolean).join(' · ')}
-              </p>
-            )}
-          </div>
-        </div>
         {activity.address && <p className={styles.address}>{activity.address}</p>}
         {activity.description && <p className={styles.activityText}>{activity.description}</p>}
         {activity.notes && <div className={styles.activityNotes}><strong>Notas</strong><p>{activity.notes}</p></div>}
