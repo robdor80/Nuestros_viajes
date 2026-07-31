@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import {
   tripStatusLabels,
@@ -25,38 +25,18 @@ function formatDate(date: string) {
 }
 
 export function TripWorkspaceHeader({ trip }: TripWorkspaceHeaderProps) {
-  const location = useLocation()
-  const navigate = useNavigate()
-
-  const goBack = () => {
-    const hasApplicationHistory =
-      location.key !== 'default' && window.history.length > 1
-
-    if (hasApplicationHistory) {
-      void navigate(-1)
-      return
-    }
-
-    void navigate('/')
-  }
-
   return (
     <header
       className={styles.header}
       style={{ '--trip-color': trip.color } as TripWorkspaceHeaderStyle}
     >
       <div className={styles.topRow}>
-        <div className={styles.navigationActions}>
-          <button className={styles.backButton} type="button" onClick={goBack}>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-            Volver
-          </button>
-          <Link className={styles.homeLink} to="/">
-            Inicio
-          </Link>
-        </div>
+        <Link className={styles.homeLink} to="/">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          Inicio
+        </Link>
 
         {trip.status === 'archived' && (
           <span className={styles.archivedBadge}>Viaje archivado</span>
