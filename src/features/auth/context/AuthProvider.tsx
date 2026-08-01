@@ -52,7 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
 
             setUser(nextUser)
-            setError(null)
+            setError((currentError) => (nextUser ? null : currentError))
             setStatus(nextUser ? 'checkingAccess' : 'signedOut')
           },
           (authError) => {
@@ -90,12 +90,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isActive = true
 
     void checkUserAccess(user.uid)
-      .then((hasAccess) => {
+      .then(async (hasAccess) => {
         if (!isActive) {
           return
         }
 
-        setStatus(hasAccess ? 'authorized' : 'unauthorized')
+        if (hasAccess) {
+          setStatus('authorized')
+          return
+        }
+
+        setError('Esta cuenta de Google no tiene acceso a Nuestros viajes.')
+
+        try {
+          await signOutFromFirebase()
+        } catch (authError) {
+          if (!isActive) {
+            return
+          }
+
+          setError(getAuthenticationErrorMessage(authError))
+          setStatus('error')
+          return
+        }
+
+        if (!isActive) {
+          return
+        }
+
+        setUser(null)
+        setStatus('signedOut')
       })
       .catch((authorizationError: unknown) => {
         if (!isActive) {

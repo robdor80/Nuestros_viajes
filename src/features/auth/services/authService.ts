@@ -18,6 +18,7 @@ import type { AuthUser } from '../model/authUser'
 
 const googleProvider = new GoogleAuthProvider()
 let persistencePromise: Promise<void> | null = null
+let isLocalPersistenceReady = false
 
 class FirebaseConfigurationError extends Error {}
 
@@ -45,7 +46,9 @@ function ensureLocalPersistence() {
   persistencePromise ??= setPersistence(
     requireFirebaseAuth(),
     browserLocalPersistence,
-  )
+  ).then(() => {
+    isLocalPersistenceReady = true
+  })
 
   return persistencePromise
 }
@@ -68,22 +71,16 @@ export function observeAuthentication(
 }
 
 export async function signInWithGoogle() {
-  await ensureLocalPersistence()
+  const auth = requireFirebaseAuth()
 
-  try {
-    await signInWithPopup(requireFirebaseAuth(), googleProvider)
-    return 'authenticated' as const
-  } catch (error) {
-    if (
-      error instanceof FirebaseError &&
-      (error.code === 'auth/popup-closed-by-user' ||
-        error.code === 'auth/cancelled-popup-request')
-    ) {
-      return 'cancelled' as const
-    }
-
-    throw error
+  if (!isLocalPersistenceReady) {
+    throw new FirebaseConfigurationError(
+      'Firebase Authentication todavía está preparando la sesión. Inténtalo de nuevo.',
+    )
   }
+
+  await signInWithPopup(auth, googleProvider)
+  return 'authenticated' as const
 }
 
 export async function signOut() {
@@ -101,16 +98,23 @@ export function getAuthenticationErrorMessage(error: unknown) {
 
   switch (error.code) {
     case 'auth/popup-blocked':
-      return 'El navegador ha bloqueado la ventana de acceso. Permite las ventanas emergentes e inténtalo de nuevo.'
+      return 'El navegador ha bloqueado la ventana de acceso. Permite las ventanas emergentes para esta página e inténtalo de nuevo.'
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return 'El acceso con Google se ha cancelado.'
     case 'auth/network-request-failed':
-      return 'No se ha podido contactar con Google. Comprueba tu conexión e inténtalo de nuevo.'
+      return 'No se pudo conectar con Google. Comprueba tu conexión e inténtalo de nuevo.'
     case 'auth/unauthorized-domain':
-      return 'Este dominio no está autorizado para iniciar sesión en Firebase.'
+      return 'No se puede iniciar sesión desde este dominio. Revisa la configuración de Firebase Authentication.'
     case 'auth/operation-not-allowed':
       return 'El acceso con Google no está habilitado en Firebase.'
+    case 'auth/invalid-api-key':
+      return 'La configuración de Firebase no es válida. Revisa la clave de Firebase Authentication.'
+    case 'auth/internal-error':
+      return 'Firebase no pudo completar el acceso con Google. Inténtalo de nuevo.'
     case 'auth/too-many-requests':
       return 'Se han realizado demasiados intentos. Espera unos minutos y vuelve a probar.'
     default:
-      return 'No se ha podido completar el acceso con Google. Inténtalo de nuevo.'
+      return 'No se pudo completar el acceso con Google. Inténtalo de nuevo.'
   }
 }
