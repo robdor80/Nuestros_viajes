@@ -11,8 +11,9 @@
 
 .dialog {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   width: min(48rem, 100%);
-  max-height: min(54rem, calc(100vh - 2.5rem));
+  max-height: min(54rem, calc(100dvh - 2.5rem));
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: 1.1rem;
@@ -23,6 +24,7 @@
 .header,
 .actions {
   display: flex;
+  flex: none;
   align-items: start;
   justify-content: space-between;
   gap: 1rem;
@@ -84,8 +86,10 @@
 
 .content {
   display: grid;
+  min-height: 0;
   gap: 1.1rem;
   padding: 1.25rem;
+  overscroll-behavior: contain;
   overflow-y: auto;
 }
 
@@ -236,6 +240,7 @@
 }
 
 .actions {
+  flex-wrap: wrap;
   align-items: center;
   justify-content: end;
   border-top: 1px solid var(--color-border);
@@ -284,7 +289,7 @@
   }
 
   .dialog {
-    max-height: calc(100vh - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
   }
 
   .header,
@@ -314,7 +319,7 @@
 
 @media (max-height: 37.499rem) {
   .dialog {
-    max-height: calc(100vh - 1rem);
+    max-height: calc(100dvh - 1rem);
   }
 
   .backdrop {
