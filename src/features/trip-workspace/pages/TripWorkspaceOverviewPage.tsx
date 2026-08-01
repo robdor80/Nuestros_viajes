@@ -11,6 +11,12 @@ import { budgetToFormData } from '../../budget/model/budget'
 import { usePlaces } from '../../places/hooks/usePlaces'
 import { usePlanningDays } from '../../planning/hooks/usePlanningDays'
 import { getTripDates } from '../../planning/utils/planning-dates'
+import { useTransfers } from '../../transfers/hooks/useTransfers'
+import {
+  transferDirections,
+  transferDirectionLabels,
+  type TransferDirection,
+} from '../../transfers/model/transfer'
 import type { BaseTrip } from '../../trips/model/trip'
 import { TripSectionCard } from '../components/TripSectionCard'
 import {
@@ -18,6 +24,18 @@ import {
   tripWorkspaceSections,
 } from '../model/trip-workspace-section'
 import styles from './TripWorkspaceOverviewPage.module.css'
+
+const transferStatusSummaryLabels = {
+  draft: 'borrador',
+  in_progress: 'en preparación',
+  completed: 'terminada',
+} as const
+
+function formatTransferDirection(direction: TransferDirection) {
+  const label = transferDirectionLabels[direction].toLowerCase()
+
+  return `${label.charAt(0).toUpperCase()}${label.slice(1)}`
+}
 
 export function TripWorkspaceOverviewPage() {
   const { tripId } = useParams()
@@ -35,6 +53,7 @@ export function TripWorkspaceOverviewPage() {
     status: accommodationsStatus,
   } = useAccommodations(tripId ?? '')
   const { budget, status: budgetStatus } = useBudget(tripId ?? '')
+  const { transfers, status: transfersStatus } = useTransfers(tripId ?? '')
 
   if (!tripId) {
     return null
@@ -105,6 +124,37 @@ export function TripWorkspaceOverviewPage() {
         ? `Total previsto: ${formatBudgetAmount(budgetCalculations.total)}`
         : undefined,
   }
+  const transfersList = transferDirections.map((direction) => ({
+    direction,
+    transfer: transfers[direction],
+  }))
+  const transfersSummaryDetail = transfersList
+    .map(({ direction, transfer }) => {
+      const statusLabel = transfer
+        ? transferStatusSummaryLabels[transfer.contentStatus]
+        : 'sin comenzar'
+
+      return `${formatTransferDirection(direction)} ${statusLabel}`
+    })
+    .join(' · ')
+  const transfersSummary = {
+    kind: 'transfers' as const,
+    status: transfersStatus,
+    total: transfersList.filter(({ transfer }) => transfer !== null).length,
+    completed: transfersList.filter(
+      ({ transfer }) => transfer?.contentStatus === 'completed',
+    ).length,
+    inProgress: transfersList.filter(
+      ({ transfer }) => transfer?.contentStatus === 'in_progress',
+    ).length,
+    draft: transfersList.filter(
+      ({ transfer }) => transfer?.contentStatus === 'draft',
+    ).length,
+    detail:
+      transfersList.some(({ transfer }) => transfer !== null)
+        ? transfersSummaryDetail
+        : undefined,
+  }
 
   return (
     <section aria-labelledby="trip-summary-title">
@@ -132,6 +182,8 @@ export function TripWorkspaceOverviewPage() {
                     ? accommodationsSummary
                     : section.id === 'budget'
                       ? budgetSummary
+                      : section.id === 'transfers'
+                        ? transfersSummary
                   : undefined
             }
           />

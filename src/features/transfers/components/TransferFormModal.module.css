@@ -1,0 +1,323 @@
+.backdrop {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  padding: 1.25rem;
+  place-items: center;
+  overflow-y: auto;
+  background: rgb(24 25 22 / 42%);
+}
+
+.dialog {
+  display: grid;
+  width: min(48rem, 100%);
+  max-height: min(54rem, calc(100vh - 2.5rem));
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 1.1rem;
+  background: var(--color-surface);
+  box-shadow: 0 1.5rem 4.5rem rgb(20 24 19 / 28%);
+}
+
+.header,
+.actions {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.header {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.eyebrow,
+.header h2,
+.header p,
+.stops h3,
+.stops p,
+.formError {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--trip-color);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin-top: 0.4rem;
+  color: var(--color-text);
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.header p,
+.stops p,
+.fullWidth small {
+  margin-top: 0.45rem;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.closeButton {
+  display: grid;
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  background: var(--color-surface-strong);
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.content {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.25rem;
+  overflow-y: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.grid label,
+.fullWidth,
+.stopItem label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.grid span,
+.fullWidth span,
+.stopItem label span {
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.grid input,
+.grid select,
+.fullWidth input,
+.fullWidth textarea,
+.stopItem input,
+.stopItem textarea {
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0.62rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.7rem;
+  color: var(--color-text);
+  background: var(--color-surface-strong);
+  font: inherit;
+}
+
+.grid textarea,
+.fullWidth textarea,
+.stopItem textarea {
+  resize: vertical;
+}
+
+.grid input:focus,
+.grid select:focus,
+.fullWidth input:focus,
+.fullWidth textarea:focus,
+.stopItem input:focus,
+.stopItem textarea:focus {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 1px;
+  border-color: color-mix(in srgb, var(--trip-color) 52%, var(--color-border));
+}
+
+.grid [aria-invalid='true'],
+.fullWidth [aria-invalid='true'] {
+  border-color: #a4483f;
+}
+
+.stops {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.95rem;
+  background: color-mix(in srgb, var(--trip-color) 4%, var(--color-surface));
+}
+
+.stopsHeader,
+.stopHeading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.stops h3 {
+  color: var(--color-text);
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.stopsHeader button,
+.stopHeading button,
+.actions button {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--trip-color) 36%, var(--color-border));
+  border-radius: 0.65rem;
+  color: color-mix(in srgb, var(--trip-color) 82%, #20231f);
+  background: var(--color-surface-strong);
+  font-size: 0.78rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.stopsHeader button:hover,
+.stopHeading button:hover,
+.actions button:hover {
+  background: color-mix(in srgb, var(--trip-color) 10%, var(--color-surface));
+}
+
+.stopsHeader button:focus-visible,
+.stopHeading button:focus-visible,
+.actions button:focus-visible,
+.closeButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.stopList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 0.8rem;
+  list-style: none;
+}
+
+.stopItem {
+  display: grid;
+  padding: 0.85rem;
+  gap: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.85rem;
+  background: var(--color-surface);
+}
+
+.stopHeading span {
+  color: var(--trip-color);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stopHeading div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 0.35rem;
+}
+
+.stopHeading button:last-child {
+  color: #8a3f39;
+}
+
+.actions {
+  align-items: center;
+  justify-content: end;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-strong);
+}
+
+.primaryButton {
+  color: #ffffff !important;
+  border-color: var(--trip-color) !important;
+  background: var(--trip-color) !important;
+}
+
+.primaryButton:hover {
+  background: color-mix(in srgb, var(--trip-color) 82%, #000000) !important;
+}
+
+.secondaryButton {
+  background: var(--color-surface) !important;
+}
+
+.error,
+.formError {
+  color: #8a3f39;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.formError {
+  padding: 0.85rem;
+  border: 1px solid #e2b9b4;
+  border-radius: 0.7rem;
+  background: #fff4f2;
+}
+
+.closeButton:disabled,
+.stopsHeader button:disabled,
+.stopHeading button:disabled,
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 42rem) {
+  .backdrop {
+    padding: 0.75rem;
+  }
+
+  .dialog {
+    max-height: calc(100vh - 1.5rem);
+  }
+
+  .header,
+  .actions,
+  .content {
+    padding: 1rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stopsHeader,
+  .stopHeading {
+    display: grid;
+  }
+
+  .actions {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
+
+@media (max-height: 37.499rem) {
+  .dialog {
+    max-height: calc(100vh - 1rem);
+  }
+
+  .backdrop {
+    padding: 0.5rem;
+  }
+}

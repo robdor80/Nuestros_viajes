@@ -1,0 +1,77 @@
+.root {
+  position: relative;
+  z-index: 6;
+}
+
+.rootOpen {
+  z-index: 30;
+}
+
+.trigger {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  background: var(--color-surface-strong);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.trigger:focus-visible,
+.menu button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  display: grid;
+  width: min(15rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface-strong);
+  box-shadow: 0 1rem 2.5rem rgb(20 24 19 / 20%);
+}
+
+.menu button {
+  display: flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.8rem;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  background: transparent;
+  font-size: 0.76rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button:hover {
+  background: var(--color-accent-soft);
+}
+
+.statusActions {
+  display: grid;
+  padding-left: 0.6rem;
+  background: var(--color-surface);
+}
+
+.menu .destructiveAction {
+  color: #8a3f39;
+  border-bottom: 0;
+}
+
+.trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

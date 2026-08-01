@@ -18,6 +18,7 @@ import { HomePage } from '../features/home/pages/HomePage'
 import { PlacesPage } from '../features/places/pages/PlacesPage'
 import { PlanningPage } from '../features/planning/pages/PlanningPage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
+import { TransfersPage } from '../features/transfers/pages/TransfersPage'
 import { TripSectionPage } from '../features/trip-workspace/pages/TripSectionPage'
 import { TripWorkspaceOverviewPage } from '../features/trip-workspace/pages/TripWorkspaceOverviewPage'
 import { TripWorkspacePage } from '../features/trip-workspace/pages/TripWorkspacePage'
@@ -443,7 +444,9 @@ function AuthenticatedApplication({
           />
           <Route
             path="trayectos"
-            element={<TripSectionPage sectionId="transfers" />}
+            element={
+              <TransfersPage userId={userId} onNotify={setNotification} />
+            }
           />
           <Route
             path="datos"
