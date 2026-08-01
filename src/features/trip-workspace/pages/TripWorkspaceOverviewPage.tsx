@@ -4,8 +4,8 @@ import { useAccommodations } from '../../accommodations/hooks/useAccommodations'
 import { useBudget } from '../../budget/hooks/useBudget'
 import {
   calculateBudget,
+  calculateBudgetAutomaticCosts,
   formatBudgetAmount,
-  parseBudgetAmount,
 } from '../../budget/utils/budget-calculations'
 import { budgetToFormData } from '../../budget/model/budget'
 import { usePlaces } from '../../places/hooks/usePlaces'
@@ -85,13 +85,13 @@ export function TripWorkspaceOverviewPage() {
       (accommodation) => accommodation.contentStatus === 'draft',
     ).length,
   }
-  const accommodationTotal = accommodations.reduce(
-    (total, accommodation) =>
-      total + parseBudgetAmount(accommodation.totalPrice),
-    0,
+  const automaticCosts = calculateBudgetAutomaticCosts(
+    accommodations,
+    places,
+    trip.participants.length,
   )
   const budgetCalculations = budget
-    ? calculateBudget(budgetToFormData(budget), accommodationTotal)
+    ? calculateBudget(budgetToFormData(budget), automaticCosts)
     : null
   const budgetSummary = {
     kind: 'budget' as const,
