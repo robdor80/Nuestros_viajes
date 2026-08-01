@@ -10,7 +10,6 @@ import {
 import {
   buildGoogleMapsEmbedDirectionsUrl,
   buildGoogleMapsDirectionsUrl,
-  buildGoogleMapsPublicEmbedDirectionsUrl,
   isValidMapsEmbedUrl,
 } from '../utils/transfer-maps'
 import { TransferActionsMenu } from './TransferActionsMenu'
@@ -115,7 +114,7 @@ function getMapsEmbedUrl(transfer: Transfer) {
     import.meta.env.VITE_GOOGLE_MAPS_EMBED_API_KEY ?? '',
   )
 
-  return apiEmbedUrl || buildGoogleMapsPublicEmbedDirectionsUrl(transferValues)
+  return apiEmbedUrl
 }
 
 export function TransferCard({
