@@ -8,6 +8,7 @@ import {
   type TransferStop,
 } from '../model/transfer'
 import {
+  buildGoogleMapsEmbedDirectionsUrl,
   buildGoogleMapsDirectionsUrl,
   isValidMapsEmbedUrl,
 } from '../utils/transfer-maps'
@@ -85,6 +86,34 @@ function getMapsUrl(transfer: Transfer) {
   )
 }
 
+function getTransferFormValues(transfer: Transfer) {
+  return {
+    date: transfer.date,
+    origin: transfer.origin,
+    destination: transfer.destination,
+    viaMotorway: transfer.viaMotorway,
+    hasTolls: transfer.hasTolls,
+    estimatedTollCost: transfer.estimatedTollCost,
+    estimatedDuration: transfer.estimatedDuration,
+    distanceKm: transfer.distanceKm,
+    plannedStops: transfer.plannedStops,
+    notes: transfer.notes,
+    mapsUrl: transfer.mapsUrl,
+    mapsEmbedUrl: transfer.mapsEmbedUrl,
+  }
+}
+
+function getMapsEmbedUrl(transfer: Transfer) {
+  if (isValidMapsEmbedUrl(transfer.mapsEmbedUrl)) {
+    return transfer.mapsEmbedUrl
+  }
+
+  return buildGoogleMapsEmbedDirectionsUrl(
+    getTransferFormValues(transfer),
+    import.meta.env.VITE_GOOGLE_MAPS_EMBED_API_KEY ?? '',
+  )
+}
+
 export function TransferCard({
   direction,
   transfer,
@@ -125,7 +154,8 @@ export function TransferCard({
 
   const isCompleted = transfer.contentStatus === 'completed'
   const mapsUrl = getMapsUrl(transfer)
-  const hasEmbed = isValidMapsEmbedUrl(transfer.mapsEmbedUrl)
+  const mapsEmbedUrl = getMapsEmbedUrl(transfer)
+  const hasEmbed = isValidMapsEmbedUrl(mapsEmbedUrl)
   const stops = transfer.plannedStops
   const usefulFacts = [
     hasValue(transfer.date) && ['Fecha', formatDate(transfer.date)],
@@ -197,8 +227,7 @@ export function TransferCard({
             <MapPanel
               direction={direction}
               transfer={transfer}
-              mapsUrl={mapsUrl}
-              hasEmbed={hasEmbed}
+              mapsEmbedUrl={hasEmbed ? mapsEmbedUrl : ''}
             />
             {stops.length > 0 && <StopsList stops={stops} />}
             {hasValue(transfer.notes) && (
@@ -238,36 +267,15 @@ export function TransferCard({
 type MapPanelProps = {
   direction: TransferDirection
   transfer: Transfer
-  mapsUrl: string
-  hasEmbed: boolean
+  mapsEmbedUrl: string
 }
 
 function MapPanel({
   direction,
   transfer,
-  mapsUrl,
-  hasEmbed,
+  mapsEmbedUrl,
 }: MapPanelProps) {
   const actionLabel = transferDirectionActionLabels[direction]
-
-  if (hasEmbed) {
-    return (
-      <div className={styles.mapEmbedWrap}>
-        <iframe
-          title={`Ruta de ${actionLabel} en Google Maps`}
-          src={transfer.mapsEmbedUrl}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          allowFullScreen
-        />
-        {mapsUrl && (
-          <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
-            Abrir ruta en Google Maps
-          </a>
-        )}
-      </div>
-    )
-  }
 
   return (
     <div className={styles.mapFallback}>
@@ -279,10 +287,16 @@ function MapPanel({
         ))}
         {hasValue(transfer.destination) && <li>{transfer.destination}</li>}
       </ol>
-      {mapsUrl && (
-        <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
-          Abrir en Google Maps
-        </a>
+      {mapsEmbedUrl && (
+        <div className={styles.embeddedMap}>
+          <iframe
+            title={`Ruta de ${actionLabel} en Google Maps`}
+            src={mapsEmbedUrl}
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
       )}
     </div>
   )

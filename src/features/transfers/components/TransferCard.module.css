@@ -138,24 +138,6 @@
   line-height: 1.45;
 }
 
-.mapEmbedWrap {
-  display: grid;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: 0.95rem;
-  background: var(--color-surface-strong);
-}
-
-.mapEmbedWrap iframe {
-  width: 100%;
-  min-height: 18rem;
-  border: 0;
-}
-
-.mapEmbedWrap a {
-  margin: 0.75rem;
-}
-
 .mapFallback {
   display: grid;
   gap: 0.8rem;
@@ -181,6 +163,22 @@
   gap: 0.45rem;
   color: var(--color-text);
   font-weight: 750;
+}
+
+.embeddedMap {
+  display: none;
+  overflow: hidden;
+  min-height: 16rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.8rem;
+  background: var(--color-accent-soft);
+}
+
+.embeddedMap iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 16rem;
+  border: 0;
 }
 
 .notes,
@@ -242,7 +240,6 @@
   margin-top: 0.2rem;
 }
 
-.mapEmbedWrap a,
 .mapFallback a {
   display: inline-flex;
   width: fit-content;
@@ -264,14 +261,12 @@
   background: color-mix(in srgb, var(--trip-color) 10%, var(--color-surface));
 }
 
-.mapEmbedWrap a:hover,
 .mapFallback a:hover {
   background: color-mix(in srgb, var(--trip-color) 82%, #000000);
 }
 
 .links a:focus-visible,
 .primaryAction:focus-visible,
-.mapEmbedWrap a:focus-visible,
 .mapFallback a:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
@@ -297,8 +292,10 @@
   .body {
     padding: 1rem;
   }
+}
 
-  .mapEmbedWrap iframe {
-    min-height: 13rem;
+@media (min-width: 48rem) and (min-height: 37.5rem) {
+  .embeddedMap {
+    display: block;
   }
 }
