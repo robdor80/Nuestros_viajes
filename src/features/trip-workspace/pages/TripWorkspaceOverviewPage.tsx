@@ -1,5 +1,6 @@
 import { useOutletContext, useParams } from 'react-router-dom'
 
+import { useAccommodations } from '../../accommodations/hooks/useAccommodations'
 import { usePlaces } from '../../places/hooks/usePlaces'
 import { usePlanningDays } from '../../planning/hooks/usePlanningDays'
 import { getTripDates } from '../../planning/utils/planning-dates'
@@ -22,6 +23,10 @@ export function TripWorkspaceOverviewPage() {
     days: planningDays,
     status: planningStatus,
   } = usePlanningDays(tripId ?? '')
+  const {
+    accommodations,
+    status: accommodationsStatus,
+  } = useAccommodations(tripId ?? '')
 
   if (!tripId) {
     return null
@@ -58,6 +63,20 @@ export function TripWorkspaceOverviewPage() {
     ).length,
     notStarted: Math.max(0, tripDates.length - currentPlanningDays.length),
   }
+  const accommodationsSummary = {
+    kind: 'accommodations' as const,
+    status: accommodationsStatus,
+    total: accommodations.length,
+    completed: accommodations.filter(
+      (accommodation) => accommodation.contentStatus === 'completed',
+    ).length,
+    inProgress: accommodations.filter(
+      (accommodation) => accommodation.contentStatus === 'in_progress',
+    ).length,
+    draft: accommodations.filter(
+      (accommodation) => accommodation.contentStatus === 'draft',
+    ).length,
+  }
 
   return (
     <section aria-labelledby="trip-summary-title">
@@ -81,6 +100,8 @@ export function TripWorkspaceOverviewPage() {
                 ? placesSummary
                 : section.id === 'planning'
                   ? planningSummary
+                  : section.id === 'accommodation'
+                    ? accommodationsSummary
                   : undefined
             }
           />

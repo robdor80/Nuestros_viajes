@@ -12,6 +12,7 @@ import { AccessStatusPage } from '../features/auth/components/AccessStatusPage'
 import { AuthUserMenu } from '../features/auth/components/AuthUserMenu'
 import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage'
 import { useAuth } from '../features/auth/hooks/useAuth'
+import { AccommodationsPage } from '../features/accommodations/pages/AccommodationsPage'
 import { HomePage } from '../features/home/pages/HomePage'
 import { PlacesPage } from '../features/places/pages/PlacesPage'
 import { PlanningPage } from '../features/planning/pages/PlanningPage'
@@ -424,7 +425,12 @@ function AuthenticatedApplication({
           />
           <Route
             path="alojamiento"
-            element={<TripSectionPage sectionId="accommodation" />}
+            element={
+              <AccommodationsPage
+                userId={userId}
+                onNotify={setNotification}
+              />
+            }
           />
           <Route
             path="presupuesto"

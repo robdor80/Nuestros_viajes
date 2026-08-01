@@ -73,6 +73,7 @@ type TripOperation =
 const tripContentSubcollections = [
   { id: 'places', label: 'lugares y actividades' },
   { id: 'planningDays', label: 'días de planning' },
+  { id: 'accommodations', label: 'alojamientos' },
 ] as const
 
 class TripServiceError extends Error {
