@@ -65,6 +65,29 @@ export function buildGoogleMapsEmbedDirectionsUrl(
   return url.toString()
 }
 
+export function buildGoogleMapsPublicEmbedDirectionsUrl(
+  values: TransferFormData,
+) {
+  const origin = values.origin.trim()
+  const destination = values.destination.trim()
+
+  if (!origin || !destination) return ''
+
+  const waypoints = values.plannedStops
+    .slice()
+    .sort((first, second) => first.order - second.order)
+    .map((stop) => stop.location.trim() || stop.description.trim())
+    .filter(Boolean)
+
+  const routePoints = [origin, ...waypoints, destination]
+  const url = new URL('https://www.google.com/maps/dir/')
+  url.pathname = `/maps/dir/${routePoints.map(encodeURIComponent).join('/')}/`
+  url.searchParams.set('output', 'embed')
+  url.searchParams.set('hl', 'es')
+
+  return url.toString()
+}
+
 export function isValidHttpUrl(value: string) {
   try {
     const url = new URL(value)
@@ -82,6 +105,7 @@ export function isValidMapsEmbedUrl(value: string) {
 
   return (
     (hostname === 'google.com' || hostname === 'maps.google.com') &&
-    url.pathname.includes('/maps/embed')
+    (url.pathname.includes('/maps/embed') ||
+      url.searchParams.get('output') === 'embed')
   )
 }
