@@ -1,6 +1,13 @@
 import { useOutletContext, useParams } from 'react-router-dom'
 
 import { useAccommodations } from '../../accommodations/hooks/useAccommodations'
+import { useBudget } from '../../budget/hooks/useBudget'
+import {
+  calculateBudget,
+  formatBudgetAmount,
+  parseBudgetAmount,
+} from '../../budget/utils/budget-calculations'
+import { budgetToFormData } from '../../budget/model/budget'
 import { usePlaces } from '../../places/hooks/usePlaces'
 import { usePlanningDays } from '../../planning/hooks/usePlanningDays'
 import { getTripDates } from '../../planning/utils/planning-dates'
@@ -27,6 +34,7 @@ export function TripWorkspaceOverviewPage() {
     accommodations,
     status: accommodationsStatus,
   } = useAccommodations(tripId ?? '')
+  const { budget, status: budgetStatus } = useBudget(tripId ?? '')
 
   if (!tripId) {
     return null
@@ -77,6 +85,26 @@ export function TripWorkspaceOverviewPage() {
       (accommodation) => accommodation.contentStatus === 'draft',
     ).length,
   }
+  const accommodationTotal = accommodations.reduce(
+    (total, accommodation) =>
+      total + parseBudgetAmount(accommodation.totalPrice),
+    0,
+  )
+  const budgetCalculations = budget
+    ? calculateBudget(budgetToFormData(budget), accommodationTotal)
+    : null
+  const budgetSummary = {
+    kind: 'budget' as const,
+    status: budgetStatus,
+    total: budget ? 1 : 0,
+    completed: budget?.contentStatus === 'completed' ? 1 : 0,
+    inProgress: budget?.contentStatus === 'in_progress' ? 1 : 0,
+    draft: budget?.contentStatus === 'draft' ? 1 : 0,
+    detail:
+      budgetCalculations && budgetCalculations.total > 0
+        ? `Total previsto: ${formatBudgetAmount(budgetCalculations.total)}`
+        : undefined,
+  }
 
   return (
     <section aria-labelledby="trip-summary-title">
@@ -102,6 +130,8 @@ export function TripWorkspaceOverviewPage() {
                   ? planningSummary
                   : section.id === 'accommodation'
                     ? accommodationsSummary
+                    : section.id === 'budget'
+                      ? budgetSummary
                   : undefined
             }
           />

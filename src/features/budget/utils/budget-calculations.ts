@@ -1,7 +1,19 @@
 import type { BudgetFormData } from '../model/budget'
 
 export function parseBudgetAmount(value: string) {
-  const amount = Number(value.trim().replace(',', '.'))
+  const rawValue = value
+    .trim()
+    .replace(/\s|€/g, '')
+    .replace(/[^\d,.-]/g, '')
+  const lastComma = rawValue.lastIndexOf(',')
+  const lastDot = rawValue.lastIndexOf('.')
+  const normalized =
+    lastComma > lastDot
+      ? rawValue.replace(/\./g, '').replace(',', '.')
+      : lastComma >= 0
+        ? rawValue.replace(/,/g, '')
+        : rawValue
+  const amount = Number(normalized)
   return Number.isFinite(amount) && amount > 0 ? amount : 0
 }
 

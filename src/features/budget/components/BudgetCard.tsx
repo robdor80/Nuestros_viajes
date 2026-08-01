@@ -1,6 +1,6 @@
 import { PlaceStatusBadge } from '../../places/components/PlaceStatusBadge'
-import type { Budget, BudgetCalculations } from '../model/budget'
-import { formatBudgetAmount } from '../utils/budget-calculations'
+import type { Budget } from '../model/budget'
+import { formatBudgetAmount, type BudgetCalculations } from '../utils/budget-calculations'
 import { BudgetActionsMenu } from './BudgetActionsMenu'
 import styles from './BudgetCard.module.css'
 

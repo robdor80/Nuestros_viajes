@@ -13,6 +13,7 @@ import { AuthUserMenu } from '../features/auth/components/AuthUserMenu'
 import { PrivateAccessPage } from '../features/auth/components/PrivateAccessPage'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { AccommodationsPage } from '../features/accommodations/pages/AccommodationsPage'
+import { BudgetPage } from '../features/budget/pages/BudgetPage'
 import { HomePage } from '../features/home/pages/HomePage'
 import { PlacesPage } from '../features/places/pages/PlacesPage'
 import { PlanningPage } from '../features/planning/pages/PlanningPage'
@@ -434,7 +435,7 @@ function AuthenticatedApplication({
           />
           <Route
             path="presupuesto"
-            element={<TripSectionPage sectionId="budget" />}
+            element={<BudgetPage userId={userId} onNotify={setNotification} />}
           />
           <Route
             path="restaurantes"

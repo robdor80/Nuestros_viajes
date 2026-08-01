@@ -1,5 +1,5 @@
 import { FirebaseError } from 'firebase/app'
-import { Timestamp, doc, getDoc, onSnapshot, serverTimestamp, setDoc, type DocumentData, type DocumentSnapshot } from 'firebase/firestore'
+import { Timestamp, deleteField, doc, getDoc, onSnapshot, serverTimestamp, setDoc, type DocumentData, type DocumentSnapshot } from 'firebase/firestore'
 
 import { firebaseConfigurationError, firestore } from '../../../infrastructure/firebase/firebaseClient'
 import { tripContentStatuses, type TripContentStatus } from '../../trip-workspace/model/trip-content'
@@ -49,7 +49,8 @@ export async function createOrUpdateBudget(tripId: string, data: SaveBudgetData,
     const previousBudget = await getDoc(budgetReference)
     const previousStatus = previousBudget.exists() ? previousBudget.data().contentStatus : undefined
     const isBecomingCompleted = data.contentStatus === 'completed' && previousStatus !== 'completed'
-    await setDoc(budgetReference, { ...buildBudgetDocument(data), contentStatus: data.contentStatus, updatedAt: serverTimestamp(), updatedBy: userId, ...(!previousBudget.exists() && { createdAt: serverTimestamp(), createdBy: userId }), ...(isBecomingCompleted && { completedAt: serverTimestamp(), completedBy: userId }) }, { merge: true })
+    const isLeavingCompleted = data.contentStatus !== 'completed' && previousStatus === 'completed'
+    await setDoc(budgetReference, { ...buildBudgetDocument(data), contentStatus: data.contentStatus, updatedAt: serverTimestamp(), updatedBy: userId, ...(!previousBudget.exists() && { createdAt: serverTimestamp(), createdBy: userId }), ...(isBecomingCompleted && { completedAt: serverTimestamp(), completedBy: userId }), ...(isLeavingCompleted && { completedAt: deleteField(), completedBy: deleteField() }) }, { merge: true })
   } catch (error) { throw toBudgetServiceError(error, 'save') }
 }
 

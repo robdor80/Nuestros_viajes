@@ -74,6 +74,7 @@ const tripContentSubcollections = [
   { id: 'places', label: 'lugares y actividades' },
   { id: 'planningDays', label: 'días de planning' },
   { id: 'accommodations', label: 'alojamientos' },
+  { id: 'budget', label: 'presupuesto' },
 ] as const
 
 class TripServiceError extends Error {
