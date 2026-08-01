@@ -168,6 +168,8 @@ function mapAccommodationDocument(
     nights: requireString(data, 'nights'),
     breakfastIncluded: requireBoolean(data, 'breakfastIncluded'),
     parkingIncluded: requireBoolean(data, 'parkingIncluded'),
+    parkingPricePerNight: getOptionalString(data, 'parkingPricePerNight') ?? '',
+    parkingTotalCost: getOptionalString(data, 'parkingTotalCost') ?? '',
     freeCancellation: requireBoolean(data, 'freeCancellation'),
     pool: requireBoolean(data, 'pool'),
     totalPrice: requireString(data, 'totalPrice'),

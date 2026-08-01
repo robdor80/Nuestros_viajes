@@ -183,6 +183,13 @@
   line-height: 1.4;
 }
 
+.calculatedHint {
+  color: var(--color-text-muted);
+  font-size: 0.73rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
 .preview {
   overflow: hidden;
   aspect-ratio: 16 / 7;
@@ -210,6 +217,13 @@
 
 .switchSection {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.parkingControl {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 0.55rem;
 }
 
 .switchField {

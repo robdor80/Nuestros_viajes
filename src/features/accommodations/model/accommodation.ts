@@ -51,6 +51,8 @@ export type Accommodation = {
   nights: string
   breakfastIncluded: boolean
   parkingIncluded: boolean
+  parkingPricePerNight: string
+  parkingTotalCost: string
   freeCancellation: boolean
   pool: boolean
   totalPrice: string
@@ -84,6 +86,8 @@ export type AccommodationFormData = Pick<
   | 'nights'
   | 'breakfastIncluded'
   | 'parkingIncluded'
+  | 'parkingPricePerNight'
+  | 'parkingTotalCost'
   | 'freeCancellation'
   | 'pool'
   | 'totalPrice'
@@ -115,6 +119,8 @@ export const emptyAccommodationFormData: AccommodationFormData = {
   nights: '',
   breakfastIncluded: false,
   parkingIncluded: false,
+  parkingPricePerNight: '',
+  parkingTotalCost: '',
   freeCancellation: false,
   pool: false,
   totalPrice: '',
@@ -143,6 +149,8 @@ export function accommodationToFormData(
     nights: accommodation.nights,
     breakfastIncluded: accommodation.breakfastIncluded,
     parkingIncluded: accommodation.parkingIncluded,
+    parkingPricePerNight: accommodation.parkingPricePerNight,
+    parkingTotalCost: accommodation.parkingTotalCost,
     freeCancellation: accommodation.freeCancellation,
     pool: accommodation.pool,
     totalPrice: accommodation.totalPrice,

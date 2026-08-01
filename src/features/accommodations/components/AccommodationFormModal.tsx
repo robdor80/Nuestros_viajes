@@ -19,6 +19,7 @@ import {
   type SaveAccommodationData,
 } from '../model/accommodation'
 import {
+  calculateParkingTotalCost,
   calculateNights,
   calculatePricePerNight,
 } from '../utils/accommodation-calculations'
@@ -65,6 +66,11 @@ export function AccommodationFormModal({
   )
   const calculatedPricePerNight = calculatePricePerNight(
     values.totalPrice,
+    calculatedNights,
+  )
+  const calculatedParkingTotalCost = calculateParkingTotalCost(
+    values.parkingIncluded,
+    values.parkingPricePerNight,
     calculatedNights,
   )
 
@@ -131,6 +137,25 @@ export function AccommodationFormModal({
     setErrors((currentErrors) => ({
       ...currentErrors,
       [field]: undefined,
+      form: undefined,
+    }))
+    setSubmissionError(null)
+  }
+
+  const updateParkingIncluded = (parkingIncluded: boolean) => {
+    setValues((currentValues) => ({
+      ...currentValues,
+      parkingIncluded,
+      parkingPricePerNight: parkingIncluded
+        ? currentValues.parkingPricePerNight
+        : '',
+      parkingTotalCost: '',
+    }))
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      parkingIncluded: undefined,
+      parkingPricePerNight: undefined,
+      parkingTotalCost: undefined,
       form: undefined,
     }))
     setSubmissionError(null)
@@ -424,18 +449,63 @@ export function AccommodationFormModal({
                   }
                 />
               </label>
-              <label className={styles.switchField}>
-                <span>Parking incluido</span>
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={values.parkingIncluded}
-                  disabled={isSaving}
-                  onChange={(event) =>
-                    updateField('parkingIncluded', event.target.checked)
-                  }
-                />
-              </label>
+              <div className={styles.parkingControl}>
+                <label className={styles.switchField}>
+                  <span>Parking incluido</span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={values.parkingIncluded}
+                    disabled={isSaving}
+                    onChange={(event) =>
+                      updateParkingIncluded(event.target.checked)
+                    }
+                  />
+                </label>
+
+                {values.parkingIncluded && (
+                  <label className={styles.field}>
+                    <span>Precio del parking por noche (€)</span>
+                    <input
+                      inputMode="decimal"
+                      value={values.parkingPricePerNight}
+                      placeholder="Por ejemplo, 10,50"
+                      aria-invalid={Boolean(fieldError('parkingPricePerNight'))}
+                      aria-describedby={
+                        fieldError('parkingPricePerNight')
+                          ? 'accommodation-parking-price-error'
+                          : calculatedParkingTotalCost
+                            ? 'accommodation-parking-total'
+                            : undefined
+                      }
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        updateField(
+                          'parkingPricePerNight',
+                          event.target.value,
+                        )
+                      }
+                    />
+                    {fieldError('parkingPricePerNight') && (
+                      <small
+                        id="accommodation-parking-price-error"
+                        className={styles.fieldError}
+                      >
+                        {fieldError('parkingPricePerNight')}
+                      </small>
+                    )}
+                    {calculatedParkingTotalCost && (
+                      <small
+                        id="accommodation-parking-total"
+                        className={styles.calculatedHint}
+                        aria-live="polite"
+                      >
+                        Coste total del parking: {calculatedParkingTotalCost}
+                      </small>
+                    )}
+                  </label>
+                )}
+              </div>
               <label className={styles.switchField}>
                 <span>Cancelación gratuita</span>
                 <input

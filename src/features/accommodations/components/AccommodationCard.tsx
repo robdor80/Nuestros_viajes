@@ -7,6 +7,7 @@ import {
   bookingPlatformLabels,
   type Accommodation,
 } from '../model/accommodation'
+import { parseParkingPrice } from '../utils/accommodation-calculations'
 import { AccommodationActionsMenu } from './AccommodationActionsMenu'
 import styles from './AccommodationCard.module.css'
 
@@ -42,9 +43,17 @@ export function AccommodationCard({
   const hasImage = Boolean(accommodation.imageUrl)
   const showImage = hasImage && !imageFailed
   const isCompleted = accommodation.contentStatus === 'completed'
+  const parsedParkingPrice = parseParkingPrice(
+    accommodation.parkingPricePerNight,
+  )
+  const hasPaidParking = Boolean(
+    accommodation.parkingIncluded &&
+      parsedParkingPrice &&
+      parsedParkingPrice > 0,
+  )
   const featureFacts = [
     accommodation.breakfastIncluded && 'Desayuno incluido',
-    accommodation.parkingIncluded && 'Parking incluido',
+    accommodation.parkingIncluded && !hasPaidParking && 'Parking gratuito',
     accommodation.freeCancellation && 'Cancelación gratuita',
     accommodation.pool && 'Piscina',
   ].filter((fact): fact is string => Boolean(fact))
@@ -57,7 +66,10 @@ export function AccommodationCard({
         },
         (accommodation.checkInDate || accommodation.checkOutDate) && {
           label: 'Fechas',
-          value: [formatDate(accommodation.checkInDate), formatDate(accommodation.checkOutDate)]
+          value: [
+            formatDate(accommodation.checkInDate),
+            formatDate(accommodation.checkOutDate),
+          ]
             .filter(Boolean)
             .join(' → '),
         },
@@ -73,6 +85,15 @@ export function AccommodationCard({
           label: 'Precio por noche',
           value: accommodation.pricePerNight,
         },
+        hasPaidParking && {
+          label: 'Parking',
+          value: `${accommodation.parkingPricePerNight}/noche`,
+        },
+        hasPaidParking &&
+          accommodation.parkingTotalCost && {
+            label: 'Coste total del parking',
+            value: accommodation.parkingTotalCost,
+          },
         accommodation.isPaid !== null && {
           label: 'Pagado',
           value: accommodation.isPaid ? 'Sí' : 'No',
@@ -104,7 +125,7 @@ export function AccommodationCard({
       ].filter((fact): fact is { label: string; value: string } =>
         Boolean(fact),
       ),
-    [accommodation],
+    [accommodation, hasPaidParking],
   )
 
   return (

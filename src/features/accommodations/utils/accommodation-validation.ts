@@ -1,8 +1,11 @@
 import type { TripContentStatus } from '../../trip-workspace/model/trip-content'
 import type { AccommodationFormData } from '../model/accommodation'
 import {
+  calculateParkingTotalCost,
   calculateNights,
   calculatePricePerNight,
+  hasInvalidParkingPrice,
+  normalizeParkingPricePerNight,
 } from './accommodation-calculations'
 
 export type AccommodationFormErrorKey =
@@ -29,6 +32,10 @@ export function normalizeAccommodationFormData(
   const checkOutDate = values.checkOutDate.trim()
   const nights = calculateNights(checkInDate, checkOutDate)
   const totalPrice = values.totalPrice.trim()
+  const parkingPricePerNight = normalizeParkingPricePerNight(
+    values.parkingIncluded,
+    values.parkingPricePerNight,
+  )
 
   return {
     name: values.name.trim(),
@@ -42,6 +49,12 @@ export function normalizeAccommodationFormData(
     nights,
     breakfastIncluded: values.breakfastIncluded,
     parkingIncluded: values.parkingIncluded,
+    parkingPricePerNight,
+    parkingTotalCost: calculateParkingTotalCost(
+      values.parkingIncluded,
+      parkingPricePerNight,
+      nights,
+    ),
     freeCancellation: values.freeCancellation,
     pool: values.pool,
     totalPrice,
@@ -68,6 +81,8 @@ export function hasUsefulAccommodationData(values: AccommodationFormData) {
       values.nights.trim() ||
       values.breakfastIncluded ||
       values.parkingIncluded ||
+      values.parkingPricePerNight.trim() ||
+      values.parkingTotalCost.trim() ||
       values.freeCancellation ||
       values.pool ||
       values.totalPrice.trim() ||
@@ -111,6 +126,11 @@ export function validateAccommodation(
   if (values.checkInDate && values.checkOutDate && !values.nights) {
     errors.checkOutDate =
       'La fecha de salida debe ser posterior a la fecha de entrada.'
+  }
+
+  if (values.parkingIncluded && hasInvalidParkingPrice(values.parkingPricePerNight)) {
+    errors.parkingPricePerNight =
+      'Introduce un precio de parking válido, sin valores negativos.'
   }
 
   if (
