@@ -17,6 +17,7 @@ import { BudgetPage } from '../features/budget/pages/BudgetPage'
 import { HomePage } from '../features/home/pages/HomePage'
 import { PlacesPage } from '../features/places/pages/PlacesPage'
 import { PlanningPage } from '../features/planning/pages/PlanningPage'
+import { RestaurantsPage } from '../features/restaurants/pages/RestaurantsPage'
 import { SettingsPage } from '../features/settings/pages/SettingsPage'
 import { TransfersPage } from '../features/transfers/pages/TransfersPage'
 import { TripSectionPage } from '../features/trip-workspace/pages/TripSectionPage'
@@ -440,7 +441,9 @@ function AuthenticatedApplication({
           />
           <Route
             path="restaurantes"
-            element={<TripSectionPage sectionId="restaurants" />}
+            element={
+              <RestaurantsPage userId={userId} onNotify={setNotification} />
+            }
           />
           <Route
             path="trayectos"

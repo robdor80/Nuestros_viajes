@@ -1,0 +1,212 @@
+.header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.7rem;
+}
+
+.eyebrow,
+.header h2,
+.header p,
+.state h3,
+.state p,
+.emptyState h3,
+.emptyState p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--trip-color);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin-top: 0.35rem;
+  color: var(--color-text);
+  font-size: clamp(2.1rem, 6vw, 3rem);
+  letter-spacing: -0.05em;
+}
+
+.header p {
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.total {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.headerActions button,
+.emptyState button,
+.state button,
+.filters button {
+  min-height: 2.55rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--trip-color) 36%, var(--color-border));
+  border-radius: 0.7rem;
+  color: var(--trip-color);
+  background: var(--color-surface-strong);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.headerActions button:hover,
+.emptyState button:hover,
+.state button:hover,
+.filters button:hover,
+.filters button[aria-pressed='true'] {
+  color: #ffffff;
+  background: var(--trip-color);
+}
+
+.headerActions button:focus-visible,
+.emptyState button:focus-visible,
+.state button:focus-visible,
+.filters button:focus-visible,
+.search input:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.state,
+.emptyState {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+}
+
+.state h3,
+.emptyState h3 {
+  color: var(--color-text);
+  font-size: 1.05rem;
+}
+
+.state p,
+.emptyState p {
+  margin-top: 0.3rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.spinner {
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--trip-color);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.emptyState {
+  display: grid;
+  justify-items: start;
+  max-width: 38rem;
+}
+
+.emptyIcon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 0.9rem;
+  color: var(--trip-color);
+  background: color-mix(in srgb, var(--trip-color) 10%, var(--color-surface));
+}
+
+.emptyIcon svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(14rem, 24rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.2rem;
+}
+
+.search {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.search span {
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.search input {
+  min-height: 2.65rem;
+  padding: 0.62rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 42rem), (max-height: 37.499rem) {
+  .header,
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    display: grid;
+  }
+
+  .headerActions,
+  .filters {
+    justify-content: flex-start;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

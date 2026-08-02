@@ -11,6 +11,7 @@ import { budgetToFormData } from '../../budget/model/budget'
 import { usePlaces } from '../../places/hooks/usePlaces'
 import { usePlanningDays } from '../../planning/hooks/usePlanningDays'
 import { getTripDates } from '../../planning/utils/planning-dates'
+import { useRestaurants } from '../../restaurants/hooks/useRestaurants'
 import { useTransfers } from '../../transfers/hooks/useTransfers'
 import {
   transferDirections,
@@ -53,6 +54,7 @@ export function TripWorkspaceOverviewPage() {
     status: accommodationsStatus,
   } = useAccommodations(tripId ?? '')
   const { budget, status: budgetStatus } = useBudget(tripId ?? '')
+  const { restaurants, status: restaurantsStatus } = useRestaurants(tripId ?? '')
   const { transfers, status: transfersStatus } = useTransfers(tripId ?? '')
 
   if (!tripId) {
@@ -124,6 +126,46 @@ export function TripWorkspaceOverviewPage() {
         ? `Total previsto: ${formatBudgetAmount(budgetCalculations.total)}`
         : undefined,
   }
+  const reservedRestaurants = restaurants.filter(
+    (restaurant) => restaurant.restaurantStatus === 'reserved',
+  ).length
+  const chosenRestaurants = restaurants.filter(
+    (restaurant) => restaurant.restaurantStatus === 'chosen',
+  ).length
+  const visitedRestaurants = restaurants.filter(
+    (restaurant) => restaurant.restaurantStatus === 'visited',
+  ).length
+  const restaurantDetail = [
+    restaurants.length > 0 &&
+      `${restaurants.length} ${
+        restaurants.length === 1 ? 'restaurante' : 'restaurantes'
+      }`,
+    reservedRestaurants > 0 &&
+      `${reservedRestaurants} reservado${
+        reservedRestaurants === 1 ? '' : 's'
+      }`,
+    chosenRestaurants > 0 &&
+      `${chosenRestaurants} elegido${chosenRestaurants === 1 ? '' : 's'}`,
+    visitedRestaurants > 0 &&
+      `${visitedRestaurants} visitado${visitedRestaurants === 1 ? '' : 's'}`,
+  ]
+    .filter((item): item is string => Boolean(item))
+    .join(' · ')
+  const restaurantsSummary = {
+    kind: 'restaurants' as const,
+    status: restaurantsStatus,
+    total: restaurants.length,
+    completed: restaurants.filter(
+      (restaurant) => restaurant.contentStatus === 'completed',
+    ).length,
+    inProgress: restaurants.filter(
+      (restaurant) => restaurant.contentStatus === 'in_progress',
+    ).length,
+    draft: restaurants.filter(
+      (restaurant) => restaurant.contentStatus === 'draft',
+    ).length,
+    detail: restaurantDetail || undefined,
+  }
   const transfersList = transferDirections.map((direction) => ({
     direction,
     transfer: transfers[direction],
@@ -182,8 +224,10 @@ export function TripWorkspaceOverviewPage() {
                     ? accommodationsSummary
                     : section.id === 'budget'
                       ? budgetSummary
-                      : section.id === 'transfers'
-                        ? transfersSummary
+                      : section.id === 'restaurants'
+                        ? restaurantsSummary
+                        : section.id === 'transfers'
+                          ? transfersSummary
                   : undefined
             }
           />
