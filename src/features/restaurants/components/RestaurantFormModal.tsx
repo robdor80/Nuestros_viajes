@@ -530,6 +530,24 @@ export function RestaurantFormModal({
                     onChange={(event) => updateField('address', event.target.value)}
                   />
                 </label>
+                <label className={`${styles.field} ${styles.fullWidth}`}>
+                  <span>Página web</span>
+                  <input
+                    type="url"
+                    inputMode="url"
+                    value={values.websiteUrl}
+                    aria-invalid={Boolean(fieldError('websiteUrl'))}
+                    disabled={isSaving}
+                    onChange={(event) =>
+                      updateField('websiteUrl', event.target.value)
+                    }
+                  />
+                  {fieldError('websiteUrl') && (
+                    <small className={styles.error}>
+                      {fieldError('websiteUrl')}
+                    </small>
+                  )}
+                </label>
                 <label className={styles.field}>
                   <span>Google Maps</span>
                   <input
@@ -832,7 +850,6 @@ export function RestaurantFormModal({
                 {(
                   [
                     ['phone', 'Teléfono', 'tel'],
-                    ['websiteUrl', 'Página web', 'url'],
                     ['menuUrl', 'Carta o menú', 'url'],
                     ['openingHours', 'Horario', 'text'],
                     ['closingDay', 'Día de cierre', 'text'],
