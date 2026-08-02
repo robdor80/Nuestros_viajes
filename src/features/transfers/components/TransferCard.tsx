@@ -279,17 +279,24 @@ function MapPanel({
   mapsEmbedUrl,
 }: MapPanelProps) {
   const actionLabel = transferDirectionActionLabels[direction]
+  const hasEmbeddedMap = Boolean(mapsEmbedUrl)
 
   return (
-    <div className={styles.mapFallback}>
+    <div
+      className={`${styles.mapFallback} ${
+        hasEmbeddedMap ? styles.mapWithEmbed : ''
+      }`}
+    >
       <p className={styles.mapEyebrow}>Ruta de {actionLabel}</p>
-      <ol>
-        {hasValue(transfer.origin) && <li>{transfer.origin}</li>}
-        {transfer.plannedStops.map((stop) => (
-          <li key={stop.id}>{getStopLabel(stop)}</li>
-        ))}
-        {hasValue(transfer.destination) && <li>{transfer.destination}</li>}
-      </ol>
+      {!hasEmbeddedMap && (
+        <ol>
+          {hasValue(transfer.origin) && <li>{transfer.origin}</li>}
+          {transfer.plannedStops.map((stop) => (
+            <li key={stop.id}>{getStopLabel(stop)}</li>
+          ))}
+          {hasValue(transfer.destination) && <li>{transfer.destination}</li>}
+        </ol>
+      )}
       {mapsEmbedUrl && (
         <div className={styles.embeddedMap}>
           <iframe
