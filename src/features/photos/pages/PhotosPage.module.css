@@ -5,8 +5,12 @@
 .eyebrow,
 .header h2,
 .header p,
+.state h3,
+.state p,
 .emptyState h3,
-.emptyState p {
+.emptyState p,
+.summaryState h3,
+.summaryState p {
   margin: 0;
 }
 
@@ -32,7 +36,9 @@
   line-height: 1.6;
 }
 
-.emptyState {
+.state,
+.emptyState,
+.summaryState {
   display: grid;
   max-width: 52rem;
   margin-top: 1.75rem;
@@ -48,6 +54,38 @@
     ),
     color-mix(in srgb, var(--trip-color) 5%, var(--color-surface));
   box-shadow: var(--shadow-soft);
+}
+
+.state {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  border-style: solid;
+  background: var(--color-surface);
+}
+
+.state h3,
+.emptyState h3,
+.summaryState h3 {
+  color: var(--color-text);
+  font-size: clamp(1.25rem, 4vw, 1.55rem);
+  letter-spacing: -0.02em;
+}
+
+.state p,
+.emptyState p,
+.summaryState p {
+  margin-top: 0.45rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 0.2rem solid var(--color-accent-soft);
+  border-top-color: var(--trip-color);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
 }
 
 .iconWrap {
@@ -69,19 +107,8 @@
   max-width: 36rem;
 }
 
-.emptyState h3 {
-  color: var(--color-text);
-  font-size: clamp(1.25rem, 4vw, 1.55rem);
-  letter-spacing: -0.02em;
-}
-
-.emptyState p {
-  margin-top: 0.45rem;
-  color: var(--color-text-muted);
-  line-height: 1.6;
-}
-
-.emptyState button {
+.emptyState button,
+.summaryState button {
   display: inline-flex;
   width: fit-content;
   min-height: 2.75rem;
@@ -97,11 +124,13 @@
   cursor: pointer;
 }
 
-.emptyState button:hover {
+.emptyState button:hover,
+.summaryState button:hover {
   background: color-mix(in srgb, var(--trip-color) 82%, #000);
 }
 
-.emptyState button:focus-visible {
+.emptyState button:focus-visible,
+.summaryState button:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
@@ -116,20 +145,35 @@
   font-weight: 700;
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (min-width: 42rem) {
-  .emptyState {
+  .emptyState,
+  .summaryState {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
   }
 
   .emptyState button,
+  .summaryState button,
   .statusMessage {
     grid-column: 2;
   }
 }
 
 @media (max-width: 26rem) {
-  .emptyState button {
+  .emptyState button,
+  .summaryState button {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
   }
 }

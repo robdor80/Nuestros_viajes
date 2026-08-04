@@ -77,6 +77,7 @@ const tripContentSubcollections = [
   { id: 'budget', label: 'presupuesto' },
   { id: 'restaurants', label: 'restaurantes' },
   { id: 'transfers', label: 'trayectos' },
+  { id: 'photos', label: 'fotografías' },
 ] as const
 
 class TripServiceError extends Error {
