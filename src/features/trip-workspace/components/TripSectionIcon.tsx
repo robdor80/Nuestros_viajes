@@ -59,6 +59,15 @@ export function TripSectionIcon({ icon, className }: TripSectionIconProps) {
           <path d="M8 18h3a3 3 0 0 0 3-3v-6a3 3 0 0 1 3-3" />
         </svg>
       )
+    case 'photo':
+      return (
+        <svg {...commonProps}>
+          <rect x="3" y="5" width="18" height="14" rx="2.5" />
+          <circle cx="8.5" cy="9.5" r="1.4" />
+          <path d="m4.5 17 4.8-4.8a1.5 1.5 0 0 1 2.1 0L16.2 17" />
+          <path d="m13.5 14.3 1.4-1.4a1.5 1.5 0 0 1 2.1 0L20 16" />
+        </svg>
+      )
     case 'info':
       return (
         <svg {...commonProps}>

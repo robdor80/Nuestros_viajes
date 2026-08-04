@@ -51,6 +51,14 @@ export const tripWorkspaceSections = [
     icon: 'route',
   },
   {
+    id: 'photos',
+    slug: 'fotos',
+    navigationLabel: 'Fotos',
+    title: 'Fotos',
+    description: 'Recuerdos y momentos especiales del viaje.',
+    icon: 'photo',
+  },
+  {
     id: 'useful-data',
     slug: 'datos',
     navigationLabel: 'Datos varios',

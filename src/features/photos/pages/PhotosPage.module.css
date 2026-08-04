@@ -1,0 +1,135 @@
+.header {
+  max-width: 42rem;
+}
+
+.eyebrow,
+.header h2,
+.header p,
+.emptyState h3,
+.emptyState p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--trip-color);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  margin-top: 0.55rem;
+  color: var(--color-text);
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.header p:not(.eyebrow) {
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.emptyState {
+  display: grid;
+  max-width: 52rem;
+  margin-top: 1.75rem;
+  padding: clamp(1.4rem, 5vw, 2.5rem);
+  gap: 1.15rem;
+  border: 1px dashed color-mix(in srgb, var(--trip-color) 42%, var(--color-border));
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--trip-color) 12%, transparent),
+      transparent 42%
+    ),
+    color-mix(in srgb, var(--trip-color) 5%, var(--color-surface));
+  box-shadow: var(--shadow-soft);
+}
+
+.iconWrap {
+  display: grid;
+  width: 3.4rem;
+  height: 3.4rem;
+  place-items: center;
+  border-radius: 0.95rem;
+  color: var(--trip-color);
+  background: color-mix(in srgb, var(--trip-color) 13%, var(--color-surface));
+}
+
+.icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.emptyCopy {
+  max-width: 36rem;
+}
+
+.emptyState h3 {
+  color: var(--color-text);
+  font-size: clamp(1.25rem, 4vw, 1.55rem);
+  letter-spacing: -0.02em;
+}
+
+.emptyState p {
+  margin-top: 0.45rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.emptyState button {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid var(--trip-color);
+  border-radius: 0.72rem;
+  color: #ffffff;
+  background: var(--trip-color);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.emptyState button:hover {
+  background: color-mix(in srgb, var(--trip-color) 82%, #000);
+}
+
+.emptyState button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.statusMessage {
+  width: fit-content;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--trip-color) 22%, var(--color-border));
+  border-radius: 0.8rem;
+  background: var(--color-surface-strong);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+@media (min-width: 42rem) {
+  .emptyState {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .emptyState button,
+  .statusMessage {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 26rem) {
+  .emptyState button {
+    width: 100%;
+  }
+}
