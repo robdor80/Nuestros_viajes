@@ -939,7 +939,7 @@ export function RestaurantFormModal({
                     {(
                       [
                         ['visitedDate', 'Fecha de visita', 'date'],
-                        ['fatyRating', 'Nota Fati (1-5)', 'text'],
+                        ['fatiRating', 'Nota Fati (1-5)', 'text'],
                         ['robertoRating', 'Nota Roberto (1-5)', 'text'],
                         ['jointRating', 'Nota conjunta (1-5)', 'text'],
                       ] as const

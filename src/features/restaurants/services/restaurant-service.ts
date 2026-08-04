@@ -82,6 +82,11 @@ function optionalString(data: DocumentData, field: string) {
   return typeof value === 'string' ? value : ''
 }
 
+function optionalFatiRating(data: DocumentData) {
+  // Compatibilidad temporal con el campo heredado mal escrito; se podrá retirar tras revisar o migrar los documentos antiguos.
+  return optionalString(data, 'fatiRating') || optionalString(data, 'fatyRating')
+}
+
 function optionalBoolean(data: DocumentData, field: string) {
   const value = data[field]
   return typeof value === 'boolean' ? value : null
@@ -213,7 +218,7 @@ function mapRestaurantDocument(
     notes: optionalString(data, 'notes'),
     visited: optionalBoolean(data, 'visited') === true,
     visitedDate: optionalString(data, 'visitedDate'),
-    fatyRating: optionalString(data, 'fatyRating'),
+    fatiRating: optionalFatiRating(data),
     robertoRating: optionalString(data, 'robertoRating'),
     jointRating: optionalString(data, 'jointRating'),
     orderedItems: optionalList(data, 'orderedItems'),
@@ -350,7 +355,7 @@ function buildRestaurantDocument(
     'closingDay',
     'notes',
     'visitedDate',
-    'fatyRating',
+    'fatiRating',
     'robertoRating',
     'jointRating',
     'visitComments',

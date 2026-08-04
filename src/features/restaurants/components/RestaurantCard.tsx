@@ -169,9 +169,9 @@ export function RestaurantCard({
       label: 'Visitado',
       value: formatRestaurantDate(restaurant.visitedDate),
     },
-    ratingLabel('Fati', restaurant.fatyRating) && {
+    ratingLabel('Fati', restaurant.fatiRating) && {
       label: 'Nota Fati',
-      value: ratingLabel('Fati', restaurant.fatyRating),
+      value: ratingLabel('Fati', restaurant.fatiRating),
     },
     ratingLabel('Roberto', restaurant.robertoRating) && {
       label: 'Nota Roberto',

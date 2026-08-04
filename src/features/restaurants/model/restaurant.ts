@@ -137,7 +137,7 @@ export type Restaurant = {
   notes: string
   visited: boolean
   visitedDate: string
-  fatyRating: string
+  fatiRating: string
   robertoRating: string
   jointRating: string
   orderedItems: RestaurantListItem[]
@@ -194,7 +194,7 @@ export type RestaurantFormData = Pick<
   | 'notes'
   | 'visited'
   | 'visitedDate'
-  | 'fatyRating'
+  | 'fatiRating'
   | 'robertoRating'
   | 'jointRating'
   | 'orderedItems'
@@ -249,7 +249,7 @@ export const emptyRestaurantFormData: RestaurantFormData = {
   notes: '',
   visited: false,
   visitedDate: '',
-  fatyRating: '',
+  fatiRating: '',
   robertoRating: '',
   jointRating: '',
   orderedItems: [],
@@ -301,7 +301,7 @@ export function restaurantToFormData(
     notes: restaurant.notes,
     visited: restaurant.visited,
     visitedDate: restaurant.visitedDate,
-    fatyRating: restaurant.fatyRating,
+    fatiRating: restaurant.fatiRating,
     robertoRating: restaurant.robertoRating,
     jointRating: restaurant.jointRating,
     orderedItems: restaurant.orderedItems,

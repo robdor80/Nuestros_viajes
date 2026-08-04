@@ -140,7 +140,7 @@ export function normalizeRestaurantFormData(
     notes: values.notes.trim(),
     visited: values.visited || values.restaurantStatus === 'visited',
     visitedDate: values.visitedDate.trim(),
-    fatyRating: normalizeRating(values.fatyRating),
+    fatiRating: normalizeRating(values.fatiRating),
     robertoRating: normalizeRating(values.robertoRating),
     jointRating: normalizeRating(values.jointRating),
     orderedItems: normalizeList(values.orderedItems),
@@ -195,7 +195,7 @@ export function hasUsefulRestaurantData(values: RestaurantFormData) {
       values.notes.trim() ||
       values.visited ||
       values.visitedDate.trim() ||
-      values.fatyRating.trim() ||
+      values.fatiRating.trim() ||
       values.robertoRating.trim() ||
       values.jointRating.trim() ||
       values.orderedItems.length > 0 ||
@@ -283,7 +283,7 @@ export function validateRestaurant(
     }
   })
 
-  ;(['fatyRating', 'robertoRating', 'jointRating'] as const).forEach(
+  ;(['fatiRating', 'robertoRating', 'jointRating'] as const).forEach(
     (field) => {
       if (!isRating(values[field])) {
         errors[field] = 'La nota debe estar entre 1 y 5.'
