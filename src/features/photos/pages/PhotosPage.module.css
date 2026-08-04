@@ -135,16 +135,6 @@
   outline-offset: 2px;
 }
 
-.statusMessage {
-  width: fit-content;
-  padding: 0.7rem 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--trip-color) 22%, var(--color-border));
-  border-radius: 0.8rem;
-  background: var(--color-surface-strong);
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -159,8 +149,7 @@
   }
 
   .emptyState button,
-  .summaryState button,
-  .statusMessage {
+  .summaryState button {
     grid-column: 2;
   }
 }

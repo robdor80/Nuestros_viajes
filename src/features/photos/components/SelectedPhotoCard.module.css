@@ -1,0 +1,99 @@
+.card {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9rem;
+  background: var(--color-surface);
+}
+
+.preview {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--trip-color) 7%, var(--color-surface-strong));
+}
+
+.preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewFallback {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  padding: 1rem;
+  gap: 0.45rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.previewFallback svg {
+  width: 2rem;
+  height: 2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.previewFallback span {
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.details {
+  display: grid;
+  min-width: 0;
+  padding: 0.8rem 0.8rem 0;
+  gap: 0.25rem;
+}
+
+.details h4,
+.details p {
+  margin: 0;
+}
+
+.details h4 {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.details p {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hint {
+  line-height: 1.35;
+}
+
+.card button {
+  min-height: 2.45rem;
+  margin: 0.8rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid color-mix(in srgb, #8b3932 45%, var(--color-border));
+  border-radius: 0.65rem;
+  color: #8b3932;
+  background: var(--color-surface-strong);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.card button:hover {
+  color: #ffffff;
+  background: #8b3932;
+}
+
+.card button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}

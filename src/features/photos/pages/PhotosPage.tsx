@@ -3,20 +3,19 @@ import { useOutletContext } from 'react-router-dom'
 
 import { TripSectionIcon } from '../../trip-workspace/components/TripSectionIcon'
 import type { BaseTrip } from '../../trips/model/trip'
+import { PhotoSelectionDialog } from '../components/PhotoSelectionDialog'
 import { usePhotos } from '../hooks/usePhotos'
 import styles from './PhotosPage.module.css'
 
 export function PhotosPage() {
   const trip = useOutletContext<BaseTrip>()
   const { photos, isLoading, error } = usePhotos(trip.id)
-  const [message, setMessage] = useState('')
+  const [isSelectingPhotos, setIsSelectingPhotos] = useState(false)
   const photoCountLabel =
     photos.length === 1 ? '1 fotografía' : `${photos.length} fotografías`
 
-  const announceNextPhase = () => {
-    setMessage(
-      'La subida de fotografías se añadirá en la siguiente fase.',
-    )
+  const openPhotoSelection = () => {
+    setIsSelectingPhotos(true)
   }
 
   return (
@@ -58,14 +57,9 @@ export function PhotosPage() {
               recordar cada momento del viaje.
             </p>
           </div>
-          <button type="button" onClick={announceNextPhase}>
+          <button type="button" onClick={openPhotoSelection}>
             Añadir fotografías
           </button>
-          {message && (
-            <p className={styles.statusMessage} role="status" aria-live="polite">
-              {message}
-            </p>
-          )}
         </div>
       )}
 
@@ -82,15 +76,14 @@ export function PhotosPage() {
               viaje.
             </p>
           </div>
-          <button type="button" onClick={announceNextPhase}>
+          <button type="button" onClick={openPhotoSelection}>
             Añadir fotografías
           </button>
-          {message && (
-            <p className={styles.statusMessage} role="status" aria-live="polite">
-              {message}
-            </p>
-          )}
         </div>
+      )}
+
+      {isSelectingPhotos && (
+        <PhotoSelectionDialog onClose={() => setIsSelectingPhotos(false)} />
       )}
     </section>
   )
