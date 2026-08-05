@@ -1,6 +1,7 @@
 import {
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -10,10 +11,14 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 
 import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-section'
 import type { BaseTrip } from '../../trips/model/trip'
+import { PhotoReviewEditor } from '../components/PhotoReviewEditor'
+import { PhotoReviewList } from '../components/PhotoReviewList'
 import { PhotoSelectionGrid } from '../components/PhotoSelectionGrid'
 import { usePhotoAnalysis } from '../hooks/usePhotoAnalysis'
+import { usePhotoReview } from '../hooks/usePhotoReview'
 import { usePhotoSelection } from '../hooks/usePhotoSelection'
 import { usePhotoUploadNavigationGuard } from '../hooks/usePhotoUploadNavigationGuard'
+import type { PhotoReviewDraft } from '../model/photo-review'
 import {
   MAX_SELECTED_PHOTOS,
   formatFileSize,
@@ -21,6 +26,7 @@ import {
 import styles from './PhotoUploadPage.module.css'
 
 type ConfirmationAction = 'clear'
+type UploadStep = 'selection' | 'review'
 
 function formatPhotoCount(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`
@@ -49,6 +55,20 @@ function buildAnalysisSummaryDetails({
   ].filter((detail): detail is string => Boolean(detail))
 }
 
+function buildReviewSummaryText({
+  ready,
+  needsReview,
+}: {
+  ready: number
+  needsReview: number
+}) {
+  return `${formatPhotoCount(ready, 'lista', 'listas')} · ${formatPhotoCount(
+    needsReview,
+    'necesita revisión',
+    'necesitan revisión',
+  )}`
+}
+
 export function PhotoUploadPage() {
   const titleId = useId()
   const continueDescriptionId = useId()
@@ -63,6 +83,9 @@ export function PhotoUploadPage() {
   const exitDialogRef = useRef<HTMLDivElement>(null)
   const stayOnUploadButtonRef = useRef<HTMLButtonElement>(null)
   const previousFocusedElementRef = useRef<HTMLElement | null>(null)
+  const reviewReturnFocusRef = useRef<HTMLElement | null>(null)
+  const [step, setStep] = useState<UploadStep>('selection')
+  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [confirmationAction, setConfirmationAction] =
     useState<ConfirmationAction | null>(null)
@@ -85,6 +108,18 @@ export function PhotoUploadPage() {
     updatePhotoAnalysis,
   })
   const {
+    reviews,
+    reviewSummary,
+    tripDayOptions,
+    updateReview,
+    removeReview,
+    clearReviews,
+  } =
+    usePhotoReview({
+      photos,
+      trip,
+    })
+  const {
     isExitConfirmationOpen,
     isConfirmingExit,
     cancelExit,
@@ -95,6 +130,7 @@ export function PhotoUploadPage() {
   })
   const photosPath = getTripWorkspacePath(trip.id, 'fotos')
   const isSecondaryMenuOpen = hasSelection && isMenuOpen
+  const activeStep = hasSelection ? step : 'selection'
   const selectedCountLabel =
     photos.length === 1
       ? '1 seleccionada'
@@ -103,6 +139,7 @@ export function PhotoUploadPage() {
   const pendingAnalysisCount =
     analysisSummary.pending + analysisSummary.analyzing
   const isAnalyzingPhotos = pendingAnalysisCount > 0
+  const canContinueToReview = hasSelection && !isAnalyzingPhotos
   const datesToReview =
     analysisSummary.lowConfidenceDate + analysisSummary.withoutDate
   const analysisDetails = buildAnalysisSummaryDetails({
@@ -122,13 +159,21 @@ export function PhotoUploadPage() {
         'fotografía preparada',
         'fotografías preparadas',
       )}`
-  const continueHintText = isAnalyzingPhotos
-    ? 'Espera a que termine el análisis de las fotografías.'
-    : 'La revisión de las fotografías se incorporará en el siguiente paso.'
+  const continueHintText =
+    activeStep === 'selection'
+      ? isAnalyzingPhotos
+        ? 'Espera a que termine el análisis de las fotografías.'
+        : 'La revisión de las fotografías se incorporará en el siguiente paso.'
+      : 'El procesamiento de las fotografías se incorporará en el siguiente paso.'
+  const editingPhoto = useMemo(
+    () => photos.find((photo) => photo.id === editingPhotoId) ?? null,
+    [editingPhotoId, photos],
+  )
+  const editingReview = editingPhoto ? reviews[editingPhoto.id] : undefined
 
   useEffect(() => {
     titleRef.current?.focus()
-  }, [])
+  }, [activeStep])
 
   useEffect(() => {
     if (confirmationAction) {
@@ -150,6 +195,13 @@ export function PhotoUploadPage() {
     window.requestAnimationFrame(() => {
       previousFocusedElementRef.current?.focus()
       previousFocusedElementRef.current = null
+    })
+  }
+
+  const restoreReviewFocus = () => {
+    window.requestAnimationFrame(() => {
+      reviewReturnFocusRef.current?.focus()
+      reviewReturnFocusRef.current = null
     })
   }
 
@@ -209,7 +261,48 @@ export function PhotoUploadPage() {
 
   const confirmClearSelection = () => {
     clearSelection()
+    clearReviews()
     setConfirmationAction(null)
+    setStep('selection')
+    setEditingPhotoId(null)
+  }
+
+  const removeSelectedPhoto = (photoId: string) => {
+    removeReview(photoId)
+    removePhoto(photoId)
+  }
+
+  const continueToReview = () => {
+    if (!canContinueToReview) return
+
+    setStep('review')
+    setIsMenuOpen(false)
+    setConfirmationAction(null)
+  }
+
+  const returnToSelection = () => {
+    setStep('selection')
+    setEditingPhotoId(null)
+  }
+
+  const openReviewEditor = (photoId: string) => {
+    reviewReturnFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+    setEditingPhotoId(photoId)
+  }
+
+  const closeReviewEditor = () => {
+    setEditingPhotoId(null)
+    restoreReviewFocus()
+  }
+
+  const saveReview = (draft: PhotoReviewDraft) => {
+    if (!editingPhoto) return
+
+    updateReview(editingPhoto.id, draft)
+    closeReviewEditor()
   }
 
   return (
@@ -219,10 +312,10 @@ export function PhotoUploadPage() {
           <button
             className={styles.backButton}
             type="button"
-            onClick={requestLeave}
+            onClick={activeStep === 'review' ? returnToSelection : requestLeave}
           >
             <span aria-hidden="true">‹</span>
-            Fotos
+            {activeStep === 'review' ? 'Volver a selección' : 'Fotos'}
           </button>
           {hasSelection && (
             <div className={styles.menuWrap}>
@@ -258,10 +351,13 @@ export function PhotoUploadPage() {
         <div className={styles.heading}>
           <p className={styles.eyebrow}>Fotos de {trip.name}</p>
           <h2 id={titleId} ref={titleRef} tabIndex={-1}>
-            Añadir fotografías
+            {activeStep === 'selection'
+              ? 'Añadir fotografías'
+              : 'Revisar fotografías'}
           </h2>
           <p>
-            Paso 1 de 3 · {selectedCountLabel} · {totalSizeLabel}
+            {activeStep === 'selection' ? 'Paso 1 de 3' : 'Paso 2 de 3'} ·{' '}
+            {selectedCountLabel} · {totalSizeLabel}
           </p>
         </div>
       </header>
@@ -277,65 +373,116 @@ export function PhotoUploadPage() {
       />
 
       <div className={styles.content}>
-        {photos.length === 0 ? (
-          <section className={styles.emptySelection}>
-            <div className={styles.emptyIcon} aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="5" width="18" height="14" rx="2.5" />
-                <circle cx="8.5" cy="9.5" r="1.4" />
-                <path d="m4.5 17 4.8-4.8a1.5 1.5 0 0 1 2.1 0L16.2 17" />
-                <path d="m13.5 14.3 1.4-1.4a1.5 1.5 0 0 1 2.1 0L20 16" />
-              </svg>
-            </div>
-            <div>
-              <h3>Selecciona las fotografías del viaje</h3>
-              <p>
-                Puedes elegir varias desde la galería. El lote admite hasta{' '}
-                {MAX_SELECTED_PHOTOS} fotografías.
+        {activeStep === 'selection' && (
+          <>
+            {photos.length === 0 ? (
+              <section className={styles.emptySelection}>
+                <div className={styles.emptyIcon} aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="3" y="5" width="18" height="14" rx="2.5" />
+                    <circle cx="8.5" cy="9.5" r="1.4" />
+                    <path d="m4.5 17 4.8-4.8a1.5 1.5 0 0 1 2.1 0L16.2 17" />
+                    <path d="m13.5 14.3 1.4-1.4a1.5 1.5 0 0 1 2.1 0L20 16" />
+                  </svg>
+                </div>
+                <div>
+                  <h3>Selecciona las fotografías del viaje</h3>
+                  <p>
+                    Puedes elegir varias desde la galería. El lote admite hasta{' '}
+                    {MAX_SELECTED_PHOTOS} fotografías.
+                  </p>
+                </div>
+                <button
+                  className={styles.primaryButton}
+                  type="button"
+                  onClick={openFileSelector}
+                >
+                  Elegir fotografías
+                </button>
+              </section>
+            ) : (
+              <PhotoSelectionGrid
+                photos={photos}
+                canAddMore={canAddMore}
+                onAddPhotos={openFileSelector}
+                onPreviewError={markPreviewUnavailable}
+                onRemove={removeSelectedPhoto}
+              />
+            )}
+
+            {statusMessage && (
+              <p
+                className={styles.statusMessage}
+                role="status"
+                aria-live="polite"
+              >
+                {statusMessage}
               </p>
-            </div>
-            <button
-              className={styles.primaryButton}
-              type="button"
-              onClick={openFileSelector}
+            )}
+
+            {photos.length > 0 && (
+              <section
+                className={styles.analysisSummary}
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                <div
+                  className={
+                    isAnalyzingPhotos ? styles.analysisSpinner : styles.analysisIcon
+                  }
+                  aria-hidden="true"
+                />
+                <div>
+                  <h3>{analysisSummaryTitle}</h3>
+                  {analysisDetails.length > 0 && (
+                    <p>{analysisDetails.join(' · ')}</p>
+                  )}
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {activeStep === 'review' && (
+          <>
+            <section
+              className={styles.reviewSummary}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
             >
-              Elegir fotografías
-            </button>
-          </section>
-        ) : (
-          <PhotoSelectionGrid
-            photos={photos}
-            canAddMore={canAddMore}
-            onAddPhotos={openFileSelector}
-            onPreviewError={markPreviewUnavailable}
-            onRemove={removePhoto}
-          />
-        )}
-
-        {statusMessage && (
-          <p className={styles.statusMessage} role="status" aria-live="polite">
-            {statusMessage}
-          </p>
-        )}
-
-        {photos.length > 0 && (
-          <section
-            className={styles.analysisSummary}
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <div
-              className={isAnalyzingPhotos ? styles.analysisSpinner : styles.analysisIcon}
-              aria-hidden="true"
-            />
-            <div>
-              <h3>{analysisSummaryTitle}</h3>
-              {analysisDetails.length > 0 && (
-                <p>{analysisDetails.join(' · ')}</p>
+              <p className={styles.reviewSummaryCount}>
+                {formatPhotoCount(
+                  reviewSummary.total,
+                  'fotografía',
+                  'fotografías',
+                )}
+              </p>
+              <h3>
+                {buildReviewSummaryText({
+                  ready: reviewSummary.ready,
+                  needsReview: reviewSummary.needsReview,
+                })}
+              </h3>
+              {reviewSummary.withLocation > 0 && (
+                <p>
+                  {formatPhotoCount(
+                    reviewSummary.withLocation,
+                    'con ubicación',
+                    'con ubicación',
+                  )}
+                </p>
               )}
-            </div>
-          </section>
+            </section>
+
+            <PhotoReviewList
+              photos={photos}
+              reviews={reviews}
+              tripDayOptions={tripDayOptions}
+              onEditPhoto={openReviewEditor}
+            />
+          </>
         )}
 
         <p
@@ -380,15 +527,38 @@ export function PhotoUploadPage() {
       </div>
 
       <footer className={styles.bottomBar}>
-        <button
-          className={styles.continueButton}
-          type="button"
-          disabled
-          aria-describedby={continueDescriptionId}
-        >
-          Continuar
-        </button>
+        {activeStep === 'selection' ? (
+          <button
+            className={styles.continueButton}
+            type="button"
+            disabled={!canContinueToReview}
+            aria-describedby={continueDescriptionId}
+            onClick={continueToReview}
+          >
+            Continuar
+          </button>
+        ) : (
+          <button
+            className={styles.continueButton}
+            type="button"
+            disabled
+            aria-describedby={continueDescriptionId}
+          >
+            Continuar a procesamiento
+          </button>
+        )}
       </footer>
+
+      {editingPhoto && editingReview && (
+        <PhotoReviewEditor
+          key={editingPhoto.id}
+          photo={editingPhoto}
+          initialDraft={editingReview}
+          tripDayOptions={tripDayOptions}
+          onCancel={closeReviewEditor}
+          onSave={saveReview}
+        />
+      )}
 
       {isExitConfirmationOpen && (
         <div className={styles.confirmationBackdrop}>
@@ -404,8 +574,8 @@ export function PhotoUploadPage() {
             <div>
               <h3 id={exitConfirmationTitleId}>¿Salir de la subida?</h3>
               <p id={exitConfirmationDescriptionId}>
-                Las fotografías seleccionadas todavía no se han subido. Si
-                sales ahora, se perderá la selección.
+                Las fotografías todavía no se han subido. Si sales ahora,
+                perderás la selección y los cambios realizados.
               </p>
             </div>
             <div className={styles.confirmationActions}>

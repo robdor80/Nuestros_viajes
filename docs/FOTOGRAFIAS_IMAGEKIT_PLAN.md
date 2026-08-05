@@ -563,6 +563,24 @@ Decisiones de implementación:
 
 Formulario de revisión y edición por lotes.
 
+#### Fase 5A
+
+Paso básico “Revisar y completar” dentro de `/viajes/:tripId/fotos/subir`:
+
+- El asistente mantiene Paso 1 “Seleccionar” y añade Paso 2 “Revisar fotografías” en la misma ruta.
+- El botón “Continuar” del Paso 1 se activa cuando hay fotografías y el análisis local ya no tiene estados pendientes o analizando.
+- El Paso 2 muestra una lista compacta con miniatura, día del viaje, fecha/hora interpretadas, estado y ubicación disponible sin coordenadas.
+- Las correcciones manuales quedan separadas de los metadatos analizados; no se destruyen los datos originales de EXIF/análisis.
+- El modelo local de revisión permite corregir día, fecha, hora y descripción.
+- Se puede aceptar explícitamente una fotografía sin fecha.
+- Todo el estado de revisión vive únicamente en memoria; no hay persistencia local ni remota.
+- Volver al Paso 1 conserva selección, miniaturas, análisis y correcciones.
+- Al añadir nuevas fotografías se analizan normalmente y su revisión se inicializa cuando termina el análisis.
+- Al retirar una fotografía se retira también su revisión local y la `objectUrl` sigue revocándose desde la selección.
+- La protección de navegación sigue cubriendo selección y cambios de revisión con el mismo `useBlocker`/`useBeforeUnload`.
+- “Continuar a procesamiento” aparece en el Paso 2, pero permanece desactivado.
+- La edición por lotes, lugares, etiquetas, personas, procesamiento, compresión, WebP, subida, ImageKit y Firestore quedan aplazados.
+
 ### Fase 6
 
 Compresión y conversión a WebP.
