@@ -1,3 +1,5 @@
+import type { PhotoAnalysis } from './photo-analysis'
+
 export type SelectedPhotoPreviewStatus = 'ready' | 'unavailable'
 
 export type SelectedPhoto = {
@@ -6,4 +8,5 @@ export type SelectedPhoto = {
   fingerprint: string
   objectUrl: string
   previewStatus: SelectedPhotoPreviewStatus
+  analysis: PhotoAnalysis
 }

@@ -1,3 +1,4 @@
+import { createPendingPhotoAnalysis } from '../model/photo-analysis'
 import type { SelectedPhoto } from '../model/selected-photo'
 
 export const MAX_SELECTED_PHOTOS = 20
@@ -28,6 +29,7 @@ export function createSelectedPhoto(file: File): SelectedPhoto {
     fingerprint: getLocalPhotoFingerprint(file),
     objectUrl: URL.createObjectURL(file),
     previewStatus: 'ready',
+    analysis: createPendingPhotoAnalysis(),
   }
 }
 

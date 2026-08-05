@@ -48,6 +48,63 @@
   line-height: 1.2;
 }
 
+.analysisIndicator {
+  position: absolute;
+  bottom: 0.35rem;
+  left: 0.35rem;
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 0.35rem 0.8rem rgb(20 24 19 / 18%);
+}
+
+.analysisIndicatorAnalyzing {
+  border-color: color-mix(in srgb, #ffffff 78%, var(--trip-color));
+  background:
+    conic-gradient(
+      from 0turn,
+      var(--trip-color),
+      color-mix(in srgb, var(--trip-color) 24%, #ffffff),
+      var(--trip-color)
+    );
+  animation: spinAnalysisIndicator 0.9s linear infinite;
+}
+
+.analysisIndicatorAnalyzing::after {
+  content: "";
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.analysisIndicatorWarning {
+  background: #8b3932;
+}
+
+.analysisIndicatorWarning::before {
+  content: "!";
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+@keyframes spinAnalysisIndicator {
+  to {
+    rotate: 1turn;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .analysisIndicatorAnalyzing {
+    animation: none;
+  }
+}
+
 .removeButton {
   position: absolute;
   top: 0.22rem;

@@ -536,6 +536,29 @@ Protección de la selección pendiente al abandonar la Subida:
 
 Lectura EXIF y metadatos automáticos.
 
+Decisiones de implementación:
+
+- Se instala únicamente `exifr` para lectura local de metadatos.
+- La lectura se realiza en el navegador, sin subir originales ni llamar a servicios externos.
+- `exifr` se carga mediante importación dinámica desde el punto público del paquete (`import('exifr')`) para no incluirlo en el bundle inicial.
+- Se usa `reviveValues: false` para conservar las fechas EXIF como texto original y evitar conversiones automáticas a `Date`.
+- No se fuerza `translateValues: false`; se mantiene el comportamiento público por defecto del paquete para no degradar la normalización de GPS.
+- La lectura se limita con `pick` a fecha, GPS, orientación y dimensiones.
+- La fecha se interpreta explícitamente desde cadenas EXIF `YYYY:MM:DD HH:mm:ss`; no se usa `new Date(exifString)`.
+- Los offsets EXIF se conservan cuando existen, pero no desplazan la fecha local de la foto.
+- `File.lastModified` solo se usa como último recurso y queda marcado con confianza baja.
+- La asignación al día del viaje se calcula por fecha local `YYYY-MM-DD`, separada de la confianza de la fecha.
+- GPS ausente es un caso normal y no genera aviso; GPS incompleto o fuera de rango sí queda marcado como inválido.
+- La orientación EXIF no rota la imagen ni usa canvas en esta fase; solo informa si las dimensiones visuales deberían intercambiarse.
+- Las dimensiones se intentan leer por EXIF y, si faltan, por `createImageBitmap` o por el elemento `Image` usando la `objectUrl` existente.
+- La propiedad y revocación de `objectUrl` sigue estando únicamente en la selección local.
+- HEIC/HEIF se acepta de forma tolerante y puede quedar con soporte parcial según el navegador.
+- La cola de análisis procesa como máximo 2 fotografías en paralelo.
+- Los resultados tardíos se ignoran si la fotografía ya fue retirada, vaciada o sustituida.
+- La UI muestra un resumen global y pequeños indicadores por miniatura, sin añadir datos técnicos bajo cada tarjeta.
+- “Continuar” sigue deshabilitado; la revisión manual y la subida real quedan para fases posteriores.
+- No se escribe en Firestore, no se sube a ImageKit, no se comprime, no se convierte a WebP y no se implementa la Fase 5.
+
 ### Fase 5
 
 Formulario de revisión y edición por lotes.

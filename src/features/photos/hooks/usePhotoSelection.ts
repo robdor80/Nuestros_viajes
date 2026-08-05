@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { PhotoAnalysis } from '../model/photo-analysis'
 import type { SelectedPhoto } from '../model/selected-photo'
 import {
   MAX_SELECTED_PHOTOS,
@@ -120,10 +121,47 @@ export function usePhotoSelection() {
       replacePhotos(
         selectedPhotosRef.current.map((photo) =>
           photo.id === photoId
-            ? { ...photo, previewStatus: 'unavailable' }
+            ? {
+                ...photo,
+                previewStatus: 'unavailable',
+                analysis: photo.analysis.warnings.includes('preview-unavailable')
+                  ? photo.analysis
+                  : {
+                      ...photo.analysis,
+                      status:
+                        photo.analysis.status === 'completed'
+                          ? 'completed-with-warnings'
+                          : photo.analysis.status,
+                      warnings: [
+                        ...photo.analysis.warnings,
+                        'preview-unavailable',
+                      ],
+                    },
+              }
             : photo,
         ),
       )
+    },
+    [replacePhotos],
+  )
+
+  const updatePhotoAnalysis = useCallback(
+    (photoId: string, fingerprint: string, analysis: PhotoAnalysis) => {
+      const currentPhotos = selectedPhotosRef.current
+      const nextPhotos = currentPhotos.map((photo) =>
+        photo.id === photoId && photo.fingerprint === fingerprint
+          ? { ...photo, analysis }
+          : photo,
+      )
+      const wasUpdated = nextPhotos.some(
+        (photo, index) => photo !== currentPhotos[index],
+      )
+
+      if (wasUpdated) {
+        replacePhotos(nextPhotos)
+      }
+
+      return wasUpdated
     },
     [replacePhotos],
   )
@@ -163,6 +201,7 @@ export function usePhotoSelection() {
     canAddMore: photos.length < MAX_SELECTED_PHOTOS,
     addFiles,
     markPreviewUnavailable,
+    updatePhotoAnalysis,
     removePhoto,
     clearSelection,
     discardSelection,

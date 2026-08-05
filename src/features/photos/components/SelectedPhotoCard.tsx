@@ -8,12 +8,40 @@ type SelectedPhotoCardProps = {
   onRemove: (photoId: string) => void
 }
 
+function getAnalysisIndicator(photo: SelectedPhoto) {
+  const { analysis } = photo
+
+  if (analysis.status === 'pending' || analysis.status === 'analyzing') {
+    return {
+      className: styles.analysisIndicatorAnalyzing,
+      label: `Analizando metadatos de ${photo.file.name}`,
+    }
+  }
+
+  if (analysis.status === 'failed') {
+    return {
+      className: styles.analysisIndicatorWarning,
+      label: `No se pudieron analizar los metadatos de ${photo.file.name}`,
+    }
+  }
+
+  if (analysis.status === 'completed-with-warnings') {
+    return {
+      className: styles.analysisIndicatorWarning,
+      label: `Los metadatos de ${photo.file.name} necesitan revisión`,
+    }
+  }
+
+  return null
+}
+
 export function SelectedPhotoCard({
   photo,
   onPreviewError,
   onRemove,
 }: SelectedPhotoCardProps) {
   const hasPreview = photo.previewStatus === 'ready'
+  const analysisIndicator = getAnalysisIndicator(photo)
 
   return (
     <article className={styles.card}>
@@ -39,6 +67,14 @@ export function SelectedPhotoCard({
             </svg>
             <span>Vista previa no disponible</span>
           </div>
+        )}
+        {analysisIndicator && (
+          <span
+            className={`${styles.analysisIndicator} ${analysisIndicator.className}`}
+            role="img"
+            aria-label={analysisIndicator.label}
+            title={analysisIndicator.label}
+          />
         )}
         <button
           className={styles.removeButton}

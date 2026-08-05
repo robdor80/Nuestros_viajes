@@ -11,6 +11,7 @@ import { useNavigate, useOutletContext } from 'react-router-dom'
 import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-section'
 import type { BaseTrip } from '../../trips/model/trip'
 import { PhotoSelectionGrid } from '../components/PhotoSelectionGrid'
+import { usePhotoAnalysis } from '../hooks/usePhotoAnalysis'
 import { usePhotoSelection } from '../hooks/usePhotoSelection'
 import { usePhotoUploadNavigationGuard } from '../hooks/usePhotoUploadNavigationGuard'
 import {
@@ -20,6 +21,33 @@ import {
 import styles from './PhotoUploadPage.module.css'
 
 type ConfirmationAction = 'clear'
+
+function formatPhotoCount(count: number, singular: string, plural: string) {
+  return `${count} ${count === 1 ? singular : plural}`
+}
+
+function buildAnalysisSummaryDetails({
+  datesToReview,
+  outsideTrip,
+  withGps,
+  failed,
+}: {
+  datesToReview: number
+  outsideTrip: number
+  withGps: number
+  failed: number
+}) {
+  return [
+    datesToReview > 0 &&
+      `${formatPhotoCount(datesToReview, 'fecha necesita', 'fechas necesitan')} revisión`,
+    outsideTrip > 0 &&
+      `${formatPhotoCount(outsideTrip, 'fuera del viaje', 'fuera del viaje')}`,
+    withGps > 0 &&
+      `${formatPhotoCount(withGps, 'con ubicación', 'con ubicación')}`,
+    failed > 0 &&
+      `${formatPhotoCount(failed, 'no se pudo analizar', 'no se pudieron analizar')}`,
+  ].filter((detail): detail is string => Boolean(detail))
+}
 
 export function PhotoUploadPage() {
   const titleId = useId()
@@ -46,10 +74,16 @@ export function PhotoUploadPage() {
     canAddMore,
     addFiles,
     markPreviewUnavailable,
+    updatePhotoAnalysis,
     removePhoto,
     clearSelection,
     discardSelection,
   } = usePhotoSelection()
+  const analysisSummary = usePhotoAnalysis({
+    photos,
+    trip,
+    updatePhotoAnalysis,
+  })
   const {
     isExitConfirmationOpen,
     isConfirmingExit,
@@ -66,6 +100,31 @@ export function PhotoUploadPage() {
       ? '1 seleccionada'
       : `${photos.length} seleccionadas`
   const totalSizeLabel = formatFileSize(totalSize)
+  const pendingAnalysisCount =
+    analysisSummary.pending + analysisSummary.analyzing
+  const isAnalyzingPhotos = pendingAnalysisCount > 0
+  const datesToReview =
+    analysisSummary.lowConfidenceDate + analysisSummary.withoutDate
+  const analysisDetails = buildAnalysisSummaryDetails({
+    datesToReview,
+    outsideTrip: analysisSummary.outsideTrip,
+    withGps: analysisSummary.withGps,
+    failed: analysisSummary.failed,
+  })
+  const analysisSummaryTitle = isAnalyzingPhotos
+    ? `Analizando ${formatPhotoCount(
+        pendingAnalysisCount,
+        'fotografía',
+        'fotografías',
+      )}…`
+    : `${formatPhotoCount(
+        analysisSummary.total,
+        'fotografía preparada',
+        'fotografías preparadas',
+      )}`
+  const continueHintText = isAnalyzingPhotos
+    ? 'Espera a que termine el análisis de las fotografías.'
+    : 'La revisión de las fotografías se incorporará en el siguiente paso.'
 
   useEffect(() => {
     titleRef.current?.focus()
@@ -259,12 +318,32 @@ export function PhotoUploadPage() {
           </p>
         )}
 
+        {photos.length > 0 && (
+          <section
+            className={styles.analysisSummary}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div
+              className={isAnalyzingPhotos ? styles.analysisSpinner : styles.analysisIcon}
+              aria-hidden="true"
+            />
+            <div>
+              <h3>{analysisSummaryTitle}</h3>
+              {analysisDetails.length > 0 && (
+                <p>{analysisDetails.join(' · ')}</p>
+              )}
+            </div>
+          </section>
+        )}
+
         <p
           id={continueDescriptionId}
           className={styles.continueHint}
           role="status"
         >
-          La revisión y la subida real se incorporarán en la siguiente fase.
+          {continueHintText}
         </p>
 
         {confirmationAction === 'clear' && (
