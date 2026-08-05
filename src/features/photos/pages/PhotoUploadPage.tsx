@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type KeyboardEvent,
 } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 
@@ -11,23 +12,29 @@ import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-
 import type { BaseTrip } from '../../trips/model/trip'
 import { PhotoSelectionGrid } from '../components/PhotoSelectionGrid'
 import { usePhotoSelection } from '../hooks/usePhotoSelection'
+import { usePhotoUploadNavigationGuard } from '../hooks/usePhotoUploadNavigationGuard'
 import {
   MAX_SELECTED_PHOTOS,
   formatFileSize,
 } from '../utils/photo-selection'
 import styles from './PhotoUploadPage.module.css'
 
-type ConfirmationAction = 'leave' | 'clear'
+type ConfirmationAction = 'clear'
 
 export function PhotoUploadPage() {
   const titleId = useId()
   const continueDescriptionId = useId()
-  const confirmationTitleId = useId()
+  const clearConfirmationTitleId = useId()
+  const exitConfirmationTitleId = useId()
+  const exitConfirmationDescriptionId = useId()
   const trip = useOutletContext<BaseTrip>()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const keepSelectingButtonRef = useRef<HTMLButtonElement>(null)
+  const exitDialogRef = useRef<HTMLDivElement>(null)
+  const stayOnUploadButtonRef = useRef<HTMLButtonElement>(null)
+  const previousFocusedElementRef = useRef<HTMLElement | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [confirmationAction, setConfirmationAction] =
     useState<ConfirmationAction | null>(null)
@@ -43,6 +50,15 @@ export function PhotoUploadPage() {
     clearSelection,
     discardSelection,
   } = usePhotoSelection()
+  const {
+    isExitConfirmationOpen,
+    isConfirmingExit,
+    cancelExit,
+    confirmExit,
+  } = usePhotoUploadNavigationGuard({
+    hasPendingChanges: hasSelection,
+    onConfirmExit: discardSelection,
+  })
   const photosPath = getTripWorkspacePath(trip.id, 'fotos')
   const isSecondaryMenuOpen = hasSelection && isMenuOpen
   const selectedCountLabel =
@@ -62,19 +78,54 @@ export function PhotoUploadPage() {
   }, [confirmationAction])
 
   useEffect(() => {
-    if (!hasSelection) return
+    if (!isExitConfirmationOpen) return
 
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    previousFocusedElementRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+    stayOnUploadButtonRef.current?.focus()
+  }, [isExitConfirmationOpen])
+
+  const restorePreviousFocus = () => {
+    window.requestAnimationFrame(() => {
+      previousFocusedElementRef.current?.focus()
+      previousFocusedElementRef.current = null
+    })
+  }
+
+  const cancelBlockedExit = () => {
+    cancelExit()
+    restorePreviousFocus()
+  }
+
+  const trapExitDialogFocus = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
       event.preventDefault()
-      event.returnValue = ''
+      cancelBlockedExit()
+      return
     }
 
-    window.addEventListener('beforeunload', handleBeforeUnload)
+    if (event.key !== 'Tab' || !exitDialogRef.current) return
 
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
+    const focusableElements = Array.from(
+      exitDialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => element.offsetParent !== null)
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements.at(-1)
+
+    if (!firstElement || !lastElement) return
+
+    if (event.shiftKey && document.activeElement === firstElement) {
+      event.preventDefault()
+      lastElement.focus()
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
+      event.preventDefault()
+      firstElement.focus()
     }
-  }, [hasSelection])
+  }
 
   const openFileSelector = () => {
     setConfirmationAction(null)
@@ -89,12 +140,6 @@ export function PhotoUploadPage() {
 
   const requestLeave = () => {
     setIsMenuOpen(false)
-
-    if (hasSelection) {
-      setConfirmationAction('leave')
-      return
-    }
-
     void navigate(photosPath)
   }
 
@@ -103,29 +148,10 @@ export function PhotoUploadPage() {
     setConfirmationAction('clear')
   }
 
-  const confirmAction = () => {
-    if (confirmationAction === 'clear') {
-      clearSelection()
-      setConfirmationAction(null)
-      return
-    }
-
-    discardSelection()
-    void navigate(photosPath)
+  const confirmClearSelection = () => {
+    clearSelection()
+    setConfirmationAction(null)
   }
-
-  const confirmationCopy =
-    confirmationAction === 'clear'
-      ? {
-          title: '¿Vaciar la selección?',
-          body: 'Se retirarán todas las fotografías elegidas para este lote. No se ha subido ni guardado nada.',
-          action: 'Vaciar selección',
-        }
-      : {
-          title: '¿Salir de la subida?',
-          body: 'Se perderán las fotografías seleccionadas para este lote. No se ha subido ni guardado nada.',
-          action: 'Salir sin guardar',
-        }
 
   return (
     <section className={styles.page} aria-labelledby={titleId}>
@@ -241,15 +267,18 @@ export function PhotoUploadPage() {
           La revisión y la subida real se incorporarán en la siguiente fase.
         </p>
 
-        {confirmationAction && (
+        {confirmationAction === 'clear' && (
           <section
             className={styles.confirmation}
             role="alertdialog"
-            aria-labelledby={confirmationTitleId}
+            aria-labelledby={clearConfirmationTitleId}
           >
             <div>
-              <h3 id={confirmationTitleId}>{confirmationCopy.title}</h3>
-              <p>{confirmationCopy.body}</p>
+              <h3 id={clearConfirmationTitleId}>¿Vaciar la selección?</h3>
+              <p>
+                Se retirarán todas las fotografías elegidas para este lote. No
+                se ha subido ni guardado nada.
+              </p>
             </div>
             <div className={styles.confirmationActions}>
               <button
@@ -262,9 +291,9 @@ export function PhotoUploadPage() {
               <button
                 className={styles.dangerButton}
                 type="button"
-                onClick={confirmAction}
+                onClick={confirmClearSelection}
               >
-                {confirmationCopy.action}
+                Vaciar selección
               </button>
             </div>
           </section>
@@ -281,6 +310,46 @@ export function PhotoUploadPage() {
           Continuar
         </button>
       </footer>
+
+      {isExitConfirmationOpen && (
+        <div className={styles.confirmationBackdrop}>
+          <div
+            ref={exitDialogRef}
+            className={styles.exitConfirmation}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby={exitConfirmationTitleId}
+            aria-describedby={exitConfirmationDescriptionId}
+            onKeyDown={trapExitDialogFocus}
+          >
+            <div>
+              <h3 id={exitConfirmationTitleId}>¿Salir de la subida?</h3>
+              <p id={exitConfirmationDescriptionId}>
+                Las fotografías seleccionadas todavía no se han subido. Si
+                sales ahora, se perderá la selección.
+              </p>
+            </div>
+            <div className={styles.confirmationActions}>
+              <button
+                ref={stayOnUploadButtonRef}
+                type="button"
+                disabled={isConfirmingExit}
+                onClick={cancelBlockedExit}
+              >
+                Seguir seleccionando
+              </button>
+              <button
+                className={styles.dangerButton}
+                type="button"
+                disabled={isConfirmingExit}
+                onClick={confirmExit}
+              >
+                Salir sin subir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

@@ -106,7 +106,9 @@
 .statusMessage,
 .continueHint,
 .confirmation h3,
-.confirmation p {
+.confirmation p,
+.exitConfirmation h3,
+.exitConfirmation p {
   margin: 0;
 }
 
@@ -150,7 +152,8 @@
 }
 
 .emptySelection,
-.confirmation {
+.confirmation,
+.exitConfirmation {
   display: grid;
   padding: clamp(1rem, 5vw, 1.45rem);
   gap: 1rem;
@@ -186,14 +189,16 @@
 }
 
 .emptySelection h3,
-.confirmation h3 {
+.confirmation h3,
+.exitConfirmation h3 {
   color: var(--color-text);
   font-size: 1.1rem;
   letter-spacing: -0.015em;
 }
 
 .emptySelection p,
-.confirmation p {
+.confirmation p,
+.exitConfirmation p {
   margin-top: 0.35rem;
   color: var(--color-text-muted);
   line-height: 1.55;
@@ -237,6 +242,25 @@
   background: #fff7f5;
 }
 
+.confirmationBackdrop {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  padding: 1rem;
+  place-items: center;
+  background: rgb(24 25 22 / 48%);
+  backdrop-filter: blur(0.25rem);
+}
+
+.exitConfirmation {
+  width: min(100%, 32rem);
+  border-style: solid;
+  border-color: color-mix(in srgb, #8b3932 38%, var(--color-border));
+  background: var(--color-surface);
+  box-shadow: 0 1.5rem 4.5rem rgb(20 24 19 / 30%);
+}
+
 .confirmationActions {
   display: flex;
   flex-wrap: wrap;
@@ -255,6 +279,11 @@
   color: #ffffff !important;
   border-color: #8b3932 !important;
   background: #8b3932 !important;
+}
+
+.confirmationActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
 .bottomBar {
@@ -285,7 +314,8 @@
 .primaryButton:focus-visible,
 .confirmationActions button:focus-visible,
 .continueButton:focus-visible,
-.heading h2:focus-visible {
+.heading h2:focus-visible,
+.exitConfirmation:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }

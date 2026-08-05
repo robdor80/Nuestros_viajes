@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { App } from './app/App'
 import './app/styles/global.css'
@@ -12,12 +12,19 @@ if (!rootElement) {
   throw new Error('No se encontró el elemento raíz de la aplicación.')
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <BrowserRouter>
+const router = createBrowserRouter([
+  {
+    path: '*',
+    element: (
       <AuthProvider>
         <App />
       </AuthProvider>
-    </BrowserRouter>
+    ),
+  },
+])
+
+createRoot(rootElement).render(
+  <StrictMode>
+    <RouterProvider router={router} />
   </StrictMode>,
 )

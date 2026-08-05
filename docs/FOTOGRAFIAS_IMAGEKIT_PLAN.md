@@ -520,6 +520,18 @@ Separación entre Galería y Subida:
 - La selección local conserva límite, duplicados provisionales, previsualizaciones y limpieza estricta de object URLs.
 - No se implementa todavía EXIF, compresión, ImageKit, escritura en Firestore ni subida real.
 
+### Fase 3.1.1
+
+Protección de la selección pendiente al abandonar la Subida:
+
+- La aplicación utiliza Data Router para poder bloquear navegación interna mediante `useBlocker`.
+- La confirmación de salida es compartida por todos los intentos de navegación interna que abandonan `/viajes/:tripId/fotos/subir`.
+- El botón `< Fotos`, Atrás del navegador, Atrás de Android, gestos Atrás y enlaces internos pasan por la misma protección cuando hay fotografías seleccionadas.
+- `useBeforeUnload` protege recargas, cierre de pestaña y salida externa con el aviso nativo del navegador.
+- No se utilizan `popstate`, `pushState`, `window.confirm()` ni `unstable_usePrompt`.
+- Las fotografías seleccionadas solo se limpian al confirmar la salida.
+- Al cancelar, la selección y las vistas previas permanecen intactas.
+
 ### Fase 4
 
 Lectura EXIF y metadatos automáticos.
