@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
+import { Outlet, useLocation, useParams } from 'react-router-dom'
 
 import { TripSectionNavigation } from '../components/TripSectionNavigation'
 import { TripWorkspaceHeader } from '../components/TripWorkspaceHeader'
@@ -28,6 +28,8 @@ export function TripWorkspacePage({
   onRetry,
 }: TripWorkspacePageProps) {
   const { tripId } = useParams()
+  const location = useLocation()
+  const isPhotoUploadRoute = location.pathname.endsWith('/fotos/subir')
 
   if (tripsStatus === 'loading') {
     return (
@@ -63,10 +65,12 @@ export function TripWorkspacePage({
 
   return (
     <div
-      className={styles.workspace}
+      className={`${styles.workspace} ${
+        isPhotoUploadRoute ? styles.photoUploadWorkspace : ''
+      }`}
       style={{ '--trip-color': trip.color } as TripWorkspaceStyle}
     >
-      <TripWorkspaceHeader trip={trip} />
+      {!isPhotoUploadRoute && <TripWorkspaceHeader trip={trip} />}
       <TripSectionNavigation tripId={tripId} />
       <div className={styles.content}>
         <Outlet context={trip} />

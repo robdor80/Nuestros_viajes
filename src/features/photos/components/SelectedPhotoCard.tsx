@@ -27,7 +27,11 @@ export function SelectedPhotoCard({
             onError={() => onPreviewError(photo.id)}
           />
         ) : (
-          <div className={styles.previewFallback} role="img" aria-label="Vista previa no disponible">
+          <div
+            className={styles.previewFallback}
+            role="img"
+            aria-label="Vista previa no disponible"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 5h16v14H4z" />
               <path d="m4 17 5-5 4 4 2-2 5 5" />
@@ -36,6 +40,14 @@ export function SelectedPhotoCard({
             <span>Vista previa no disponible</span>
           </div>
         )}
+        <button
+          className={styles.removeButton}
+          type="button"
+          aria-label={`Retirar ${photo.file.name}`}
+          onClick={() => onRemove(photo.id)}
+        >
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
 
       <div className={styles.details}>
@@ -47,14 +59,6 @@ export function SelectedPhotoCard({
           </p>
         )}
       </div>
-
-      <button
-        type="button"
-        aria-label={`Retirar ${photo.file.name}`}
-        onClick={() => onRemove(photo.id)}
-      >
-        Retirar
-      </button>
     </article>
   )
 }

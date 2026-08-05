@@ -1,21 +1,20 @@
-import { useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 
 import { TripSectionIcon } from '../../trip-workspace/components/TripSectionIcon'
+import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-section'
 import type { BaseTrip } from '../../trips/model/trip'
-import { PhotoSelectionDialog } from '../components/PhotoSelectionDialog'
 import { usePhotos } from '../hooks/usePhotos'
 import styles from './PhotosPage.module.css'
 
 export function PhotosPage() {
   const trip = useOutletContext<BaseTrip>()
+  const navigate = useNavigate()
   const { photos, isLoading, error } = usePhotos(trip.id)
-  const [isSelectingPhotos, setIsSelectingPhotos] = useState(false)
   const photoCountLabel =
     photos.length === 1 ? '1 fotografía' : `${photos.length} fotografías`
 
-  const openPhotoSelection = () => {
-    setIsSelectingPhotos(true)
+  const openPhotoUploadPage = () => {
+    void navigate(`${getTripWorkspacePath(trip.id, 'fotos')}/subir`)
   }
 
   return (
@@ -57,7 +56,7 @@ export function PhotosPage() {
               recordar cada momento del viaje.
             </p>
           </div>
-          <button type="button" onClick={openPhotoSelection}>
+          <button type="button" onClick={openPhotoUploadPage}>
             Añadir fotografías
           </button>
         </div>
@@ -76,14 +75,10 @@ export function PhotosPage() {
               viaje.
             </p>
           </div>
-          <button type="button" onClick={openPhotoSelection}>
+          <button type="button" onClick={openPhotoUploadPage}>
             Añadir fotografías
           </button>
         </div>
-      )}
-
-      {isSelectingPhotos && (
-        <PhotoSelectionDialog onClose={() => setIsSelectingPhotos(false)} />
       )}
     </section>
   )

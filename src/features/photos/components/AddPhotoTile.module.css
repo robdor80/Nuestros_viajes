@@ -1,0 +1,45 @@
+.tile {
+  display: grid;
+  min-width: 0;
+  aspect-ratio: 1;
+  place-items: center;
+  align-content: center;
+  padding: 0.45rem;
+  gap: 0.25rem;
+  border: 1px dashed color-mix(in srgb, var(--trip-color) 48%, var(--color-border));
+  border-radius: 0.9rem;
+  color: color-mix(in srgb, var(--trip-color) 82%, #20231f);
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--trip-color) 12%, transparent),
+      transparent 44%
+    ),
+    color-mix(in srgb, var(--trip-color) 5%, var(--color-surface));
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.tile span {
+  font-size: clamp(1.6rem, 8vw, 2.2rem);
+  line-height: 1;
+}
+
+.tile small {
+  font-size: 0.72rem;
+}
+
+.tile:hover {
+  background: color-mix(in srgb, var(--trip-color) 10%, var(--color-surface));
+}
+
+.tile:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tile:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

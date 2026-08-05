@@ -16,6 +16,7 @@ import { AccommodationsPage } from '../features/accommodations/pages/Accommodati
 import { BudgetPage } from '../features/budget/pages/BudgetPage'
 import { HomePage } from '../features/home/pages/HomePage'
 import { PlacesPage } from '../features/places/pages/PlacesPage'
+import { PhotoUploadPage } from '../features/photos/pages/PhotoUploadPage'
 import { PhotosPage } from '../features/photos/pages/PhotosPage'
 import { PlanningPage } from '../features/planning/pages/PlanningPage'
 import { RestaurantsPage } from '../features/restaurants/pages/RestaurantsPage'
@@ -453,6 +454,7 @@ function AuthenticatedApplication({
             }
           />
           <Route path="fotos" element={<PhotosPage />} />
+          <Route path="fotos/subir" element={<PhotoUploadPage />} />
           <Route
             path="datos"
             element={<TripSectionPage sectionId="useful-data" />}

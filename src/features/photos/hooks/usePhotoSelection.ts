@@ -1,0 +1,170 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import type { SelectedPhoto } from '../model/selected-photo'
+import {
+  MAX_SELECTED_PHOTOS,
+  createSelectedPhoto,
+  getLocalPhotoFingerprint,
+  isValidImageFile,
+  revokeSelectedPhotoUrl,
+} from '../utils/photo-selection'
+
+function buildSelectionMessage({
+  addedCount,
+  duplicateCount,
+  invalidCount,
+  limitedCount,
+}: {
+  addedCount: number
+  duplicateCount: number
+  invalidCount: number
+  limitedCount: number
+}) {
+  const messages = [
+    addedCount > 0 &&
+      `${addedCount} ${
+        addedCount === 1 ? 'fotografía añadida' : 'fotografías añadidas'
+      }.`,
+    duplicateCount > 0 &&
+      `${duplicateCount} ${
+        duplicateCount === 1
+          ? 'archivo ya estaba incluido'
+          : 'archivos ya estaban incluidos'
+      }.`,
+    invalidCount > 0 &&
+      `${invalidCount} ${
+        invalidCount === 1
+          ? 'archivo no era una imagen válida'
+          : 'archivos no eran imágenes válidas'
+      }.`,
+    limitedCount > 0 &&
+      `El lote está limitado a ${MAX_SELECTED_PHOTOS} fotografías; se han conservado solo las primeras que cabían.`,
+  ].filter((message): message is string => Boolean(message))
+
+  return messages.join(' ')
+}
+
+export function usePhotoSelection() {
+  const [photos, setPhotos] = useState<SelectedPhoto[]>([])
+  const [statusMessage, setStatusMessage] = useState('')
+  const selectedPhotosRef = useRef<SelectedPhoto[]>([])
+
+  const replacePhotos = useCallback((nextPhotos: SelectedPhoto[]) => {
+    selectedPhotosRef.current = nextPhotos
+    setPhotos(nextPhotos)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      selectedPhotosRef.current.forEach(revokeSelectedPhotoUrl)
+      selectedPhotosRef.current = []
+    }
+  }, [])
+
+  const totalSize = useMemo(
+    () => photos.reduce((total, photo) => total + photo.file.size, 0),
+    [photos],
+  )
+
+  const addFiles = useCallback(
+    (fileList: FileList | File[]) => {
+      const files = Array.from(fileList)
+
+      if (files.length === 0) return
+
+      const currentPhotos = selectedPhotosRef.current
+      const existingFingerprints = new Set(
+        currentPhotos.map((photo) => photo.fingerprint),
+      )
+      const acceptedPhotos: SelectedPhoto[] = []
+      let duplicateCount = 0
+      let invalidCount = 0
+      let limitedCount = 0
+
+      files.forEach((file) => {
+        if (!isValidImageFile(file)) {
+          invalidCount += 1
+          return
+        }
+
+        const fingerprint = getLocalPhotoFingerprint(file)
+        if (existingFingerprints.has(fingerprint)) {
+          duplicateCount += 1
+          return
+        }
+
+        if (currentPhotos.length + acceptedPhotos.length >= MAX_SELECTED_PHOTOS) {
+          limitedCount += 1
+          return
+        }
+
+        existingFingerprints.add(fingerprint)
+        acceptedPhotos.push(createSelectedPhoto(file))
+      })
+
+      replacePhotos([...currentPhotos, ...acceptedPhotos])
+      setStatusMessage(
+        buildSelectionMessage({
+          addedCount: acceptedPhotos.length,
+          duplicateCount,
+          invalidCount,
+          limitedCount,
+        }),
+      )
+    },
+    [replacePhotos],
+  )
+
+  const markPreviewUnavailable = useCallback(
+    (photoId: string) => {
+      replacePhotos(
+        selectedPhotosRef.current.map((photo) =>
+          photo.id === photoId
+            ? { ...photo, previewStatus: 'unavailable' }
+            : photo,
+        ),
+      )
+    },
+    [replacePhotos],
+  )
+
+  const removePhoto = useCallback(
+    (photoId: string) => {
+      const currentPhotos = selectedPhotosRef.current
+      const photoToRemove = currentPhotos.find((photo) => photo.id === photoId)
+
+      if (photoToRemove) {
+        revokeSelectedPhotoUrl(photoToRemove)
+      }
+
+      replacePhotos(currentPhotos.filter((photo) => photo.id !== photoId))
+      setStatusMessage('Fotografía retirada de la selección.')
+    },
+    [replacePhotos],
+  )
+
+  const clearSelection = useCallback(() => {
+    selectedPhotosRef.current.forEach(revokeSelectedPhotoUrl)
+    replacePhotos([])
+    setStatusMessage('Selección vaciada.')
+  }, [replacePhotos])
+
+  const discardSelection = useCallback(() => {
+    selectedPhotosRef.current.forEach(revokeSelectedPhotoUrl)
+    replacePhotos([])
+    setStatusMessage('')
+  }, [replacePhotos])
+
+  return {
+    photos,
+    statusMessage,
+    totalSize,
+    hasSelection: photos.length > 0,
+    canAddMore: photos.length < MAX_SELECTED_PHOTOS,
+    addFiles,
+    markPreviewUnavailable,
+    removePhoto,
+    clearSelection,
+    discardSelection,
+  }
+}

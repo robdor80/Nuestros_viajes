@@ -1,0 +1,330 @@
+.page {
+  display: grid;
+  width: min(100%, 76rem);
+  margin-inline: auto;
+  gap: clamp(1rem, 4vw, 1.5rem);
+}
+
+.header {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.backButton,
+.menuButton,
+.primaryButton,
+.confirmationActions button,
+.continueButton {
+  min-height: 2.65rem;
+  border-radius: 0.72rem;
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  gap: 0.25rem;
+  border: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+}
+
+.backButton span {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.backButton:hover {
+  color: var(--color-text);
+}
+
+.menuWrap {
+  position: relative;
+}
+
+.menuButton {
+  display: grid;
+  width: 2.65rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-size: 1.25rem;
+}
+
+.menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  min-width: 11rem;
+  padding: 0.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.menu button {
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0.55rem;
+  color: #8b3932;
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button:hover {
+  background: #fff7f5;
+}
+
+.heading {
+  max-width: 44rem;
+}
+
+.eyebrow,
+.heading h2,
+.heading p,
+.emptySelection h3,
+.emptySelection p,
+.statusMessage,
+.continueHint,
+.confirmation h3,
+.confirmation p {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--trip-color);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.heading h2 {
+  margin-top: 0.35rem;
+  color: var(--color-text);
+  font-size: clamp(1.7rem, 7vw, 2.6rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.heading p {
+  margin-top: 0.45rem;
+  color: var(--color-text-muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.content {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.emptySelection,
+.confirmation {
+  display: grid;
+  padding: clamp(1rem, 5vw, 1.45rem);
+  gap: 1rem;
+  border: 1px dashed color-mix(in srgb, var(--trip-color) 42%, var(--color-border));
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--trip-color) 12%, transparent),
+      transparent 42%
+    ),
+    color-mix(in srgb, var(--trip-color) 5%, var(--color-surface));
+}
+
+.emptyIcon {
+  display: grid;
+  width: 3.4rem;
+  height: 3.4rem;
+  place-items: center;
+  border-radius: 0.95rem;
+  color: var(--trip-color);
+  background: color-mix(in srgb, var(--trip-color) 13%, var(--color-surface));
+}
+
+.emptyIcon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.emptySelection h3,
+.confirmation h3 {
+  color: var(--color-text);
+  font-size: 1.1rem;
+  letter-spacing: -0.015em;
+}
+
+.emptySelection p,
+.confirmation p {
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.primaryButton,
+.continueButton {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid var(--trip-color);
+  color: #ffffff;
+  background: var(--trip-color);
+}
+
+.primaryButton:hover {
+  background: color-mix(in srgb, var(--trip-color) 82%, #000);
+}
+
+.statusMessage,
+.continueHint {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.statusMessage {
+  width: fit-content;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--trip-color) 22%, var(--color-border));
+  border-radius: 0.8rem;
+  background: var(--color-surface-strong);
+  font-weight: 750;
+}
+
+.confirmation {
+  border-style: solid;
+  border-color: color-mix(in srgb, #8b3932 38%, var(--color-border));
+  background: #fff7f5;
+}
+
+.confirmationActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.confirmationActions button {
+  padding: 0.58rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--trip-color) 38%, var(--color-border));
+  color: color-mix(in srgb, var(--trip-color) 82%, #20231f);
+  background: var(--color-surface-strong);
+}
+
+.dangerButton {
+  color: #ffffff !important;
+  border-color: #8b3932 !important;
+  background: #8b3932 !important;
+}
+
+.bottomBar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+  margin-inline: -1rem;
+  padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  backdrop-filter: blur(0.6rem);
+}
+
+.continueButton {
+  width: min(100%, 18rem);
+}
+
+.continueButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.backButton:focus-visible,
+.menuButton:focus-visible,
+.menu button:focus-visible,
+.primaryButton:focus-visible,
+.confirmationActions button:focus-visible,
+.continueButton:focus-visible,
+.heading h2:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (min-width: 42rem) {
+  .emptySelection {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .emptySelection .primaryButton {
+    grid-column: 2;
+  }
+}
+
+@media (min-width: 64rem) {
+  .bottomBar {
+    position: static;
+    margin-inline: 0;
+    padding-inline: 0;
+    border-top: 0;
+    background: transparent;
+    backdrop-filter: none;
+  }
+}
+
+@media (max-width: 42rem) {
+  .page {
+    gap: 1rem;
+  }
+
+  .confirmationActions {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .confirmationActions button,
+  .primaryButton,
+  .continueButton {
+    width: 100%;
+  }
+}

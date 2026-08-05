@@ -238,6 +238,18 @@ Primera versión:
 - Máximo inicial de 20 fotografías por lote.
 - El límite debe estar centralizado y ser configurable.
 
+Decisión de Fase 3.1:
+
+- Galería y Subida son experiencias distintas.
+- La Galería vive en `/viajes/:tripId/fotos`.
+- La Subida vive en `/viajes/:tripId/fotos/subir`.
+- La selección múltiple se realiza en una página independiente, no en un modal.
+- La subida está diseñada principalmente para móvil vertical, con una interfaz ágil, ligera y de pocas acciones visibles.
+- PC y tablet deben funcionar correctamente para subir, pero son secundarios frente al uso principal en móvil.
+- El formulario de subida debe aprovechar al máximo los datos automáticos de fases posteriores y evitar pedir información manual prematuramente.
+- La futura Galería debe brillar especialmente en PC y tablet, mostrando principalmente imágenes.
+- En la Galería no se mostrarán normalmente nombres, tamaños ni datos técnicos; los metadatos estarán disponibles de forma opcional y discreta.
+
 ## 10. Metadatos automáticos
 
 La aplicación intentará obtener:
@@ -497,6 +509,16 @@ Modelo TypeScript, servicio Firestore, listener y protección frente al borrado 
 ### Fase 3
 
 Selección múltiple y previsualización local.
+
+### Fase 3.1
+
+Separación entre Galería y Subida:
+
+- `/viajes/:tripId/fotos` queda como entrada principal y futura galería.
+- `/viajes/:tripId/fotos/subir` queda como página independiente para seleccionar fotografías.
+- La experiencia de subida se optimiza primero para móvil vertical.
+- La selección local conserva límite, duplicados provisionales, previsualizaciones y limpieza estricta de object URLs.
+- No se implementa todavía EXIF, compresión, ImageKit, escritura en Firestore ni subida real.
 
 ### Fase 4
 
