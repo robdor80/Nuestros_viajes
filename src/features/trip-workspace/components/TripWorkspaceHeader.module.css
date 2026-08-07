@@ -39,6 +39,27 @@
   text-decoration: none;
 }
 
+.printButton {
+  min-height: 2.4rem;
+  margin-left: auto;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--trip-color) 55%, var(--color-border));
+  border-radius: 0.65rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.printButton:hover {
+  background: color-mix(in srgb, var(--trip-color) 12%, var(--color-surface));
+}
+
+.printButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .homeLink:hover {
   color: var(--color-text);
   text-decoration: underline;

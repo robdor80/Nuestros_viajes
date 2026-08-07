@@ -1,8 +1,9 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 
 import { TripSectionNavigation } from '../components/TripSectionNavigation'
 import { TripWorkspaceHeader } from '../components/TripWorkspaceHeader'
+import { TripPrintDialog } from '../components/TripPrintDialog'
 import { TripWorkspaceState } from '../components/TripWorkspaceState'
 import type {
   BaseTrip,
@@ -27,6 +28,7 @@ export function TripWorkspacePage({
   tripsError,
   onRetry,
 }: TripWorkspacePageProps) {
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
   const { tripId } = useParams()
   const location = useLocation()
   const isPhotoUploadRoute = location.pathname.endsWith('/fotos/subir')
@@ -70,11 +72,22 @@ export function TripWorkspacePage({
       }`}
       style={{ '--trip-color': trip.color } as TripWorkspaceStyle}
     >
-      {!isPhotoUploadRoute && <TripWorkspaceHeader trip={trip} />}
+      {!isPhotoUploadRoute && (
+        <TripWorkspaceHeader
+          trip={trip}
+          onPrint={() => setIsPrintDialogOpen(true)}
+        />
+      )}
       <TripSectionNavigation tripId={tripId} />
       <div className={styles.content}>
         <Outlet context={trip} />
       </div>
+      {isPrintDialogOpen && (
+        <TripPrintDialog
+          trip={trip}
+          onClose={() => setIsPrintDialogOpen(false)}
+        />
+      )}
     </div>
   )
 }

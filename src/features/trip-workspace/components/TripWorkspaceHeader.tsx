@@ -9,6 +9,7 @@ import styles from './TripWorkspaceHeader.module.css'
 
 type TripWorkspaceHeaderProps = {
   trip: BaseTrip
+  onPrint: () => void
 }
 
 type TripWorkspaceHeaderStyle = CSSProperties & {
@@ -24,7 +25,10 @@ function formatDate(date: string) {
   }).format(new Date(`${date}T00:00:00Z`))
 }
 
-export function TripWorkspaceHeader({ trip }: TripWorkspaceHeaderProps) {
+export function TripWorkspaceHeader({
+  trip,
+  onPrint,
+}: TripWorkspaceHeaderProps) {
   return (
     <header
       className={styles.header}
@@ -41,6 +45,10 @@ export function TripWorkspaceHeader({ trip }: TripWorkspaceHeaderProps) {
         {trip.status === 'archived' && (
           <span className={styles.archivedBadge}>Viaje archivado</span>
         )}
+
+        <button className={styles.printButton} type="button" onClick={onPrint}>
+          PDF / Imprimir
+        </button>
       </div>
 
       <div className={styles.heading}>
