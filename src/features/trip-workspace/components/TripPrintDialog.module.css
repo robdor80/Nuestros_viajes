@@ -138,6 +138,17 @@
 }
 
 @media print {
+  .dialog {
+    position: static;
+    display: block;
+    padding: 0;
+  }
+
+  .backdrop,
+  .panel {
+    display: none;
+  }
+
   :global(#root) * {
     visibility: hidden;
   }
@@ -148,8 +159,7 @@
   }
 
   .printDocument {
-    position: fixed;
-    inset: 0;
+    position: static;
     display: block;
     width: 100%;
     color: #1c1b18;
