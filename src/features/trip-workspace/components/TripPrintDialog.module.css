@@ -142,8 +142,8 @@
     visibility: hidden;
   }
 
-  .printDocument,
-  .printDocument * {
+  :global(#root) .printDocument,
+  :global(#root) .printDocument * {
     visibility: visible;
   }
 
