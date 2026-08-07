@@ -70,6 +70,7 @@ export function TripWorkspacePage({
       className={`${styles.workspace} ${
         isPhotoUploadRoute ? styles.photoUploadWorkspace : ''
       }`}
+      data-print-active={isPrintDialogOpen ? 'true' : undefined}
       style={{ '--trip-color': trip.color } as TripWorkspaceStyle}
     >
       {!isPhotoUploadRoute && (

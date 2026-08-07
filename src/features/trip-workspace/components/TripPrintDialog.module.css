@@ -138,6 +138,14 @@
 }
 
 @media print {
+  :global([data-print-active]) {
+    min-height: 0;
+  }
+
+  :global([data-print-active]) > :not(:has(.printDocument)) {
+    display: none;
+  }
+
   .dialog {
     position: static;
     display: block;
