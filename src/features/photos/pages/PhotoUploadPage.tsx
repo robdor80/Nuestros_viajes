@@ -13,8 +13,10 @@ import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-
 import type { BaseTrip } from '../../trips/model/trip'
 import { PhotoReviewEditor } from '../components/PhotoReviewEditor'
 import { PhotoReviewList } from '../components/PhotoReviewList'
+import { PhotoProcessingList } from '../components/PhotoProcessingList'
 import { PhotoSelectionGrid } from '../components/PhotoSelectionGrid'
 import { usePhotoAnalysis } from '../hooks/usePhotoAnalysis'
+import { usePhotoProcessing } from '../hooks/usePhotoProcessing'
 import { usePhotoReview } from '../hooks/usePhotoReview'
 import { usePhotoSelection } from '../hooks/usePhotoSelection'
 import { usePhotoUploadNavigationGuard } from '../hooks/usePhotoUploadNavigationGuard'
@@ -26,7 +28,7 @@ import {
 import styles from './PhotoUploadPage.module.css'
 
 type ConfirmationAction = 'clear'
-type UploadStep = 'selection' | 'review'
+type UploadStep = 'selection' | 'review' | 'processing'
 
 function formatPhotoCount(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`
@@ -98,10 +100,13 @@ export function PhotoUploadPage() {
     addFiles,
     markPreviewUnavailable,
     updatePhotoAnalysis,
+    updatePhotoProcessing,
     removePhoto,
     clearSelection,
     discardSelection,
   } = usePhotoSelection()
+  const { isProcessing, processPhotos, summary: processingSummary } =
+    usePhotoProcessing({ photos, updatePhotoProcessing })
   const analysisSummary = usePhotoAnalysis({
     photos,
     trip,
@@ -140,6 +145,7 @@ export function PhotoUploadPage() {
     analysisSummary.pending + analysisSummary.analyzing
   const isAnalyzingPhotos = pendingAnalysisCount > 0
   const canContinueToReview = hasSelection && !isAnalyzingPhotos
+  const canStartProcessing = reviewSummary.needsReview === 0 && !isProcessing
   const datesToReview =
     analysisSummary.lowConfidenceDate + analysisSummary.withoutDate
   const analysisDetails = buildAnalysisSummaryDetails({
@@ -164,7 +170,15 @@ export function PhotoUploadPage() {
       ? isAnalyzingPhotos
         ? 'Espera a que termine el análisis de las fotografías.'
         : 'La revisión de las fotografías se incorporará en el siguiente paso.'
-      : 'El procesamiento de las fotografías se incorporará en el siguiente paso.'
+      : activeStep === 'review'
+        ? reviewSummary.needsReview > 0
+          ? 'Revisa las fotografías pendientes antes de procesarlas.'
+          : 'Las fotografías se convertirán localmente a WebP.'
+        : isProcessing
+          ? 'Procesando las fotografías una a una en este dispositivo.'
+          : processingSummary.failed > 0
+            ? 'Puedes reintentar las fotografías que no se hayan podido procesar.'
+            : 'Las fotografías están preparadas en memoria para la futura subida.'
   const editingPhoto = useMemo(
     () => photos.find((photo) => photo.id === editingPhotoId) ?? null,
     [editingPhotoId, photos],
@@ -285,6 +299,16 @@ export function PhotoUploadPage() {
     setEditingPhotoId(null)
   }
 
+  const returnToReview = () => {
+    if (!isProcessing) setStep('review')
+  }
+
+  const startProcessing = () => {
+    if (!canStartProcessing) return
+    setStep('processing')
+    void processPhotos()
+  }
+
   const openReviewEditor = (photoId: string) => {
     reviewReturnFocusRef.current =
       document.activeElement instanceof HTMLElement
@@ -312,10 +336,21 @@ export function PhotoUploadPage() {
           <button
             className={styles.backButton}
             type="button"
-            onClick={activeStep === 'review' ? returnToSelection : requestLeave}
+            disabled={activeStep === 'processing' && isProcessing}
+            onClick={
+              activeStep === 'review'
+                ? returnToSelection
+                : activeStep === 'processing'
+                  ? returnToReview
+                  : requestLeave
+            }
           >
             <span aria-hidden="true">‹</span>
-            {activeStep === 'review' ? 'Volver a selección' : 'Fotos'}
+            {activeStep === 'review'
+              ? 'Volver a selección'
+              : activeStep === 'processing'
+                ? 'Volver a revisión'
+                : 'Fotos'}
           </button>
           {hasSelection && (
             <div className={styles.menuWrap}>
@@ -353,10 +388,16 @@ export function PhotoUploadPage() {
           <h2 id={titleId} ref={titleRef} tabIndex={-1}>
             {activeStep === 'selection'
               ? 'Añadir fotografías'
-              : 'Revisar fotografías'}
+              : activeStep === 'review'
+                ? 'Revisar fotografías'
+                : 'Procesar fotografías'}
           </h2>
           <p>
-            {activeStep === 'selection' ? 'Paso 1 de 3' : 'Paso 2 de 3'} ·{' '}
+            {activeStep === 'selection'
+              ? 'Paso 1 de 3'
+              : activeStep === 'review'
+                ? 'Paso 2 de 3'
+                : 'Paso 3 de 3'} ·{' '}
             {selectedCountLabel} · {totalSizeLabel}
           </p>
         </div>
@@ -485,6 +526,34 @@ export function PhotoUploadPage() {
           </>
         )}
 
+        {activeStep === 'processing' && (
+          <>
+            <section
+              className={styles.processingSummary}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <p className={styles.reviewSummaryCount}>Procesamiento local</p>
+              <h3>
+                {isProcessing
+                  ? `${processingSummary.completed + processingSummary['completed-with-warnings'] + processingSummary.failed} de ${processingSummary.total} procesadas`
+                  : `${processingSummary.completed + processingSummary['completed-with-warnings']} preparadas`}
+              </h3>
+              {processingSummary.failed > 0 && (
+                <p>
+                  {formatPhotoCount(
+                    processingSummary.failed,
+                    'fotografía no se pudo procesar',
+                    'fotografías no se pudieron procesar',
+                  )}
+                </p>
+              )}
+            </section>
+            <PhotoProcessingList photos={photos} />
+          </>
+        )}
+
         <p
           id={continueDescriptionId}
           className={styles.continueHint}
@@ -537,15 +606,27 @@ export function PhotoUploadPage() {
           >
             Continuar
           </button>
-        ) : (
+        ) : activeStep === 'review' ? (
           <button
             className={styles.continueButton}
             type="button"
-            disabled
+            disabled={!canStartProcessing}
             aria-describedby={continueDescriptionId}
+            onClick={startProcessing}
           >
-            Continuar a procesamiento
+            Procesar fotografías
           </button>
+        ) : (
+          processingSummary.failed > 0 &&
+          !isProcessing && (
+            <button
+              className={styles.continueButton}
+              type="button"
+              onClick={() => void processPhotos()}
+            >
+              Reintentar fallidas
+            </button>
+          )
         )}
       </footer>
 

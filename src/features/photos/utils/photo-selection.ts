@@ -1,4 +1,5 @@
 import { createPendingPhotoAnalysis } from '../model/photo-analysis'
+import { createPendingPhotoProcessing } from '../model/photo-processing'
 import type { SelectedPhoto } from '../model/selected-photo'
 
 export const MAX_SELECTED_PHOTOS = 20
@@ -30,11 +31,15 @@ export function createSelectedPhoto(file: File): SelectedPhoto {
     objectUrl: URL.createObjectURL(file),
     previewStatus: 'ready',
     analysis: createPendingPhotoAnalysis(),
+    processing: createPendingPhotoProcessing(),
   }
 }
 
 export function revokeSelectedPhotoUrl(photo: SelectedPhoto) {
   URL.revokeObjectURL(photo.objectUrl)
+  if (photo.processing.result) {
+    URL.revokeObjectURL(photo.processing.result.objectUrl)
+  }
 }
 
 export function formatFileSize(sizeInBytes: number) {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { PhotoAnalysis } from '../model/photo-analysis'
+import type { PhotoProcessing } from '../model/photo-processing'
 import type { SelectedPhoto } from '../model/selected-photo'
 import {
   MAX_SELECTED_PHOTOS,
@@ -166,6 +167,32 @@ export function usePhotoSelection() {
     [replacePhotos],
   )
 
+  const updatePhotoProcessing = useCallback(
+    (photoId: string, fingerprint: string, processing: PhotoProcessing) => {
+      const currentPhotos = selectedPhotosRef.current
+      const currentPhoto = currentPhotos.find((photo) => photo.id === photoId)
+      const nextPhotos = currentPhotos.map((photo) =>
+        photo.id === photoId && photo.fingerprint === fingerprint
+          ? { ...photo, processing }
+          : photo,
+      )
+      const wasUpdated = nextPhotos.some(
+        (photo, index) => photo !== currentPhotos[index],
+      )
+
+      if (wasUpdated) {
+        const previousResult = currentPhoto?.processing.result
+        if (previousResult && previousResult.objectUrl !== processing.result?.objectUrl) {
+          URL.revokeObjectURL(previousResult.objectUrl)
+        }
+        replacePhotos(nextPhotos)
+      }
+
+      return wasUpdated
+    },
+    [replacePhotos],
+  )
+
   const removePhoto = useCallback(
     (photoId: string) => {
       const currentPhotos = selectedPhotosRef.current
@@ -202,6 +229,7 @@ export function usePhotoSelection() {
     addFiles,
     markPreviewUnavailable,
     updatePhotoAnalysis,
+    updatePhotoProcessing,
     removePhoto,
     clearSelection,
     discardSelection,

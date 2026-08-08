@@ -1,4 +1,5 @@
 import type { PhotoAnalysis } from './photo-analysis'
+import type { PhotoProcessing } from './photo-processing'
 
 export type SelectedPhotoPreviewStatus = 'ready' | 'unavailable'
 
@@ -9,4 +10,5 @@ export type SelectedPhoto = {
   objectUrl: string
   previewStatus: SelectedPhotoPreviewStatus
   analysis: PhotoAnalysis
+  processing: PhotoProcessing
 }
