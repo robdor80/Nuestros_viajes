@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { PhotoAnalysis } from '../model/photo-analysis'
 import type { PhotoProcessing } from '../model/photo-processing'
+import type { PhotoPersistence } from '../model/photo-persistence'
 import type { PhotoUpload } from '../model/photo-upload'
 import type { SelectedPhoto } from '../model/selected-photo'
 import {
@@ -215,6 +216,27 @@ export function usePhotoSelection() {
     [replacePhotos],
   )
 
+  const updatePhotoPersistence = useCallback(
+    (photoId: string, fingerprint: string, persistence: PhotoPersistence) => {
+      const currentPhotos = selectedPhotosRef.current
+      const nextPhotos = currentPhotos.map((photo) =>
+        photo.id === photoId && photo.fingerprint === fingerprint
+          ? { ...photo, persistence }
+          : photo,
+      )
+      const wasUpdated = nextPhotos.some(
+        (photo, index) => photo !== currentPhotos[index],
+      )
+
+      if (wasUpdated) {
+        replacePhotos(nextPhotos)
+      }
+
+      return wasUpdated
+    },
+    [replacePhotos],
+  )
+
   const removePhoto = useCallback(
     (photoId: string) => {
       const currentPhotos = selectedPhotosRef.current
@@ -253,6 +275,7 @@ export function usePhotoSelection() {
     updatePhotoAnalysis,
     updatePhotoProcessing,
     updatePhotoUpload,
+    updatePhotoPersistence,
     removePhoto,
     clearSelection,
     discardSelection,

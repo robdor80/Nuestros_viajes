@@ -7,6 +7,7 @@
 .body p { margin-top: 0.18rem; color: var(--color-text-muted); font-size: 0.8rem; line-height: 1.35; }
 .body .status { color: var(--trip-color); font-weight: 800; }
 .body .uploadStatus { color: #2d6a4f; font-weight: 800; }
+.body .persistenceStatus { color: #2e5c88; font-weight: 800; }
 .body .originalFile { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .body .warning { color: #7a5e25; }
 .body .error { color: #a33d34; }

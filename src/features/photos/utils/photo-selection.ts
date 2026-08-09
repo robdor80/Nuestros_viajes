@@ -1,5 +1,6 @@
 import { createPendingPhotoAnalysis } from '../model/photo-analysis'
 import { createPendingPhotoProcessing } from '../model/photo-processing'
+import { createPendingPhotoPersistence } from '../model/photo-persistence'
 import { createPendingPhotoUpload } from '../model/photo-upload'
 import type { SelectedPhoto } from '../model/selected-photo'
 
@@ -34,6 +35,7 @@ export function createSelectedPhoto(file: File): SelectedPhoto {
     analysis: createPendingPhotoAnalysis(),
     processing: createPendingPhotoProcessing(),
     upload: createPendingPhotoUpload(),
+    persistence: createPendingPhotoPersistence(),
   }
 }
 

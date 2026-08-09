@@ -31,6 +31,15 @@ function getUploadStatus(photo: SelectedPhoto) {
   }
 }
 
+function getPersistenceStatus(photo: SelectedPhoto) {
+  switch (photo.persistence.status) {
+    case 'pending': return 'Pendiente de guardar en el viaje'
+    case 'saving': return 'Guardando en el viaje…'
+    case 'completed': return 'Guardada en el viaje'
+    case 'failed': return 'No se pudo guardar en el viaje'
+  }
+}
+
 export function PhotoProcessingList({
   photos,
   reviews,
@@ -56,6 +65,8 @@ export function PhotoProcessingList({
           {errorMessage && <p className={styles.error}>{errorMessage}</p>}
           {output && <p className={photo.upload.status === 'failed' ? styles.error : styles.uploadStatus}>{getUploadStatus(photo)}</p>}
           {photo.upload.status === 'failed' && photo.upload.errorMessage && <p className={styles.error}>{photo.upload.errorMessage}</p>}
+          {photo.upload.status === 'completed' && <p className={photo.persistence.status === 'failed' ? styles.error : styles.persistenceStatus}>{getPersistenceStatus(photo)}</p>}
+          {photo.persistence.status === 'failed' && photo.persistence.errorMessage && <p className={styles.error}>{photo.persistence.errorMessage}</p>}
         </div>
       </article>
     })}

@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 
+import { useAuth } from '../../auth/hooks/useAuth'
 import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-section'
 import type { BaseTrip } from '../../trips/model/trip'
 import { PhotoReviewEditor } from '../components/PhotoReviewEditor'
@@ -17,6 +18,7 @@ import { PhotoProcessingList } from '../components/PhotoProcessingList'
 import { PhotoSelectionGrid } from '../components/PhotoSelectionGrid'
 import { usePhotoAnalysis } from '../hooks/usePhotoAnalysis'
 import { usePhotoProcessing } from '../hooks/usePhotoProcessing'
+import { usePhotoPersistence } from '../hooks/usePhotoPersistence'
 import { usePhotoReview } from '../hooks/usePhotoReview'
 import { usePhotoSelection } from '../hooks/usePhotoSelection'
 import { usePhotoUpload } from '../hooks/usePhotoUpload'
@@ -79,6 +81,7 @@ export function PhotoUploadPage() {
   const exitConfirmationTitleId = useId()
   const exitConfirmationDescriptionId = useId()
   const trip = useOutletContext<BaseTrip>()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -103,6 +106,7 @@ export function PhotoUploadPage() {
     updatePhotoAnalysis,
     updatePhotoProcessing,
     updatePhotoUpload,
+    updatePhotoPersistence,
     removePhoto,
     clearSelection,
     discardSelection,
@@ -132,6 +136,17 @@ export function PhotoUploadPage() {
       trip,
     })
   const {
+    isSaving,
+    summary: persistenceSummary,
+    savePhotos,
+  } = usePhotoPersistence({
+    photos,
+    reviews,
+    tripId: trip.id,
+    userId: user?.uid,
+    updatePhotoPersistence,
+  })
+  const {
     isExitConfirmationOpen,
     isConfirmingExit,
     cancelExit,
@@ -153,7 +168,7 @@ export function PhotoUploadPage() {
   const isAnalyzingPhotos = pendingAnalysisCount > 0
   const canContinueToReview = hasSelection && !isAnalyzingPhotos
   const canStartProcessing =
-    reviewSummary.needsReview === 0 && !isProcessing && !isUploading
+    reviewSummary.needsReview === 0 && !isProcessing && !isUploading && !isSaving
   const datesToReview =
     analysisSummary.lowConfidenceDate + analysisSummary.withoutDate
   const analysisDetails = buildAnalysisSummaryDetails({
@@ -188,11 +203,17 @@ export function PhotoUploadPage() {
             ? 'Puedes reintentar las fotografías que no se hayan podido procesar.'
             : isUploading
               ? 'Subiendo las fotografías preparadas a ImageKit.'
+              : isSaving
+                ? 'Guardando las fotografías subidas en el viaje.'
               : uploadSummary.failed > 0
                 ? 'Puedes reintentar las fotografías que no se hayan podido subir.'
+                : persistenceSummary.failed > 0
+                  ? 'Puedes reintentar las fotografías que no se hayan podido guardar.'
                 : uploadSummary.pending > 0
                   ? 'Las fotografías están preparadas para subir a ImageKit.'
-                  : 'Las fotografías se han subido a ImageKit y aún no se han guardado en Firebase.'
+                  : persistenceSummary.pending > 0
+                    ? 'Las fotografías se han subido a ImageKit y están listas para guardarse en el viaje.'
+                    : 'Las fotografías se han guardado en el viaje.'
   const editingPhoto = useMemo(
     () => photos.find((photo) => photo.id === editingPhotoId) ?? null,
     [editingPhotoId, photos],
@@ -314,7 +335,7 @@ export function PhotoUploadPage() {
   }
 
   const returnToReview = () => {
-    if (!isProcessing && !isUploading) setStep('review')
+    if (!isProcessing && !isUploading && !isSaving) setStep('review')
   }
 
   const startProcessing = () => {
@@ -350,7 +371,7 @@ export function PhotoUploadPage() {
           <button
             className={styles.backButton}
             type="button"
-            disabled={activeStep === 'processing' && (isProcessing || isUploading)}
+            disabled={activeStep === 'processing' && (isProcessing || isUploading || isSaving)}
             onClick={
               activeStep === 'review'
                 ? returnToSelection
@@ -554,6 +575,10 @@ export function PhotoUploadPage() {
                   ? `${processingSummary.completed + processingSummary['completed-with-warnings'] + processingSummary.failed} de ${processingSummary.total} procesadas`
                   : isUploading
                     ? `${uploadSummary.completed + uploadSummary.failed} de ${uploadSummary.total} subidas`
+                    : isSaving
+                      ? `${persistenceSummary.completed + persistenceSummary.failed} de ${persistenceSummary.total} guardadas`
+                    : persistenceSummary.completed === persistenceSummary.total && persistenceSummary.total > 0
+                      ? `${persistenceSummary.completed} guardadas en el viaje`
                     : uploadSummary.completed === uploadSummary.total && uploadSummary.total > 0
                       ? `${uploadSummary.completed} subidas a ImageKit`
                       : `${processingSummary.completed + processingSummary['completed-with-warnings']} preparadas`}
@@ -573,6 +598,15 @@ export function PhotoUploadPage() {
                     uploadSummary.failed,
                     'fotografía no se pudo subir',
                     'fotografías no se pudieron subir',
+                  )}
+                </p>
+              )}
+              {persistenceSummary.failed > 0 && (
+                <p>
+                  {formatPhotoCount(
+                    persistenceSummary.failed,
+                    'fotografía no se pudo guardar',
+                    'fotografías no se pudieron guardar',
                   )}
                 </p>
               )}
@@ -643,7 +677,7 @@ export function PhotoUploadPage() {
           >
             Procesar fotografías
           </button>
-        ) : processingSummary.failed > 0 && !isProcessing && !isUploading ? (
+        ) : processingSummary.failed > 0 && !isProcessing && !isUploading && !isSaving ? (
           <button
             className={styles.continueButton}
             type="button"
@@ -664,6 +698,20 @@ export function PhotoUploadPage() {
               : uploadSummary.failed > 0
                 ? 'Reintentar subidas fallidas'
                 : 'Subir fotografías'}
+          </button>
+        ) : isSaving || persistenceSummary.pending > 0 || persistenceSummary.failed > 0 ? (
+          <button
+            className={styles.continueButton}
+            type="button"
+            disabled={isSaving}
+            aria-describedby={continueDescriptionId}
+            onClick={() => void savePhotos()}
+          >
+            {isSaving
+              ? 'Guardando fotografías…'
+              : persistenceSummary.failed > 0
+                ? 'Reintentar guardados fallidos'
+                : 'Guardar fotografías en el viaje'}
           </button>
         ) : null}
       </footer>

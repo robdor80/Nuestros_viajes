@@ -2,7 +2,10 @@ import { FirebaseError } from 'firebase/app'
 import {
   Timestamp,
   collection,
+  doc,
   onSnapshot,
+  runTransaction,
+  serverTimestamp,
   type DocumentData,
   type DocumentSnapshot,
 } from 'firebase/firestore'
@@ -26,10 +29,12 @@ import {
   type PhotoSyncStatus,
   type TripPhoto,
 } from '../model/photo'
+import type { PhotoReviewData } from '../model/photo-review'
+import type { SelectedPhoto } from '../model/selected-photo'
 
 type PhotosSubscriber = (photos: TripPhoto[]) => void
 type PhotosSubscriptionErrorHandler = (error: Error) => void
-type PhotoOperation = 'load'
+type PhotoOperation = 'load' | 'save'
 
 class PhotoServiceError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -209,6 +214,88 @@ function normalizeSearchMetadata(
   })
 }
 
+function toTimestamp(localDate: string | undefined, localTime?: string | null) {
+  if (!localDate) return undefined
+
+  const value = new Date(`${localDate}T${localTime || '00:00'}`)
+  return Number.isNaN(value.getTime()) ? undefined : Timestamp.fromDate(value)
+}
+
+function getOriginalFormat(mimeType: string) {
+  const [, format] = mimeType.split('/')
+  return format || undefined
+}
+
+function getCaptureDateSource(photo: SelectedPhoto): PhotoDateSource {
+  switch (photo.analysis.metadata?.date.source) {
+    case 'exif-original':
+    case 'exif-create':
+    case 'exif-modify':
+      return 'exif'
+    case 'file-last-modified':
+      return 'file'
+    default:
+      return 'unknown'
+  }
+}
+
+function getDetectedTripDay(photo: SelectedPhoto) {
+  const tripDay = photo.analysis.metadata?.tripDay
+  return tripDay?.status === 'matched' ? tripDay.dayNumber : undefined
+}
+
+function buildPhotoDocument({
+  photo,
+  review,
+}: {
+  photo: SelectedPhoto
+  review: PhotoReviewData
+}) {
+  const metadata = photo.analysis.metadata
+  const asset = photo.upload.asset
+  if (photo.upload.status !== 'completed' || !asset) {
+    throw new PhotoServiceError(
+      'La fotografía no tiene un archivo válido en ImageKit para guardar.',
+    )
+  }
+
+  return cleanEmptyValues({
+    originalMetadata: {
+      fileName: metadata?.originalFileName ?? photo.file.name,
+      mimeType: metadata?.originalMimeType ?? photo.file.type,
+      sizeBytes: metadata?.originalSize ?? photo.file.size,
+      format: getOriginalFormat(metadata?.originalMimeType ?? photo.file.type),
+      width: metadata?.dimensions.originalWidth,
+      height: metadata?.dimensions.originalHeight,
+      lastModifiedAt: Timestamp.fromMillis(photo.file.lastModified),
+    },
+    captureMetadata: {
+      capturedAt: toTimestamp(metadata?.date.localDate, metadata?.date.localTime),
+      dateSource: getCaptureDateSource(photo),
+      latitude:
+        metadata?.location.status === 'available'
+          ? metadata.location.latitude
+          : undefined,
+      longitude:
+        metadata?.location.status === 'available'
+          ? metadata.location.longitude
+          : undefined,
+      orientation: metadata?.orientation.value,
+      width: metadata?.dimensions.originalWidth,
+      height: metadata?.dimensions.originalHeight,
+      tripDay: getDetectedTripDay(photo),
+    },
+    editableMetadata: {
+      title: review.title,
+      description: review.description,
+      capturedAt: toTimestamp(review.localDate ?? undefined, review.localTime),
+      tripDay: review.tripDayNumber ?? undefined,
+    },
+    imageKitAsset: asset,
+    syncStatus: 'ready' satisfies PhotoSyncStatus,
+  })
+}
+
 export function normalizeTripPhotoDocument(
   snapshot: DocumentSnapshot<DocumentData>,
   tripId: string,
@@ -272,10 +359,12 @@ function sortPhotos(photos: TripPhoto[]) {
 
 const operationErrorMessages: Record<PhotoOperation, string> = {
   load: 'No se han podido cargar las fotografías. Inténtalo de nuevo.',
+  save: 'No se ha podido guardar la fotografía en el viaje. Inténtalo de nuevo.',
 }
 
 const permissionErrorMessages: Record<PhotoOperation, string> = {
   load: 'Firestore no permite consultar las fotografías con esta cuenta.',
+  save: 'Firestore no permite guardar fotografías con esta cuenta.',
 }
 
 function toPhotoServiceError(error: unknown, operation: PhotoOperation) {
@@ -327,5 +416,49 @@ export function subscribeToPhotos(
   } catch (error) {
     onError(toPhotoServiceError(error, 'load'))
     return () => undefined
+  }
+}
+
+export async function saveTripPhoto({
+  tripId,
+  photo,
+  review,
+  userId,
+}: {
+  tripId: string
+  photo: SelectedPhoto
+  review: PhotoReviewData
+  userId: string
+}) {
+  try {
+    requireIdentifier(tripId, 'el viaje')
+    requireIdentifier(photo.id, 'la fotografía')
+    requireIdentifier(userId, 'el usuario')
+
+    const database = requireFirestore()
+    const photoReference = doc(database, 'trips', tripId, 'photos', photo.id)
+    const photoDocument = buildPhotoDocument({ photo, review })
+
+    await runTransaction(database, async (transaction) => {
+      const existingPhoto = await transaction.get(photoReference)
+
+      transaction.set(
+        photoReference,
+        {
+          ...photoDocument,
+          ...(existingPhoto.exists()
+            ? {}
+            : {
+                createdBy: userId,
+                createdAt: serverTimestamp(),
+              }),
+          updatedBy: userId,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      )
+    })
+  } catch (error) {
+    throw toPhotoServiceError(error, 'save')
   }
 }
