@@ -16,6 +16,7 @@ type TripWorkspacePageProps = {
   tripsStatus: TripsLoadStatus
   tripsError: string | null
   onRetry: () => void
+  onEditSections: (trip: BaseTrip) => void
 }
 
 type TripWorkspaceStyle = CSSProperties & {
@@ -27,6 +28,7 @@ export function TripWorkspacePage({
   tripsStatus,
   tripsError,
   onRetry,
+  onEditSections,
 }: TripWorkspacePageProps) {
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
   const { tripId } = useParams()
@@ -77,6 +79,7 @@ export function TripWorkspacePage({
         <TripWorkspaceHeader
           trip={trip}
           onPrint={() => setIsPrintDialogOpen(true)}
+          onEditSections={() => onEditSections(trip)}
         />
       )}
       <TripSectionNavigation tripId={tripId} />

@@ -39,9 +39,15 @@
   text-decoration: none;
 }
 
-.printButton {
-  min-height: 2.4rem;
+.actions {
+  display: flex;
   margin-left: auto;
+  gap: 0.45rem;
+}
+
+.printButton,
+.editButton {
+  min-height: 2.4rem;
   padding: 0.5rem 0.8rem;
   border: 1px solid color-mix(in srgb, var(--trip-color) 55%, var(--color-border));
   border-radius: 0.65rem;
@@ -51,11 +57,13 @@
   cursor: pointer;
 }
 
-.printButton:hover {
+.printButton:hover,
+.editButton:hover {
   background: color-mix(in srgb, var(--trip-color) 12%, var(--color-surface));
 }
 
-.printButton:focus-visible {
+.printButton:focus-visible,
+.editButton:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }

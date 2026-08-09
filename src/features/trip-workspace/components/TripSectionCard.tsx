@@ -15,6 +15,7 @@ type TripSectionCardProps = {
       | 'budget'
       | 'restaurants'
       | 'transfers'
+      | 'photos'
     status: 'loading' | 'ready' | 'error'
     total: number
     contentCount?: number
@@ -36,6 +37,7 @@ export function TripSectionCard({
   const isBudget = contentSummary?.kind === 'budget'
   const isRestaurants = contentSummary?.kind === 'restaurants'
   const isTransfers = contentSummary?.kind === 'transfers'
+  const isPhotos = contentSummary?.kind === 'photos'
   const hasContent =
     contentSummary?.status === 'ready' &&
     (isPlanning
@@ -52,7 +54,7 @@ export function TripSectionCard({
         isPlanning &&
           Boolean(contentSummary.notStarted) &&
           `${contentSummary.notStarted} sin comenzar`,
-        (isBudget || isRestaurants || isTransfers) && contentSummary.detail,
+        contentSummary.detail,
       ].filter((item): item is string => Boolean(item))
     : isPlanning && contentSummary?.status === 'ready' && contentSummary.total > 0
       ? [`${contentSummary.total} ${contentSummary.total === 1 ? 'día' : 'días'} del viaje`]
@@ -83,6 +85,10 @@ export function TripSectionCard({
                       ? contentSummary.total === 1
                         ? 'trayecto'
                         : 'trayectos'
+                      : isPhotos
+                        ? contentSummary.total === 1
+                          ? 'fotografía'
+                          : 'fotografías'
                   : contentSummary.total === 1
                     ? 'ficha'
                     : 'fichas'

@@ -11,6 +11,7 @@ import { budgetToFormData } from '../../budget/model/budget'
 import { usePlaces } from '../../places/hooks/usePlaces'
 import { usePlanningDays } from '../../planning/hooks/usePlanningDays'
 import { getTripDates } from '../../planning/utils/planning-dates'
+import { usePhotos } from '../../photos/hooks/usePhotos'
 import { useRestaurants } from '../../restaurants/hooks/useRestaurants'
 import { useTransfers } from '../../transfers/hooks/useTransfers'
 import {
@@ -24,6 +25,10 @@ import {
   getTripWorkspacePath,
   tripWorkspaceSections,
 } from '../model/trip-workspace-section'
+import {
+  isTripWorkspaceSectionEnabled,
+  shouldShowTripWorkspaceSection,
+} from '../utils/trip-section-visibility'
 import styles from './TripWorkspaceOverviewPage.module.css'
 
 const transferStatusSummaryLabels = {
@@ -56,6 +61,11 @@ export function TripWorkspaceOverviewPage() {
   const { budget, status: budgetStatus } = useBudget(tripId ?? '')
   const { restaurants, status: restaurantsStatus } = useRestaurants(tripId ?? '')
   const { transfers, status: transfersStatus } = useTransfers(tripId ?? '')
+  const {
+    photos,
+    isLoading: arePhotosLoading,
+    error: photosError,
+  } = usePhotos(tripId ?? '')
 
   if (!tripId) {
     return null
@@ -105,6 +115,14 @@ export function TripWorkspaceOverviewPage() {
     draft: accommodations.filter(
       (accommodation) => accommodation.contentStatus === 'draft',
     ).length,
+    detail: accommodations[0]
+      ? [
+          accommodations[0].name,
+          accommodations[0].nights && `${accommodations[0].nights} noches`,
+        ]
+          .filter((item): item is string => Boolean(item))
+          .join(' · ') || undefined
+      : undefined,
   }
   const automaticCosts = calculateBudgetAutomaticCosts(
     accommodations,
@@ -136,6 +154,7 @@ export function TripWorkspaceOverviewPage() {
     (restaurant) => restaurant.restaurantStatus === 'visited',
   ).length
   const restaurantDetail = [
+    restaurants[0]?.name,
     restaurants.length > 0 &&
       `${restaurants.length} ${
         restaurants.length === 1 ? 'restaurante' : 'restaurantes'
@@ -197,6 +216,32 @@ export function TripWorkspaceOverviewPage() {
         ? transfersSummaryDetail
         : undefined,
   }
+  const photosSummary = {
+    kind: 'photos' as const,
+    status: arePhotosLoading ? ('loading' as const) : photosError ? ('error' as const) : ('ready' as const),
+    total: photos.length,
+    completed: 0,
+    inProgress: 0,
+    draft: 0,
+  }
+  const summaries = {
+    places: placesSummary,
+    planning: planningSummary,
+    accommodation: accommodationsSummary,
+    budget: budgetSummary,
+    restaurants: restaurantsSummary,
+    transfers: transfersSummary,
+    photos: photosSummary,
+  }
+  const visibleSections = tripWorkspaceSections.filter((section) =>
+    shouldShowTripWorkspaceSection(summaries[section.id as keyof typeof summaries]),
+  )
+  const isSummaryLoading = Object.values(summaries).some(
+    (summary) => summary.status === 'loading',
+  )
+  const enabledSectionCount = tripWorkspaceSections.filter((section) =>
+    isTripWorkspaceSectionEnabled(section.id, trip.enabledSections),
+  ).length
 
   return (
     <section aria-labelledby="trip-summary-title">
@@ -209,30 +254,40 @@ export function TripWorkspaceOverviewPage() {
         </p>
       </header>
 
+      {isSummaryLoading && visibleSections.length === 0 && (
+        <div className={styles.loadingState} role="status" aria-live="polite">
+          <span className={styles.spinner} aria-hidden="true" />
+          <p>Preparando el resumen del viaje…</p>
+        </div>
+      )}
+
+      {!isSummaryLoading && visibleSections.length === 0 && (
+        <section className={styles.emptyState}>
+          <h3>Este viaje todavía no tiene información</h3>
+          <p>
+            Añade datos en las secciones que necesites para ver aquí un resumen
+            práctico del viaje.
+          </p>
+          <p className={styles.emptyHint}>
+            {enabledSectionCount > 0
+              ? 'Puedes ajustarlas desde “Editar secciones”.'
+              : 'Puedes empezar desde “Editar secciones”.'}
+          </p>
+        </section>
+      )}
+
+      {visibleSections.length > 0 && (
       <div className={styles.grid}>
-        {tripWorkspaceSections.map((section) => (
+        {visibleSections.map((section) => (
           <TripSectionCard
             key={section.id}
             section={section}
             to={getTripWorkspacePath(tripId, section.slug)}
-            contentSummary={
-              section.id === 'places'
-                ? placesSummary
-                : section.id === 'planning'
-                  ? planningSummary
-                  : section.id === 'accommodation'
-                    ? accommodationsSummary
-                    : section.id === 'budget'
-                      ? budgetSummary
-                      : section.id === 'restaurants'
-                        ? restaurantsSummary
-                        : section.id === 'transfers'
-                          ? transfersSummary
-                  : undefined
-            }
+            contentSummary={summaries[section.id as keyof typeof summaries]}
           />
         ))}
       </div>
+      )}
     </section>
   )
 }

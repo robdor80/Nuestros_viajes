@@ -412,6 +412,7 @@ function AuthenticatedApplication({
               tripsStatus={tripsStatus}
               tripsError={tripsError}
               onRetry={retryTrips}
+              onEditSections={editTrip}
             />
           }
         >
