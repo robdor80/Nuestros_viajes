@@ -21,6 +21,15 @@ function getErrorMessage(photo: SelectedPhoto) {
   }
 }
 
+function getUploadStatus(photo: SelectedPhoto) {
+  switch (photo.upload.status) {
+    case 'pending': return 'Preparada para subir'
+    case 'uploading': return `Subiendo: ${photo.upload.progress}%`
+    case 'completed': return 'Subida correctamente'
+    case 'failed': return 'No se pudo subir'
+  }
+}
+
 export function PhotoProcessingList({ photos }: { photos: SelectedPhoto[] }) {
   return <div className={styles.list} aria-label="Estado del procesamiento">
     {photos.map((photo) => {
@@ -36,6 +45,8 @@ export function PhotoProcessingList({ photos }: { photos: SelectedPhoto[] }) {
           {output && <p>WebP · {output.width} × {output.height} · {formatFileSize(output.sizeBytes)}</p>}
           {photo.processing.warnings.includes('large-output') && <p className={styles.warning}>El archivo sigue siendo grande tras comprimirlo.</p>}
           {errorMessage && <p className={styles.error}>{errorMessage}</p>}
+          {output && <p className={photo.upload.status === 'failed' ? styles.error : styles.uploadStatus}>{getUploadStatus(photo)}</p>}
+          {photo.upload.status === 'failed' && photo.upload.errorMessage && <p className={styles.error}>{photo.upload.errorMessage}</p>}
         </div>
       </article>
     })}

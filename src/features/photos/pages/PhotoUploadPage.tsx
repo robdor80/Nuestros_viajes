@@ -19,6 +19,7 @@ import { usePhotoAnalysis } from '../hooks/usePhotoAnalysis'
 import { usePhotoProcessing } from '../hooks/usePhotoProcessing'
 import { usePhotoReview } from '../hooks/usePhotoReview'
 import { usePhotoSelection } from '../hooks/usePhotoSelection'
+import { usePhotoUpload } from '../hooks/usePhotoUpload'
 import { usePhotoUploadNavigationGuard } from '../hooks/usePhotoUploadNavigationGuard'
 import type { PhotoReviewDraft } from '../model/photo-review'
 import {
@@ -101,12 +102,18 @@ export function PhotoUploadPage() {
     markPreviewUnavailable,
     updatePhotoAnalysis,
     updatePhotoProcessing,
+    updatePhotoUpload,
     removePhoto,
     clearSelection,
     discardSelection,
   } = usePhotoSelection()
   const { isProcessing, processPhotos, summary: processingSummary } =
     usePhotoProcessing({ photos, updatePhotoProcessing })
+  const {
+    isUploading,
+    summary: uploadSummary,
+    uploadPhotos,
+  } = usePhotoUpload({ photos, tripId: trip.id, updatePhotoUpload })
   const analysisSummary = usePhotoAnalysis({
     photos,
     trip,
@@ -145,7 +152,8 @@ export function PhotoUploadPage() {
     analysisSummary.pending + analysisSummary.analyzing
   const isAnalyzingPhotos = pendingAnalysisCount > 0
   const canContinueToReview = hasSelection && !isAnalyzingPhotos
-  const canStartProcessing = reviewSummary.needsReview === 0 && !isProcessing
+  const canStartProcessing =
+    reviewSummary.needsReview === 0 && !isProcessing && !isUploading
   const datesToReview =
     analysisSummary.lowConfidenceDate + analysisSummary.withoutDate
   const analysisDetails = buildAnalysisSummaryDetails({
@@ -178,7 +186,13 @@ export function PhotoUploadPage() {
           ? 'Procesando las fotografías una a una en este dispositivo.'
           : processingSummary.failed > 0
             ? 'Puedes reintentar las fotografías que no se hayan podido procesar.'
-            : 'Las fotografías están preparadas en memoria para la futura subida.'
+            : isUploading
+              ? 'Subiendo las fotografías preparadas a ImageKit.'
+              : uploadSummary.failed > 0
+                ? 'Puedes reintentar las fotografías que no se hayan podido subir.'
+                : uploadSummary.pending > 0
+                  ? 'Las fotografías están preparadas para subir a ImageKit.'
+                  : 'Las fotografías se han subido a ImageKit y aún no se han guardado en Firebase.'
   const editingPhoto = useMemo(
     () => photos.find((photo) => photo.id === editingPhotoId) ?? null,
     [editingPhotoId, photos],
@@ -300,7 +314,7 @@ export function PhotoUploadPage() {
   }
 
   const returnToReview = () => {
-    if (!isProcessing) setStep('review')
+    if (!isProcessing && !isUploading) setStep('review')
   }
 
   const startProcessing = () => {
@@ -336,7 +350,7 @@ export function PhotoUploadPage() {
           <button
             className={styles.backButton}
             type="button"
-            disabled={activeStep === 'processing' && isProcessing}
+            disabled={activeStep === 'processing' && (isProcessing || isUploading)}
             onClick={
               activeStep === 'review'
                 ? returnToSelection
@@ -538,7 +552,11 @@ export function PhotoUploadPage() {
               <h3>
                 {isProcessing
                   ? `${processingSummary.completed + processingSummary['completed-with-warnings'] + processingSummary.failed} de ${processingSummary.total} procesadas`
-                  : `${processingSummary.completed + processingSummary['completed-with-warnings']} preparadas`}
+                  : isUploading
+                    ? `${uploadSummary.completed + uploadSummary.failed} de ${uploadSummary.total} subidas`
+                    : uploadSummary.completed === uploadSummary.total && uploadSummary.total > 0
+                      ? `${uploadSummary.completed} subidas a ImageKit`
+                      : `${processingSummary.completed + processingSummary['completed-with-warnings']} preparadas`}
               </h3>
               {processingSummary.failed > 0 && (
                 <p>
@@ -546,6 +564,15 @@ export function PhotoUploadPage() {
                     processingSummary.failed,
                     'fotografía no se pudo procesar',
                     'fotografías no se pudieron procesar',
+                  )}
+                </p>
+              )}
+              {uploadSummary.failed > 0 && (
+                <p>
+                  {formatPhotoCount(
+                    uploadSummary.failed,
+                    'fotografía no se pudo subir',
+                    'fotografías no se pudieron subir',
                   )}
                 </p>
               )}
@@ -616,18 +643,29 @@ export function PhotoUploadPage() {
           >
             Procesar fotografías
           </button>
-        ) : (
-          processingSummary.failed > 0 &&
-          !isProcessing && (
-            <button
-              className={styles.continueButton}
-              type="button"
-              onClick={() => void processPhotos()}
-            >
-              Reintentar fallidas
-            </button>
-          )
-        )}
+        ) : processingSummary.failed > 0 && !isProcessing && !isUploading ? (
+          <button
+            className={styles.continueButton}
+            type="button"
+            onClick={() => void processPhotos()}
+          >
+            Reintentar fallidas
+          </button>
+        ) : isUploading || uploadSummary.pending > 0 || uploadSummary.failed > 0 ? (
+          <button
+            className={styles.continueButton}
+            type="button"
+            disabled={isUploading}
+            aria-describedby={continueDescriptionId}
+            onClick={() => void uploadPhotos()}
+          >
+            {isUploading
+              ? 'Subiendo fotografías…'
+              : uploadSummary.failed > 0
+                ? 'Reintentar subidas fallidas'
+                : 'Subir fotografías'}
+          </button>
+        ) : null}
       </footer>
 
       {editingPhoto && editingReview && (

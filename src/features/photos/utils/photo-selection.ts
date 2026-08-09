@@ -1,5 +1,6 @@
 import { createPendingPhotoAnalysis } from '../model/photo-analysis'
 import { createPendingPhotoProcessing } from '../model/photo-processing'
+import { createPendingPhotoUpload } from '../model/photo-upload'
 import type { SelectedPhoto } from '../model/selected-photo'
 
 export const MAX_SELECTED_PHOTOS = 20
@@ -32,6 +33,7 @@ export function createSelectedPhoto(file: File): SelectedPhoto {
     previewStatus: 'ready',
     analysis: createPendingPhotoAnalysis(),
     processing: createPendingPhotoProcessing(),
+    upload: createPendingPhotoUpload(),
   }
 }
 

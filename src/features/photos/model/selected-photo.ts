@@ -1,5 +1,6 @@
 import type { PhotoAnalysis } from './photo-analysis'
 import type { PhotoProcessing } from './photo-processing'
+import type { PhotoUpload } from './photo-upload'
 
 export type SelectedPhotoPreviewStatus = 'ready' | 'unavailable'
 
@@ -11,4 +12,5 @@ export type SelectedPhoto = {
   previewStatus: SelectedPhotoPreviewStatus
   analysis: PhotoAnalysis
   processing: PhotoProcessing
+  upload: PhotoUpload
 }
