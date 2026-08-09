@@ -577,7 +577,7 @@ export function PhotoUploadPage() {
                 </p>
               )}
             </section>
-            <PhotoProcessingList photos={photos} />
+            <PhotoProcessingList photos={photos} reviews={reviews} />
           </>
         )}
 

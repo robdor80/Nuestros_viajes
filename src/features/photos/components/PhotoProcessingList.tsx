@@ -1,3 +1,4 @@
+import type { PhotoReviewData } from '../model/photo-review'
 import type { SelectedPhoto } from '../model/selected-photo'
 import { formatFileSize } from '../utils/photo-selection'
 import styles from './PhotoProcessingList.module.css'
@@ -30,17 +31,25 @@ function getUploadStatus(photo: SelectedPhoto) {
   }
 }
 
-export function PhotoProcessingList({ photos }: { photos: SelectedPhoto[] }) {
+export function PhotoProcessingList({
+  photos,
+  reviews,
+}: {
+  photos: SelectedPhoto[]
+  reviews: Record<string, PhotoReviewData>
+}) {
   return <div className={styles.list} aria-label="Estado del procesamiento">
     {photos.map((photo) => {
       const output = photo.processing.result
       const errorMessage = getErrorMessage(photo)
+      const title = reviews[photo.id]?.title || 'Fotografía sin nombre'
       return <article className={styles.item} key={photo.id}>
         <div className={styles.thumbnail} aria-hidden="true">
           <img src={output?.objectUrl ?? photo.objectUrl} alt="" />
         </div>
         <div className={styles.body}>
-          <h3>{photo.file.name}</h3>
+          <h3>{title}</h3>
+          <p className={styles.originalFile}>Archivo original: {photo.file.name}</p>
           <p className={styles.status}>{getStatus(photo)}</p>
           {output && <p>WebP · {output.width} × {output.height} · {formatFileSize(output.sizeBytes)}</p>}
           {photo.processing.warnings.includes('large-output') && <p className={styles.warning}>El archivo sigue siendo grande tras comprimirlo.</p>}

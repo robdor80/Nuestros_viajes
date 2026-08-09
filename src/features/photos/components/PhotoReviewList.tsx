@@ -34,6 +34,7 @@ export function PhotoReviewList({
         const meta = formatPhotoReviewMeta({ review, tripDayOptions })
         const needsReview = shouldPhotoNeedReview(photo) && !review?.isConfirmed
         const hasLocation = photo.analysis.metadata?.location.status === 'available'
+        const title = review?.title || 'Fotografía sin nombre'
 
         return (
           <button
@@ -41,7 +42,7 @@ export function PhotoReviewList({
             className={styles.item}
             type="button"
             onClick={() => onEditPhoto(photo.id)}
-            aria-label={`Editar fotografía. ${status}. ${meta.join(', ')}`}
+            aria-label={`Editar ${title}. ${status}. ${meta.join(', ')}`}
           >
             <span className={styles.thumbnail} aria-hidden="true">
               {photo.previewStatus === 'ready' ? (
@@ -51,9 +52,9 @@ export function PhotoReviewList({
               )}
             </span>
             <span className={styles.itemBody}>
-              <span className={styles.itemTitle}>{status}</span>
+              <span className={styles.itemTitle}>{title}</span>
               <span className={styles.itemMeta}>
-                {meta.join(' · ') || 'Sin datos de fecha'}
+                {[status, ...meta].join(' · ') || 'Sin datos de fecha'}
               </span>
               {hasLocation && (
                 <span className={styles.location}>Ubicación disponible</span>

@@ -113,6 +113,7 @@ export function createReviewFromPhoto(photo: SelectedPhoto): PhotoReviewData {
     localTime: metadata?.date.localTime ?? null,
     tripDayMode: tripDayNumber ? 'analyzed' : 'unassigned',
     tripDayNumber,
+    title: '',
     description: '',
     isConfirmed: !shouldPhotoNeedReview(photo),
   }

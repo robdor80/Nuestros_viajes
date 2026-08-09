@@ -26,6 +26,7 @@ type PhotoReviewEditorProps = {
 }
 
 const DESCRIPTION_MAX_LENGTH = 280
+const TITLE_MAX_LENGTH = 120
 
 export function PhotoReviewEditor({
   photo,
@@ -35,6 +36,7 @@ export function PhotoReviewEditor({
   onSave,
 }: PhotoReviewEditorProps) {
   const titleId = useId()
+  const photoTitleId = useId()
   const descriptionId = useId()
   const firstButtonRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -106,6 +108,7 @@ export function PhotoReviewEditor({
 
     onSave({
       ...draft,
+      title: draft.title.trim(),
       description: draft.description.trim(),
       isConfirmed: true,
     })
@@ -253,6 +256,25 @@ export function PhotoReviewEditor({
                 </option>
               ))}
             </select>
+          </label>
+
+          <label>
+            Nombre de la fotografía
+            <input
+              id={photoTitleId}
+              type="text"
+              value={draft.title}
+              maxLength={TITLE_MAX_LENGTH}
+              autoCapitalize="sentences"
+              onChange={(event) =>
+                updateDraft({
+                  title: event.target.value,
+                })
+              }
+            />
+            <span className={styles.characterCount}>
+              {draft.title.length}/{TITLE_MAX_LENGTH}
+            </span>
           </label>
 
           <label>

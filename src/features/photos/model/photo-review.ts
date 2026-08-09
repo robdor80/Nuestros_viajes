@@ -10,6 +10,7 @@ export type PhotoReviewData = {
   localTime: string | null
   tripDayMode: PhotoReviewTripDayMode
   tripDayNumber: number | null
+  title: string
   description: string
   isConfirmed: boolean
 }
@@ -21,6 +22,7 @@ export type PhotoReviewDraft = Pick<
   | 'localTime'
   | 'tripDayMode'
   | 'tripDayNumber'
+  | 'title'
   | 'description'
   | 'isConfirmed'
 >
