@@ -31,6 +31,7 @@ import {
 } from '../model/photo'
 import type { PhotoReviewData } from '../model/photo-review'
 import type { SelectedPhoto } from '../model/selected-photo'
+import { getPhotoSortDate } from '../utils/photo-presentation'
 
 type PhotosSubscriber = (photos: TripPhoto[]) => void
 type PhotosSubscriptionErrorHandler = (error: Error) => void
@@ -343,10 +344,8 @@ export function normalizeTripPhotoDocument(
 
 function sortPhotos(photos: TripPhoto[]) {
   return [...photos].sort((firstPhoto, secondPhoto) => {
-    const firstDate =
-      firstPhoto.captureMetadata?.capturedAt ?? firstPhoto.createdAt
-    const secondDate =
-      secondPhoto.captureMetadata?.capturedAt ?? secondPhoto.createdAt
+    const firstDate = getPhotoSortDate(firstPhoto)
+    const secondDate = getPhotoSortDate(secondPhoto)
     const dateDifference = firstDate.localeCompare(secondDate)
 
     if (dateDifference !== 0) {

@@ -1,0 +1,19 @@
+.backdrop { position: fixed; z-index: 1200; inset: 0; display: grid; padding: 0.65rem; place-items: center; background: rgb(11 13 10 / 92%); }
+.dialog { display: grid; width: min(100%, 78rem); max-height: calc(100dvh - 1.3rem); overflow: auto; gap: 0.7rem; color: #ffffff; }
+.topBar { display: flex; min-height: 2.75rem; align-items: center; justify-content: space-between; gap: 1rem; }
+.topBar p, .details h2, .details p { margin: 0; }
+.topBar p { color: rgb(255 255 255 / 76%); font-size: 0.82rem; font-weight: 750; }
+.topBar button, .previousButton, .nextButton { display: grid; min-width: 2.75rem; min-height: 2.75rem; place-items: center; border: 1px solid rgb(255 255 255 / 30%); border-radius: 0.72rem; color: #ffffff; background: rgb(255 255 255 / 12%); font: inherit; font-weight: 850; cursor: pointer; }
+.topBar button:hover, .previousButton:hover, .nextButton:hover { background: rgb(255 255 255 / 22%); }
+.topBar button:focus-visible, .previousButton:focus-visible, .nextButton:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
+.imageStage { position: relative; display: grid; min-height: 0; place-items: center; overflow: hidden; border-radius: 0.9rem; background: #080a08; touch-action: pan-y; }
+.imageStage img { display: block; max-width: 100%; max-height: min(68dvh, 52rem); width: auto; height: auto; object-fit: contain; user-select: none; }
+.previousButton, .nextButton { position: absolute; top: 50%; transform: translateY(-50%); border-radius: 999px; font-size: 2rem; line-height: 1; }
+.previousButton { left: 0.65rem; }
+.nextButton { right: 0.65rem; }
+.details { display: grid; padding: 0.2rem 0.25rem; gap: 0.32rem; }
+.details h2 { font-size: clamp(1.05rem, 4vw, 1.35rem); letter-spacing: -0.02em; }
+.details p { max-width: 46rem; color: rgb(255 255 255 / 82%); line-height: 1.5; }
+.details .meta { color: rgb(255 255 255 / 62%); font-size: 0.84rem; font-weight: 720; }
+@media (max-width: 42rem) { .previousButton, .nextButton { opacity: 0.84; } }
+@media (prefers-reduced-motion: reduce) { .imageStage img { transition: none; } }

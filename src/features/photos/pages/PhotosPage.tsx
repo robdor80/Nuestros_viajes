@@ -1,20 +1,35 @@
+import { useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 
 import { TripSectionIcon } from '../../trip-workspace/components/TripSectionIcon'
 import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-section'
 import type { BaseTrip } from '../../trips/model/trip'
+import { PhotoGallery } from '../components/PhotoGallery'
+import { PhotoLightbox } from '../components/PhotoLightbox'
 import { usePhotos } from '../hooks/usePhotos'
+import type { TripPhoto } from '../model/photo'
 import styles from './PhotosPage.module.css'
 
 export function PhotosPage() {
   const trip = useOutletContext<BaseTrip>()
   const navigate = useNavigate()
   const { photos, isLoading, error } = usePhotos(trip.id)
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null)
+  const galleryPhotos = useMemo(
+    () => photos.filter((photo): photo is TripPhoto & { imageKitAsset: NonNullable<TripPhoto['imageKitAsset']> } => Boolean(photo.imageKitAsset?.url)),
+    [photos],
+  )
   const photoCountLabel =
-    photos.length === 1 ? '1 fotografía' : `${photos.length} fotografías`
+    galleryPhotos.length === 1
+      ? '1 fotografía'
+      : `${galleryPhotos.length} fotografías`
 
   const openPhotoUploadPage = () => {
     void navigate(`${getTripWorkspacePath(trip.id, 'fotos')}/subir`)
+  }
+
+  const openPhoto = (photo: TripPhoto) => {
+    setSelectedPhotoId(photo.id)
   }
 
   return (
@@ -44,7 +59,7 @@ export function PhotosPage() {
         </div>
       )}
 
-      {!isLoading && !error && photos.length === 0 && (
+      {!isLoading && !error && galleryPhotos.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.iconWrap} aria-hidden="true">
             <TripSectionIcon icon="photo" className={styles.icon} />
@@ -62,23 +77,30 @@ export function PhotosPage() {
         </div>
       )}
 
-      {!isLoading && !error && photos.length > 0 && (
-        <div className={styles.summaryState}>
-          <div className={styles.iconWrap} aria-hidden="true">
-            <TripSectionIcon icon="photo" className={styles.icon} />
+      {!isLoading && !error && galleryPhotos.length > 0 && (
+        <>
+          <div className={styles.galleryToolbar}>
+            <p>{photoCountLabel}</p>
+            <button type="button" onClick={openPhotoUploadPage}>
+              Añadir fotografías
+            </button>
           </div>
-          <div className={styles.emptyCopy}>
-            <h3>{photoCountLabel} guardadas</h3>
-            <p>
-              La galería visual llegará en una próxima fase. Por ahora ya
-              estamos leyendo el número real de fotografías guardadas en este
-              viaje.
-            </p>
-          </div>
-          <button type="button" onClick={openPhotoUploadPage}>
-            Añadir fotografías
-          </button>
-        </div>
+          <PhotoGallery
+            photos={galleryPhotos}
+            tripName={trip.name}
+            onOpen={openPhoto}
+          />
+        </>
+      )}
+
+      {selectedPhotoId && (
+        <PhotoLightbox
+          photos={galleryPhotos}
+          selectedPhotoId={selectedPhotoId}
+          tripName={trip.name}
+          onClose={() => setSelectedPhotoId(null)}
+          onSelect={setSelectedPhotoId}
+        />
       )}
     </section>
   )

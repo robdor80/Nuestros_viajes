@@ -713,6 +713,14 @@ export function PhotoUploadPage() {
                 ? 'Reintentar guardados fallidos'
                 : 'Guardar fotografías en el viaje'}
           </button>
+        ) : persistenceSummary.completed === persistenceSummary.total && persistenceSummary.total > 0 ? (
+          <button
+            className={styles.continueButton}
+            type="button"
+            onClick={requestLeave}
+          >
+            Ver fotografías
+          </button>
         ) : null}
       </footer>
 
