@@ -6,23 +6,48 @@ import { getTripWorkspacePath } from '../../trip-workspace/model/trip-workspace-
 import type { BaseTrip } from '../../trips/model/trip'
 import { PhotoGallery } from '../components/PhotoGallery'
 import { PhotoLightbox } from '../components/PhotoLightbox'
+import { PhotoSearchControls } from '../components/PhotoSearchControls'
 import { usePhotos } from '../hooks/usePhotos'
 import type { TripPhoto } from '../model/photo'
+import {
+  filterPhotos,
+  getAvailablePhotoTripDays,
+  hasActivePhotoSearchCriteria,
+  type PhotoSearchCriteria,
+} from '../utils/photo-search'
 import styles from './PhotosPage.module.css'
+
+const initialSearchCriteria: PhotoSearchCriteria = {
+  query: '',
+  date: '',
+  tripDay: '',
+}
 
 export function PhotosPage() {
   const trip = useOutletContext<BaseTrip>()
   const navigate = useNavigate()
   const { photos, isLoading, error } = usePhotos(trip.id)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null)
+  const [searchCriteria, setSearchCriteria] = useState(initialSearchCriteria)
   const galleryPhotos = useMemo(
     () => photos.filter((photo): photo is TripPhoto & { imageKitAsset: NonNullable<TripPhoto['imageKitAsset']> } => Boolean(photo.imageKitAsset?.url)),
     [photos],
   )
+  const filteredPhotos = useMemo(
+    () => filterPhotos(galleryPhotos, searchCriteria),
+    [galleryPhotos, searchCriteria],
+  )
+  const tripDays = useMemo(
+    () => getAvailablePhotoTripDays(galleryPhotos),
+    [galleryPhotos],
+  )
+  const hasActiveCriteria = hasActivePhotoSearchCriteria(searchCriteria)
   const photoCountLabel =
-    galleryPhotos.length === 1
-      ? '1 fotografía'
-      : `${galleryPhotos.length} fotografías`
+    hasActiveCriteria
+      ? `${filteredPhotos.length} de ${galleryPhotos.length} fotografías`
+      : galleryPhotos.length === 1
+        ? '1 fotografía'
+        : `${galleryPhotos.length} fotografías`
 
   const openPhotoUploadPage = () => {
     void navigate(`${getTripWorkspacePath(trip.id, 'fotos')}/subir`)
@@ -30,6 +55,16 @@ export function PhotosPage() {
 
   const openPhoto = (photo: TripPhoto) => {
     setSelectedPhotoId(photo.id)
+  }
+
+  const updateSearchCriteria = (criteria: PhotoSearchCriteria) => {
+    setSelectedPhotoId(null)
+    setSearchCriteria(criteria)
+  }
+
+  const clearSearchCriteria = () => {
+    setSelectedPhotoId(null)
+    setSearchCriteria(initialSearchCriteria)
   }
 
   return (
@@ -79,23 +114,40 @@ export function PhotosPage() {
 
       {!isLoading && !error && galleryPhotos.length > 0 && (
         <>
+          <PhotoSearchControls
+            criteria={searchCriteria}
+            tripDays={tripDays}
+            hasActiveCriteria={hasActiveCriteria}
+            onCriteriaChange={updateSearchCriteria}
+            onClear={clearSearchCriteria}
+          />
           <div className={styles.galleryToolbar}>
             <p>{photoCountLabel}</p>
             <button type="button" onClick={openPhotoUploadPage}>
               Añadir fotografías
             </button>
           </div>
-          <PhotoGallery
-            photos={galleryPhotos}
-            tripName={trip.name}
-            onOpen={openPhoto}
-          />
+          {filteredPhotos.length > 0 ? (
+            <PhotoGallery
+              photos={filteredPhotos}
+              tripName={trip.name}
+              onOpen={openPhoto}
+            />
+          ) : (
+            <div className={styles.noResults}>
+              <h3>No se encontraron fotografías</h3>
+              <p>Prueba con otros términos o elimina los filtros aplicados.</p>
+              <button type="button" onClick={clearSearchCriteria}>
+                Limpiar búsqueda y filtros
+              </button>
+            </div>
+          )}
         </>
       )}
 
-      {selectedPhotoId && (
+      {selectedPhotoId && filteredPhotos.some((photo) => photo.id === selectedPhotoId) && (
         <PhotoLightbox
-          photos={galleryPhotos}
+          photos={filteredPhotos}
           selectedPhotoId={selectedPhotoId}
           tripName={trip.name}
           onClose={() => setSelectedPhotoId(null)}

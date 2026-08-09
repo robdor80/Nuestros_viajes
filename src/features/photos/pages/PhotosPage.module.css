@@ -9,6 +9,8 @@
 .state p,
 .emptyState h3,
 .emptyState p,
+.noResults h3,
+.noResults p,
 .summaryState h3,
 .summaryState p,
 .galleryToolbar p {
@@ -39,7 +41,8 @@
 
 .state,
 .emptyState,
-.summaryState {
+.summaryState,
+.noResults {
   display: grid;
   max-width: 52rem;
   margin-top: 1.75rem;
@@ -66,7 +69,8 @@
 
 .state h3,
 .emptyState h3,
-.summaryState h3 {
+.summaryState h3,
+.noResults h3 {
   color: var(--color-text);
   font-size: clamp(1.25rem, 4vw, 1.55rem);
   letter-spacing: -0.02em;
@@ -74,7 +78,8 @@
 
 .state p,
 .emptyState p,
-.summaryState p {
+.summaryState p,
+.noResults p {
   margin-top: 0.45rem;
   color: var(--color-text-muted);
   line-height: 1.6;
@@ -109,7 +114,8 @@
 }
 
 .emptyState button,
-.summaryState button {
+.summaryState button,
+.noResults button {
   display: inline-flex;
   width: fit-content;
   min-height: 2.75rem;
@@ -126,12 +132,14 @@
 }
 
 .emptyState button:hover,
-.summaryState button:hover {
+.summaryState button:hover,
+.noResults button:hover {
   background: color-mix(in srgb, var(--trip-color) 82%, #000);
 }
 
 .emptyState button:focus-visible,
-.summaryState button:focus-visible {
+.summaryState button:focus-visible,
+.noResults button:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
 }
@@ -175,20 +183,23 @@
 
 @media (min-width: 42rem) {
   .emptyState,
-  .summaryState {
+  .summaryState,
+  .noResults {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
   }
 
   .emptyState button,
-  .summaryState button {
+  .summaryState button,
+  .noResults button {
     grid-column: 2;
   }
 }
 
 @media (max-width: 26rem) {
   .emptyState button,
-  .summaryState button {
+  .summaryState button,
+  .noResults button {
     width: 100%;
   }
 
