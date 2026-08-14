@@ -4,8 +4,6 @@ import { createPendingPhotoPersistence } from '../model/photo-persistence'
 import { createPendingPhotoUpload } from '../model/photo-upload'
 import type { SelectedPhoto } from '../model/selected-photo'
 
-export const MAX_SELECTED_PHOTOS = 20
-
 export function createSelectedPhotoId() {
   if (
     typeof crypto !== 'undefined' &&

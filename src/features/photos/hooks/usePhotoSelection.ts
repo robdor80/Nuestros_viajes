@@ -6,7 +6,6 @@ import type { PhotoPersistence } from '../model/photo-persistence'
 import type { PhotoUpload } from '../model/photo-upload'
 import type { SelectedPhoto } from '../model/selected-photo'
 import {
-  MAX_SELECTED_PHOTOS,
   createSelectedPhoto,
   getLocalPhotoFingerprint,
   isValidImageFile,
@@ -17,12 +16,10 @@ function buildSelectionMessage({
   addedCount,
   duplicateCount,
   invalidCount,
-  limitedCount,
 }: {
   addedCount: number
   duplicateCount: number
   invalidCount: number
-  limitedCount: number
 }) {
   const messages = [
     addedCount > 0 &&
@@ -41,8 +38,6 @@ function buildSelectionMessage({
           ? 'archivo no era una imagen válida'
           : 'archivos no eran imágenes válidas'
       }.`,
-    limitedCount > 0 &&
-      `El lote está limitado a ${MAX_SELECTED_PHOTOS} fotografías; se han conservado solo las primeras que cabían.`,
   ].filter((message): message is string => Boolean(message))
 
   return messages.join(' ')
@@ -83,7 +78,6 @@ export function usePhotoSelection() {
       const acceptedPhotos: SelectedPhoto[] = []
       let duplicateCount = 0
       let invalidCount = 0
-      let limitedCount = 0
 
       files.forEach((file) => {
         if (!isValidImageFile(file)) {
@@ -97,11 +91,6 @@ export function usePhotoSelection() {
           return
         }
 
-        if (currentPhotos.length + acceptedPhotos.length >= MAX_SELECTED_PHOTOS) {
-          limitedCount += 1
-          return
-        }
-
         existingFingerprints.add(fingerprint)
         acceptedPhotos.push(createSelectedPhoto(file))
       })
@@ -112,7 +101,6 @@ export function usePhotoSelection() {
           addedCount: acceptedPhotos.length,
           duplicateCount,
           invalidCount,
-          limitedCount,
         }),
       )
     },
@@ -269,7 +257,6 @@ export function usePhotoSelection() {
     statusMessage,
     totalSize,
     hasSelection: photos.length > 0,
-    canAddMore: photos.length < MAX_SELECTED_PHOTOS,
     addFiles,
     markPreviewUnavailable,
     updatePhotoAnalysis,

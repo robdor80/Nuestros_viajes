@@ -24,10 +24,7 @@ import { usePhotoSelection } from '../hooks/usePhotoSelection'
 import { usePhotoUpload } from '../hooks/usePhotoUpload'
 import { usePhotoUploadNavigationGuard } from '../hooks/usePhotoUploadNavigationGuard'
 import type { PhotoReviewDraft } from '../model/photo-review'
-import {
-  MAX_SELECTED_PHOTOS,
-  formatFileSize,
-} from '../utils/photo-selection'
+import { formatFileSize } from '../utils/photo-selection'
 import styles from './PhotoUploadPage.module.css'
 
 type ConfirmationAction = 'clear'
@@ -100,7 +97,6 @@ export function PhotoUploadPage() {
     statusMessage,
     totalSize,
     hasSelection,
-    canAddMore,
     addFiles,
     markPreviewUnavailable,
     updatePhotoAnalysis,
@@ -464,8 +460,7 @@ export function PhotoUploadPage() {
                 <div>
                   <h3>Selecciona las fotografías del viaje</h3>
                   <p>
-                    Puedes elegir varias desde la galería. El lote admite hasta{' '}
-                    {MAX_SELECTED_PHOTOS} fotografías.
+                    Puedes elegir todas las fotografías que quieras desde la galería.
                   </p>
                 </div>
                 <button
@@ -479,7 +474,6 @@ export function PhotoUploadPage() {
             ) : (
               <PhotoSelectionGrid
                 photos={photos}
-                canAddMore={canAddMore}
                 onAddPhotos={openFileSelector}
                 onPreviewError={markPreviewUnavailable}
                 onRemove={removeSelectedPhoto}

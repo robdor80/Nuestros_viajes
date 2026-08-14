@@ -5,7 +5,6 @@ import styles from './PhotoSelectionGrid.module.css'
 
 type PhotoSelectionGridProps = {
   photos: SelectedPhoto[]
-  canAddMore: boolean
   onAddPhotos: () => void
   onPreviewError: (photoId: string) => void
   onRemove: (photoId: string) => void
@@ -13,7 +12,6 @@ type PhotoSelectionGridProps = {
 
 export function PhotoSelectionGrid({
   photos,
-  canAddMore,
   onAddPhotos,
   onPreviewError,
   onRemove,
@@ -28,7 +26,7 @@ export function PhotoSelectionGrid({
           onRemove={onRemove}
         />
       ))}
-      {canAddMore && <AddPhotoTile onClick={onAddPhotos} />}
+      <AddPhotoTile onClick={onAddPhotos} />
     </div>
   )
 }
